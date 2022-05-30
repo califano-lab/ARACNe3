@@ -17,15 +17,18 @@
 /*
  * The "ball on stick" data structure for edges in network.  Will be used with
  * dictionary so that a regulator can have a group of these associated.
- * Compressed and non-compressed versions are supported with this template.  The
- * identifier should be a String& as the "gene" or uint16_t as the associated
- * number.
  */
-template <typename identifier>
-struct edge_tar {const identifier &target; const float mi;};
+typedef struct edge_tar{
+	const std::string &target;
+	const float mi;
+	edge_tar(const std::string &t, const float mi) : target(t), mi(mi) {};
+} edge_tar;
 
-template <typename identifier>
-struct edge_tar_p : edge_tar<identifier> {const float p_value;};
+typedef struct edge_tar_p : edge_tar {
+	const float p_value;
+	edge_tar_p(const std::string &t, const float mi, const float p) :
+	edge_tar(t, mi), p_value(p) {};
+} edge_tar_p;
 
 /*
  * The regulator and target list is represented by this data type, an unordered
@@ -33,12 +36,8 @@ struct edge_tar_p : edge_tar<identifier> {const float p_value;};
  * implementation) as well as a vector of "ball-on-stick" structs, or all the
  * targets and their MIs.
  */
-typedef std::unordered_map<std::string, std::vector<edge_tar<std::string>>> reg_web;
-typedef std::unordered_map<std::string, std::vector<edge_tar_p<std::string>>> reg_web_p;
-typedef std::unordered_map<uint16_t, std::vector<edge_tar<uint16_t>>>
-reg_web_compressed;
-typedef std::unordered_map<uint16_t, std::vector<edge_tar_p<uint16_t>>>
-reg_web_p_compressed;
+typedef std::unordered_map<std::string, std::vector<edge_tar>> reg_web;
+typedef std::unordered_map<std::string, std::vector<edge_tar_p>> reg_web_p;
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
 /*
@@ -46,30 +45,9 @@ reg_web_p_compressed;
  */
 typedef std::unordered_map<std::string, std::vector<float>> genemap;
 
-/*
- * Compressed version of the original genemap, limited to 65536 possible feature
- * names.  Same as genemap, but swapping strings with unsigned short.
- */
-typedef std::unordered_map<uint16_t, std::vector<float>>
-genemap_compressed;
-
-/*
- * Maps strings to unsigned short, mainly used for speeding up compression
- * feature
- */
-typedef std::unordered_map<std::string, uint16_t> string_map;
-
 std::vector<std::string> readRegList(std::string);
 
 genemap readTransformedGexpMatrix(std::string);
-
-const std::tuple<const std::vector<std::string>, const string_map>
-readRegList_compressed(std::string);
-
-const std::tuple<const genemap_compressed, const std::vector<std::string>>
-readTransformedGexpMatrix_compressed(const std::tuple<const
-		std::vector<std::string>, const string_map>, std::string);
-
 
 
 //--------------------- APMI.cpp	 		-----------------------
@@ -88,8 +66,7 @@ typedef struct {const float &x_bound1, &y_bound1, &width;
 float APMI(std::vector<float>, std::vector<float>, const float q_thresh, 
 		const uint16_t);
 
-template<typename genemap, typename identifier>
-std::vector<edge_tar<identifier>> genemapAPMI(genemap &, const identifier &, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
+std::vector<edge_tar> genemapAPMI(genemap &, const std::string &, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
 
 const std::vector<float> permuteAPMI(std::vector<float> &ref_vec, 
 		std::vector<std::vector<float>> &target_vec, const float,
@@ -99,6 +76,9 @@ const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
 //--------------------- NullModel.cpp	 		-----------------------
 // sets a file static variable of an ordered null distribution
 std::vector<float> initNullMIs(const unsigned int);
+
+// the function below requires that initNullMIs has been called
+float getMIPVal(const float);
 
 // the function below requires that initNullMIs has been called
 std::vector<float> getMIPVals(const std::vector<float>);

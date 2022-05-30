@@ -129,16 +129,13 @@ float APMI(vector<float> &vec_x, vector<float> &vec_y,
  * vec_x many times.  It assumes a particular usage case in the ARACNe3.cpp main
  * function.  
  *
- * It is a template to support compressed and non-compressed gene identifiers.
- *
  * Inputs are the entire genemap of gene->expression, the regulator name, and
  * then the q_thresh and size_thresh same as above
  * 
  * Returns a vector of 'edge' structs
  * corresponding to each edge and their MI.
  */
-template<typename genemap, typename identifier>
-vector<edge_tar<identifier>> genemapAPMI(genemap &matrix, const identifier &reg,
+vector<edge_tar> genemapAPMI(genemap &matrix, const string &reg,
 		    const float q_thresh,
 		    const uint16_t size_thresh) {
 	// set file static variables
@@ -150,25 +147,21 @@ vector<edge_tar<identifier>> genemapAPMI(genemap &matrix, const identifier &reg,
 	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }	
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
 	
-	edge_tar<identifier> edges[matrix.size() - 2]; // - 2 because we don't
-						// have one for regulator
-	uint16_t i;
+	vector<edge_tar> edges;
+	edges.reserve(matrix.size() - 2);
 	for (auto it = matrix.begin(); it != matrix.end(); ++it) {
 		::vec_y = it->second;
 		if (it->first != reg) {
 			APMI_split(init);
 			const float mi = std::accumulate(mis.begin(), mis.end(),
 					static_cast<float>(0.0));
-			edges[i++] = edge_tar<identifier>{it->first, mi};
+			edges.emplace_back(it->first, mi);
 			mis.clear();
-		}	
+		}
 	}
-	
-	// vectorize
-	vector<edge_tar<identifier>> return_vec(&edges[0], &edges[i]);
-	return return_vec;
+	return edges;
 }
-
+	
 /*
  * Computes the MI for a reference vector ref and a vector of vector targets.
  * Similar to genemapAPMI, but faster run time and used when creating edge
