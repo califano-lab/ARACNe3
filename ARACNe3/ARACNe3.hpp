@@ -17,13 +17,15 @@
 /*
  * The "ball on stick" data structure for edges in network.  Will be used with
  * dictionary so that a regulator can have a group of these associated.
- * Compressed and non-compressed versions.
+ * Compressed and non-compressed versions are supported with this template.  The
+ * identifier should be a String& as the "gene" or uint16_t as the associated
+ * number.
  */
-typedef struct {const std::string &target; const float mi;} edge_tar;
-typedef struct {edge_tar &etr; const float p_value;} edge_tar_p;
-typedef struct {const uint16_t &target; const float mi;} edge_tar_compressed;
-typedef struct {edge_tar_compressed &etr; const float p_value;}
-edge_tar_p_compressed;
+template <typename identifier>
+struct edge_tar {const identifier &target; const float mi;};
+
+template <typename identifier>
+struct edge_tar_p : edge_tar<identifier> {const float p_value;};
 
 /*
  * The regulator and target list is represented by this data type, an unordered
@@ -31,11 +33,11 @@ edge_tar_p_compressed;
  * implementation) as well as a vector of "ball-on-stick" structs, or all the
  * targets and their MIs.
  */
-typedef std::unordered_map<std::string, std::vector<edge_tar>> reg_web;
-typedef std::unordered_map<std::string, std::vector<edge_tar_p>> reg_web_p;
-typedef std::unordered_map<uint16_t, std::vector<edge_tar_compressed>>
+typedef std::unordered_map<std::string, std::vector<edge_tar<std::string>>> reg_web;
+typedef std::unordered_map<std::string, std::vector<edge_tar_p<std::string>>> reg_web_p;
+typedef std::unordered_map<uint16_t, std::vector<edge_tar<uint16_t>>>
 reg_web_compressed;
-typedef std::unordered_map<uint16_t, std::vector<edge_tar_p_compressed>>
+typedef std::unordered_map<uint16_t, std::vector<edge_tar_p<uint16_t>>>
 reg_web_p_compressed;
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
@@ -61,9 +63,6 @@ std::vector<std::string> readRegList(std::string);
 
 genemap readTransformedGexpMatrix(std::string);
 
-// NOTE TO SELF: const on a std::object will make the entire object const, so do
-// not define const within the object.  Returning const stuff is okay and
-// automatically cast.  const tuple can have const contents.
 const std::tuple<const std::vector<std::string>, const string_map>
 readRegList_compressed(std::string);
 
@@ -89,16 +88,20 @@ typedef struct {const float &x_bound1, &y_bound1, &width;
 float APMI(std::vector<float>, std::vector<float>, const float q_thresh, 
 		const uint16_t);
 
-void genemapAPMI(genemap &, const std::string &, const float, const unsigned
-		short);
+template<typename genemap, typename identifier>
+std::vector<edge_tar<identifier>> genemapAPMI(genemap &, const identifier &, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
 
-const std::vector<const float> permuteAPMI(std::vector<float> &ref_vec, 
+const std::vector<float> permuteAPMI(std::vector<float> &ref_vec, 
 		std::vector<std::vector<float>> &target_vec, const float,
 		const uint16_t);
 
 
 //--------------------- NullModel.cpp	 		-----------------------
-std::vector<float> initNullMis(const unsigned int);
+// sets a file static variable of an ordered null distribution
+std::vector<float> initNullMIs(const unsigned int);
+
+// the function below requires that initNullMIs has been called
+std::vector<float> getMIPVals(const std::vector<float>);
 
 
 

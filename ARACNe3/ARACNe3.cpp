@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
 	if (compressed == true) {
 		regs = readRegList(string(argv[1]));
 		matrix = readTransformedGexpMatrix(string(argv[2]));
+		
 	} else if (compressed == false) {
 		regs = readRegList(string(argv[1]));
 		matrix = readTransformedGexpMatrix(string(argv[2]));

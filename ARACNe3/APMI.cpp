@@ -1,11 +1,8 @@
-// [[Rcpp::depends(BH)]]
-// [[Rcpp::plugins("cpp11")]]
 
 //#include <boost/math/distributions/chi_squared.hpp>
 //#include <Rcpp.h>
 #include "ARACNe3.hpp"
 
-//using namespace Rcpp;
 using namespace std;
 
 /*
@@ -131,15 +128,19 @@ float APMI(vector<float> &vec_x, vector<float> &vec_y,
  * passed in memory, with the advance knowledge that we need to use the same
  * vec_x many times.  It assumes a particular usage case in the ARACNe3.cpp main
  * function.  
- * 
+ *
+ * It is a template to support compressed and non-compressed gene identifiers.
+ *
  * Inputs are the entire genemap of gene->expression, the regulator name, and
  * then the q_thresh and size_thresh same as above
  * 
- * Returns a vector of 'edge' structs corresponding to each edge and their MI.
+ * Returns a vector of 'edge' structs
+ * corresponding to each edge and their MI.
  */
-void genemapAPMI(genemap &matrix, const string &reg,
-		const float q_thresh = 7.815,
-		const uint16_t size_thresh = 4) {
+template<typename genemap, typename identifier>
+vector<edge_tar<identifier>> genemapAPMI(genemap &matrix, const identifier &reg,
+		    const float q_thresh,
+		    const uint16_t size_thresh) {
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
@@ -148,22 +149,24 @@ void genemapAPMI(genemap &matrix, const string &reg,
 	uint16_t all_pts[tot_num_pts];
 	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }	
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
-
-	// we use array and vectorize later; runtime advantage
-	//float (const rowMI_arr)[tot_num_pts];
-
-	for (auto it = matrix.begin(); it != matrix.end();
-			++it) {
+	
+	edge_tar<identifier> edges[matrix.size() - 2]; // - 2 because we don't
+						// have one for regulator
+	uint16_t i;
+	for (auto it = matrix.begin(); it != matrix.end(); ++it) {
 		::vec_y = it->second;
 		if (it->first != reg) {
 			APMI_split(init);
 			const float mi = std::accumulate(mis.begin(), mis.end(),
 					static_cast<float>(0.0));
-			cout << reg << "\t" << it->first << "\t" << mi << "\n";
+			edges[i++] = edge_tar<identifier>{it->first, mi};
 			mis.clear();
 		}	
 	}
-	return;
+	
+	// vectorize
+	vector<edge_tar<identifier>> return_vec(&edges[0], &edges[i]);
+	return return_vec;
 }
 
 /*
@@ -179,7 +182,7 @@ void genemapAPMI(genemap &matrix, const string &reg,
  * returns a float vector of targets.size() MI values, in the order of 'targets'
  */
 
-const vector<const float> permuteAPMI(vector<float> &ref, 
+const vector<float> permuteAPMI(vector<float> &ref,
 		vector<vector<float>> &targets, const float q_thresh
 		= 7.815, const uint16_t size_thresh = 4) {
 	// set file static variables
@@ -202,7 +205,7 @@ const vector<const float> permuteAPMI(vector<float> &ref,
 		mis.clear();
 	}
 
-	const vector<const float> mi_vec(&mi_array[0],
+	const vector<float> mi_vec(&mi_array[0],
 			&mi_array[targets.size()]);
 	return mi_vec;
 }

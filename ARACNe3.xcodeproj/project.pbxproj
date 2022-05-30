@@ -11,6 +11,7 @@
 		49451D9128450A1300158C6D /* ARACNe3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8928450A1300158C6D /* ARACNe3.cpp */; };
 		49451D9328450A1300158C6D /* MatrixReglistIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */; };
 		49451D9428450A1300158C6D /* NullModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8E28450A1300158C6D /* NullModel.cpp */; };
+		49451D9628453A0700158C6D /* ARACNe3.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 49451D8C28450A1300158C6D /* ARACNe3.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +36,7 @@
 		49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixReglistIO.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8E28450A1300158C6D /* NullModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = NullModel.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8F28450A1300158C6D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; tabWidth = 8; };
+		49451DA7284563D300158C6D /* ARACNe3_Rcpp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3_Rcpp.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +57,7 @@
 				49451D7F284509E500158C6D /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 1;
 		};
 		49451D7F284509E500158C6D /* Products */ = {
 			isa = PBXGroup;
@@ -67,13 +70,14 @@
 		49451D80284509E500158C6D /* ARACNe3 */ = {
 			isa = PBXGroup;
 			children = (
-				49451D8828450A1300158C6D /* APMI.cpp */,
-				49451D8928450A1300158C6D /* ARACNe3.cpp */,
 				49451D8C28450A1300158C6D /* ARACNe3.hpp */,
-				49451D8B28450A1300158C6D /* Makefile */,
+				49451D8928450A1300158C6D /* ARACNe3.cpp */,
 				49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */,
+				49451D8828450A1300158C6D /* APMI.cpp */,
 				49451D8E28450A1300158C6D /* NullModel.cpp */,
+				49451DA7284563D300158C6D /* ARACNe3_Rcpp.cpp */,
 				49451D8F28450A1300158C6D /* README.md */,
+				49451D8B28450A1300158C6D /* Makefile */,
 				49451D8A28450A1300158C6D /* test */,
 			);
 			path = ARACNe3;
@@ -81,11 +85,23 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		49451D95284539FC00158C6D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49451D9628453A0700158C6D /* ARACNe3.hpp in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		49451D7D284509E500158C6D /* ARACNe3 */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 49451D85284509E500158C6D /* Build configuration list for PBXNativeTarget "ARACNe3" */;
 			buildPhases = (
+				49451D95284539FC00158C6D /* Headers */,
 				49451D7A284509E500158C6D /* Sources */,
 				49451D7B284509E500158C6D /* Frameworks */,
 				49451D7C284509E500158C6D /* CopyFiles */,
@@ -281,7 +297,7 @@
 				49451D84284509E500158C6D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		49451D85284509E500158C6D /* Build configuration list for PBXNativeTarget "ARACNe3" */ = {
 			isa = XCConfigurationList;
@@ -290,7 +306,7 @@
 				49451D87284509E500158C6D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
