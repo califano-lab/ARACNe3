@@ -1,0 +1,8 @@
+I will output all new test results with commits so that this can be tracked.
+The most recent test result is furthest down this list.  
+
+./ARACNe3 test/regulators.txt test/exp_mat.txt  499.32s user 82.01s system 700% cpu 1:22.96 total
+./NullModel  11.91s user 0.24s system 99% cpu 12.159 total
+./NullModel  11.76s user 0.11s system 89% cpu 13.217 total
+./NullModel  11.74s user 0.11s system 99% cpu 11.869 total
+./ARACNe3 test/regulators.txt test/exp_mat.txt  551.67s user 93.84s system 754% cpu 1:25.55 total

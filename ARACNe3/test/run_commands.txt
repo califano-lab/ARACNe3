@@ -1,0 +1,3 @@
+time java -Xmx32G -jar '/Users/andrew/Library/CloudStorage/OneDrive-Personal/Columbia/Califano Lab/Aaron Projects/20220513 NaRnEA Sample Code/NaRnEA/data/ARACNe3/aracne.jar' -e '/Users/andrew/Library/CloudStorage/OneDrive-Personal/Columbia/Califano Lab/Aaron Projects/20220518 ARACNe3 C++/official/test/exp_mat.txt' -o '/Users/andrew/Library/CloudStorage/OneDrive-Personal/Columbia/Califano Lab/Aaron Projects/20220513 NaRnEA Sample Code/output' --tfs '/Users/andrew/Library/CloudStorage/OneDrive-Personal/Columbia/Califano Lab/Aaron Projects/20220518 ARACNe3 C++/official/test/regulators.txt' --pvalue 1E-8 --seed 1 --nobootstrap --nodpi
+
+time ./ARACNe3 test/regulators.txt test/exp_mat.txt
