@@ -11,7 +11,7 @@
  *
  */
 
-static std::vector<float> *null_mis;
+//static std::vector<float> *null_mis;
 
 /*
  * Computes 1 million null mutual information values from the number of samples.
@@ -45,8 +45,8 @@ const std::vector<const float> initNullMIs(int tot_num_samps) {
 	return mi_vec;
 }
 
-int main() {
-	const std::vector<const float> mis = initNullMIs(100);
-	//for (auto &num : mis) { std::cerr << num << std::endl; }
-	return 0;
-}
+//int main() {
+//	const std::vector<const float> mis = initNullMIs(100);
+//	//for (auto &num : mis) { std::cerr << num << std::endl; }
+//	return 0;
+//}
