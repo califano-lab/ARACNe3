@@ -1,10 +1,8 @@
-# ARACNe3
+# ARACNe3 C++
 
-## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3)
+## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) in C++
 
-This is a prototype of the C++ implementation of ARACNe3 currently under
-development.  ARACNe3 presents multiple computational and theoretical
-improvements to the existing ARACNe-AP algorithm formulated in Java.  
+This is a prototype of the C++ implementation of ARACNe3 currently under development.  ARACNe3 presents multiple computational and theoretical improvements to the existing ARACNe-AP algorithm formulated in Java.  
 
 
 Please contact Aaron T. Griffin and Lukas J. Vlahos for any questions regarding this project.
@@ -22,7 +20,7 @@ executable can still be run using the following commandline arguments:
 
 ./ARACNe3 /path/to/regulators.txt /path/to/gexpmatrix.txt
 
-The program will output an 'output.txt' that contains the regulator-target MI values estimated via Adaptive Partitioning (APMI), and the p-value associated determined a null distribution from the APMI of shuffled gene-expressio marginals.  Currently, this is computationally extremely slow, can only run on one CPU core, and will take approximately 2 hours.   
+The program will output an 'output.txt' that contains the regulator-target MI values estimated via Adaptive Partitioning (APMI), and the associated p-value determined from a null distribution of the APMI between 1 million shuffled gene-expression marginals.  Currently, this is computationally extremely slow, can only run on one CPU core, and will take approximately 2 hours.   
 
 ## List of Improvements in Development:
  - **IN PROGRESS** Compute p-values from eCDF as opposed to manual search through sorted null MI vector
