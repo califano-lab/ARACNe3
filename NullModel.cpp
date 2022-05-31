@@ -49,13 +49,10 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 }
 
 const float getMIPVal(const float &mi) {
-	auto start = std::chrono::high_resolution_clock::now();
 	// returns an iterator to the highest index mi is less than
 	auto it = std::upper_bound(null_mis.begin(), null_mis.end(), mi);
-	// p-value is 1 minus the percentile
 	
-	// timing the p-value calculation
-	std::cout << duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
+	// p-value is 1 minus the percentile
 	return (1 - (it-null_mis.begin())/1000000.0);
 };
 
@@ -72,3 +69,7 @@ const std::vector<float> getMIPVals(const std::vector<float> &mis) {
 //	//for (auto &num : mis) { std::cerr << num << std::endl; }
 //	return 0;
 //}
+
+// timing the calculation
+//auto start = std::chrono::high_resolution_clock::now();
+//std::cout << duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
