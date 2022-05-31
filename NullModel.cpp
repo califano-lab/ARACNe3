@@ -7,8 +7,6 @@
  * via APMI from 1,000,000 random vectors.  The vector is sorted and stored on
  * the heap, and it will be accessible for p-value calculation from the global
  * variable pointer null_mis.  null_mis is to be free'd after the first pruning
- * step.
- *
  */
 
 static std::vector<float> null_mis;

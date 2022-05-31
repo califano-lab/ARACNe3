@@ -27,6 +27,8 @@ The program will output an 'output.txt' that contains the regulator-target MI va
  - Optimize calculation of 1 million null MIs, possibly by shuffling index and sending to APMI(), as opposed to vector matrix by std::shuffle()
  - Multithreading/non-multithreading option using standard library
  - Compression of gene name identifiers ("_gxxx_") from std::string -> uint16_t and decompression
+ - Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
+ - Adjacency matrix insertion after first pruning step of regulatiors x regulators to determine if edge exists -> will make checking the reg\_web map much faster for third edge.
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
 
