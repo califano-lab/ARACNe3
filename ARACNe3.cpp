@@ -23,24 +23,40 @@ int main(int argc, char *argv[]) {
 	if (prune_1) {
 		cout << "REGULATOR\tTARGET\tMI\tP-Value" << endl;
 		
-		auto start = chrono::high_resolution_clock::now();
+		
+		cout << "INIT NULL" << endl;
+		//-------time module-------
+		auto last = chrono::high_resolution_clock::now();
+		//-------------------------
 		
 		initNullMIs(tot_num_samps);
 		
-		auto end = chrono::high_resolution_clock::now();
-		cout << "DONE WITH NULL" << endl;
-		cout << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
+		cout << "NULL DONE" << endl;
+		//-------time module-------
+		auto cur = chrono::high_resolution_clock::now();
+		cout << chrono::duration_cast<chrono::milliseconds>(cur - last).count() << "ms" << endl;
+		last = cur;
+		//-------------------------
 		
+		cout << "COMPUTING REGULATOR \"WEBS\" WITH P" << endl;
 		reg_web_p reg_edge_tars_p;
 		reg_edge_tars_p.reserve(regs.size());
 		for (auto &reg : regs) {
 			reg_edge_tars_p[reg] = genemapAPMI_p(matrix, reg, 7.815, 4);
 		}
+		cout << "REGULATOR \"WEBS\" DONE" << endl;
+		//-------time module-------
+		cur = chrono::high_resolution_clock::now();
+		cout << chrono::duration_cast<chrono::milliseconds>(cur - last).count() << "ms" << endl;
+		last = cur;
+		//-------------------------
+		
 		for (auto it = reg_edge_tars_p.begin(); it != reg_edge_tars_p.end(); ++it) {
 			for (auto &edge_tar_p : it->second) {
 				cout << it->first << '\t' << edge_tar_p.target << '\t' << edge_tar_p.mi << '\t' << edge_tar_p.p_value << endl;
 			}
 		}
+		
 	} else {
 		cout << "REGULATOR\tTARGET\tMI" << endl;
 		reg_web reg_edge_tars;
@@ -57,3 +73,10 @@ int main(int argc, char *argv[]) {
 
 	//cout.rdbuf(cout_buff);
 }
+
+/* timing funcs
+#include <chrono>
+auto start = chrono::high_resolution_clock::now();
+auto end = chrono::high_resolution_clock::now();
+cout << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
+ */

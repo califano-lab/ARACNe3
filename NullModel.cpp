@@ -28,6 +28,7 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 	// vector of vectors, 1mil rows
 	std::vector<std::vector<float>> target_vec(1000000, ref_vec);
 
+	// consider optimizing this
 	auto rng = std::default_random_engine {};
 	for (unsigned int i = 0; i < 1000000; ++i) {
 		std::shuffle(std::begin(target_vec[i]), std::end(target_vec[i]),
@@ -66,8 +67,3 @@ const std::vector<float> getMIPVals(const std::vector<float> &mis) {
 //	//for (auto &num : mis) { std::cerr << num << std::endl; }
 //	return 0;
 //}
-
-// timing the calculation
-//#include <chrono>
-//auto start = std::chrono::high_resolution_clock::now();
-//std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
