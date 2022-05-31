@@ -14,8 +14,7 @@ Lukas J. Vlahos - lv2395@cumc.columbia.edu
 
 ## Running the Most Recent Executable
 
-This codebase is currently under development, but the most up-to-date ARACNe3
-executable can still be run using the following commandline arguments: 
+This codebase is currently under development, but the most up-to-date ARACNe3 executable can still be run on any platform.  The executable must be compiled using source files in this directory, but only standard libraries are used, so this can be done by linking all object file dependencies with the ARACNe3 target executable, which can be run using the following commandline arguments: 
 
 
 `./ARACNe3 /path/to/regulators.txt /path/to/gexpmatrix.txt`
