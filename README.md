@@ -34,10 +34,11 @@ devices.  C++ files may be recompiled to operate on any UNIX-based operating
 system.  
 
 ## List of Improvements in Development:
- - **IN PROGRESS** Multithreading/non-multithreading option via commandline 
- - **IN PROGRESS** First MI-pruning step based on null model for MI and
+ -  - **IN PROGRESS** First MI-pruning step based on null model for MI and
    Benjamini-Hochberg principle control for user-parametrizable FDR. 
  - Second DPI-pruning step made optional and implemented
+ - Multithreading/non-multithreading option via commandline 
+ - Compression of gene name identifiers ("_gxxx_") from std::string -> uint16_t and decompression
  - **IN PROGRESS** Low-level optimization and parallel for loop processing.
    Namely, minimizing heap allocation and using caches, as well as using the
 most efficient data structures required to store edge information (hashmaps,

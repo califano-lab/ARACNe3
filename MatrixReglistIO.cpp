@@ -2,7 +2,7 @@
 
 using namespace std;
 
-static uint16_t samps = 0;
+uint16_t tot_num_samps = 0;
 
 /*
  * Reads a newline-separated regulator list and outputs a vector of strings
@@ -39,12 +39,12 @@ genemap readTransformedGexpMatrix(string filename = "exp_mat.txt") {
 	string line;
 	getline(f, line, '\n');
 	for (size_t i = 0; (i = line.find('\t', i)) != string::npos; ++i) {
-		++samps;
+		++tot_num_samps;
 	}
 	
 	// now, we can more efficiently load
 	string gene;
-	float expr_vals[samps];
+	float expr_vals[tot_num_samps];
 	while(getline(f, line, '\n')) {
 		size_t prev = 0U, pos, i = 0U;
 		pos = line.find_first_of("\t", prev);
@@ -56,10 +56,10 @@ genemap readTransformedGexpMatrix(string filename = "exp_mat.txt") {
 			}
 			prev = pos + 1;
 		}
-		expr_vals[samps-1] = stof(line.substr(prev, string::npos));
+		expr_vals[tot_num_samps-1] = stof(line.substr(prev, string::npos));
 
 		// copy the array to vector
-		vector<float> expr_vec(&expr_vals[0], &expr_vals[samps]);
+		vector<float> expr_vec(&expr_vals[0], &expr_vals[tot_num_samps]);
 		gm[gene] = expr_vec;
 	}
 	return gm;
@@ -75,8 +75,8 @@ genemap readTransformedGexpMatrix(string filename = "exp_mat.txt") {
 //     genemap expression = readTransformedGexpMatrix(matrix_file);
 //     for (string reg : regulators) { cout << reg << " " << 
 //     	expression[reg][0] << " " <<
-//     	expression[reg][samps - 1] << endl; }
-//     cout << "SAMPS: " << samps << endl;
+//     	expression[reg][tot_num_samps - 1] << endl; }
+//     cout << "tot_num_samps: " << tot_num_samps << endl;
 //
 //     return 0;
 //}

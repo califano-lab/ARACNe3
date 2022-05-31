@@ -63,25 +63,27 @@ genemap readTransformedGexpMatrix(std::string);
 typedef struct {const float &x_bound1, &y_bound1, &width; 
 	uint16_t *pts, &num_pts;} square;
 
-float APMI(std::vector<float>, std::vector<float>, const float q_thresh, 
-		const uint16_t);
+float APMI(std::vector<float>, std::vector<float>, const float q_thresh = 7.815, 
+		const uint16_t size_thresh = 4);
 
 std::vector<edge_tar> genemapAPMI(genemap &, const std::string &, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
 
-const std::vector<float> permuteAPMI(std::vector<float> &ref_vec, 
-		std::vector<std::vector<float>> &target_vec, const float,
-		const uint16_t);
+std::vector<edge_tar_p> genemapAPMI_p(genemap &, const std::string &, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
+
+const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
+		std::vector<std::vector<float>> &target_vec, const float q_thresh = 7.815,
+		const uint16_t size_thresh = 4);
 
 
 //--------------------- NullModel.cpp	 		-----------------------
 // sets a file static variable of an ordered null distribution
-std::vector<float> initNullMIs(const unsigned int);
+const std::vector<float> initNullMIs(uint16_t);
 
 // the function below requires that initNullMIs has been called
-float getMIPVal(const float);
+const float getMIPVal(const float &);
 
 // the function below requires that initNullMIs has been called
-std::vector<float> getMIPVals(const std::vector<float>);
+const std::vector<float> getMIPVals(const std::vector<float>);
 
 
 

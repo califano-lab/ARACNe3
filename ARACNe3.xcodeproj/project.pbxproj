@@ -36,7 +36,7 @@
 		49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixReglistIO.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8E28450A1300158C6D /* NullModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = NullModel.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8F28450A1300158C6D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; tabWidth = 8; };
-		49451DA7284563D300158C6D /* ARACNe3_Rcpp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3_Rcpp.cpp; sourceTree = "<group>"; };
+		49451DA7284563D300158C6D /* ARACNe3_R.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3_R.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,7 +53,15 @@
 		49451D75284509E500158C6D = {
 			isa = PBXGroup;
 			children = (
-				49451D80284509E500158C6D /* ARACNe3 */,
+				49451D8C28450A1300158C6D /* ARACNe3.hpp */,
+				49451D8928450A1300158C6D /* ARACNe3.cpp */,
+				49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */,
+				49451D8828450A1300158C6D /* APMI.cpp */,
+				49451D8E28450A1300158C6D /* NullModel.cpp */,
+				49451DA7284563D300158C6D /* ARACNe3_R.cpp */,
+				49451D8F28450A1300158C6D /* README.md */,
+				49451D8B28450A1300158C6D /* Makefile */,
+				49451D8A28450A1300158C6D /* test */,
 				49451D7F284509E500158C6D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -65,22 +73,6 @@
 				49451D7E284509E500158C6D /* ARACNe3 */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		49451D80284509E500158C6D /* ARACNe3 */ = {
-			isa = PBXGroup;
-			children = (
-				49451D8C28450A1300158C6D /* ARACNe3.hpp */,
-				49451D8928450A1300158C6D /* ARACNe3.cpp */,
-				49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */,
-				49451D8828450A1300158C6D /* APMI.cpp */,
-				49451D8E28450A1300158C6D /* NullModel.cpp */,
-				49451DA7284563D300158C6D /* ARACNe3_Rcpp.cpp */,
-				49451D8F28450A1300158C6D /* README.md */,
-				49451D8B28450A1300158C6D /* Makefile */,
-				49451D8A28450A1300158C6D /* test */,
-			);
-			path = ARACNe3;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

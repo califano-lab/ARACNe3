@@ -11,7 +11,7 @@ using namespace std;
  * each time the APMI is calculated, discarding all products.
  */
 static float q_thresh;
-static vector<float> vec_x, vec_y;
+static vector<float> *vec_x, *vec_y;
 static vector<float> mis;
 static uint16_t tot_num_pts, size_thresh;
 
@@ -54,8 +54,8 @@ void APMI_split(const square &s) {
 	for (uint16_t i = 0; i < num_pts; ++i) {
 		// we must pull the actual point index from the pts array
 		const uint16_t p = pts[i];
-		const bool top = vec_y[p] >= y_thresh, 
-		      right = vec_x[p] >= x_thresh;
+		const bool top = (*vec_y)[p] >= y_thresh,
+		      right = (*vec_x)[p] >= x_thresh;
 		if (top && right) { tr_pts[tr_num_pts++] = p; } 
 		else if (right) { br_pts[br_num_pts++] = p; } 
 		else if (top) { tl_pts[tl_num_pts++] = p; } 
@@ -99,20 +99,20 @@ void APMI_split(const square &s) {
  */
 // [[Rcpp::export]]
 float APMI(vector<float> &vec_x, vector<float> &vec_y, 
-		const float q_thresh = 7.815, 
-		const uint16_t size_thresh = 4) {
+		const float q_thresh,
+		const uint16_t size_thresh) {
 	// Set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	::vec_x = vec_x;
-	::vec_y = vec_y;
-	::tot_num_pts = vec_x.size();
+	::vec_x = &vec_x;
+	::vec_y = &vec_y;
+	::tot_num_pts = (*::vec_x).size();
 
 	// clear the mis vector -- THIS IS VERY INEFFICIENT AND SHALL CHANGE
 	mis.clear();
 
 	// Make an array of all indices, to be partitioned later
-	uint16_t all_pts[vec_x.size()];
+	uint16_t all_pts[(*::vec_x).size()];
 	for (uint16_t i = 0; i < tot_num_pts; i++) { all_pts[i] = i; }
 	
 	// Initialize plane and calc all MIs
@@ -141,8 +141,8 @@ vector<edge_tar> genemapAPMI(genemap &matrix, const string &reg,
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	::vec_x = matrix[reg];
-	::tot_num_pts = vec_x.size();
+	::vec_x = &matrix[reg];
+	::tot_num_pts = (*vec_x).size();
 	uint16_t all_pts[tot_num_pts];
 	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }	
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
@@ -150,7 +150,7 @@ vector<edge_tar> genemapAPMI(genemap &matrix, const string &reg,
 	vector<edge_tar> edges;
 	edges.reserve(matrix.size() - 2);
 	for (auto it = matrix.begin(); it != matrix.end(); ++it) {
-		::vec_y = it->second;
+		::vec_y = &(it->second);
 		if (it->first != reg) {
 			APMI_split(init);
 			const float mi = std::accumulate(mis.begin(), mis.end(),
@@ -160,6 +160,35 @@ vector<edge_tar> genemapAPMI(genemap &matrix, const string &reg,
 		}
 	}
 	return edges;
+}
+
+/*
+ A version of genemap_APMI that also computes the p-value of each edge
+ */
+vector<edge_tar_p> genemapAPMI_p(genemap &matrix, const string &reg, const float q_thresh, const uint16_t size_thresh) {
+	//set file static variables
+	::size_thresh = size_thresh;
+	::q_thresh = q_thresh;
+	::vec_x = &matrix[reg];
+	::tot_num_pts = (*vec_x).size();
+	uint16_t all_pts[tot_num_pts];
+	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }
+	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
+	
+	vector<edge_tar_p> edges;
+	edges.reserve(matrix.size() - 2);
+	for (auto it = matrix.begin(); it != matrix.end(); ++it) {
+		::vec_y = &(it->second);
+		if (it->first != reg) {
+			APMI_split(init);
+			const float mi = std::accumulate(mis.begin(), mis.end(),
+					static_cast<float>(0.0));
+			edges.emplace_back(it->first, mi, getMIPVal(mi));
+			mis.clear();
+		}
+	}
+	return edges;
+	
 }
 	
 /*
@@ -176,12 +205,11 @@ vector<edge_tar> genemapAPMI(genemap &matrix, const string &reg,
  */
 
 const vector<float> permuteAPMI(vector<float> &ref,
-		vector<vector<float>> &targets, const float q_thresh
-		= 7.815, const uint16_t size_thresh = 4) {
+		vector<vector<float>> &targets, const float q_thresh, const uint16_t size_thresh) {
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	::vec_x = ref;
+	::vec_x = &ref;
 	::tot_num_pts = ref.size();
 
 	float mi_array[targets.size()];
@@ -191,7 +219,7 @@ const vector<float> permuteAPMI(vector<float> &ref,
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
 
 	for (unsigned int i = 0; i < targets.size(); ++i) {
-		::vec_y = targets[i];
+		::vec_y = &(targets[i]);
 		APMI_split(init);
 		mi_array[i] = std::accumulate(mis.begin(), mis.end(),
 				static_cast<float>(0.0));

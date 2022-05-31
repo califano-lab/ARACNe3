@@ -17,7 +17,7 @@ static std::vector<float> null_mis;
  * Computes 1 million null mutual information values from the number of samples.
  * To reduce runtime, we emulate rowAPMI but 
  */
-const std::vector<float> initNullMIs(int tot_num_samps) {
+const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 	// make the permute vector, the ref vector, send to permuteAPMI
 	std::vector<float> ref_vec;
 	ref_vec.reserve(tot_num_samps);
@@ -37,17 +37,29 @@ const std::vector<float> initNullMIs(int tot_num_samps) {
 	}
 
 	// vector is now on heap
-	const std::vector<float> mi_vec = permuteAPMI(ref_vec, target_vec,
-			7.815, 4);
-
-	// NEXT -> Sort vector largest to smallest and output.
+	std::vector<float> mi_vec = permuteAPMI(ref_vec, target_vec, 7.815, 4);
+	
+	// standard sorting, largest to smallest
+	std::sort(mi_vec.begin(), mi_vec.end(), std::greater<float>());
 	
 	// finally, set file static variable and/or return mi_vec to caller
 	null_mis = mi_vec;
 	return mi_vec;
 }
 
+const float getMIPVal(const float &mi) {
+	auto it = null_mis.cbegin();
+	while (*it++ > mi) {}
+	return ((it-null_mis.begin())/1000000.0);
+};
 
+const std::vector<float> getMIPVals(const std::vector<float> &mis) {
+	std::vector<float> ps;
+	ps.reserve(mis.size());
+	for (auto &mi : mis)
+		ps.emplace_back(getMIPVal(mi));
+	return ps;
+}
 
 //int main() {
 //	const std::vector<const float> mis = initNullMIs(100);
