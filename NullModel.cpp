@@ -1,4 +1,5 @@
 #include "ARACNe3.hpp"
+#include <chrono>
 
 /*
  * This file is the null-model module of ARACNe3.  It is a separate file because
@@ -39,8 +40,8 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 	// vector is now on heap
 	std::vector<float> mi_vec = permuteAPMI(ref_vec, target_vec, 7.815, 4);
 	
-	// standard sorting, largest to smallest
-	std::sort(mi_vec.begin(), mi_vec.end(), std::greater<float>());
+	// standard sorting, smallest to largest
+	std::sort(mi_vec.begin(), mi_vec.end(), std::less<float>());
 	
 	// finally, set file static variable and/or return mi_vec to caller
 	null_mis = mi_vec;
@@ -48,9 +49,14 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 }
 
 const float getMIPVal(const float &mi) {
-	auto it = null_mis.cbegin();
-	while (*it++ > mi) {}
-	return ((it-null_mis.begin())/1000000.0);
+	auto start = std::chrono::high_resolution_clock::now();
+	// returns an iterator to the highest index mi is less than
+	auto it = std::upper_bound(null_mis.begin(), null_mis.end(), mi);
+	// p-value is 1 minus the percentile
+	
+	// timing the p-value calculation
+	std::cout << duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
+	return (1 - (it-null_mis.begin())/1000000.0);
 };
 
 const std::vector<float> getMIPVals(const std::vector<float> &mis) {
