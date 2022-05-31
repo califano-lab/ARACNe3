@@ -22,19 +22,11 @@ executable can still be run using the following commandline arguments:
 
 ./ARACNe3 /path/to/regulators.txt /path/to/gexpmatrix.txt
 
-
-The program will CURRENTLY output a directory 'output/' that contains the
-regulator-target MI values estimated via Adaptive Partitioning (APMI).  
-
-To run this multiple times, DELETE 'output/', as this is a primitive program and
-will append to the previous directory.
-
-It may be the case that this executable is only operable on MacOS 12.3.1 arm64
-devices.  C++ files may be recompiled to operate on any UNIX-based operating
-system.  
+The program will output an 'output.txt' that contains the regulator-target MI values estimated via Adaptive Partitioning (APMI), and the p-value associated determined a null distribution from the APMI of shuffled gene-expressio marginals.  Currently, this is computationally extremely slow, can only run on one CPU core, and will take approximately 2 hours.   
 
 ## List of Improvements in Development:
- -  - **IN PROGRESS** First MI-pruning step based on null model for MI and
+ - **IN PROGRESS** Compute p-values from eCDF as opposed to manual search through sorted null MI vector
+ - **IN PROGRESS** First MI-pruning step based on null model for MI and
    Benjamini-Hochberg principle control for user-parametrizable FDR. 
  - Second DPI-pruning step made optional and implemented
  - Multithreading/non-multithreading option via commandline 
