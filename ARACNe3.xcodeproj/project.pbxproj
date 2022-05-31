@@ -289,7 +289,7 @@
 				49451D84284509E500158C6D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		49451D85284509E500158C6D /* Build configuration list for PBXNativeTarget "ARACNe3" */ = {
 			isa = XCConfigurationList;
@@ -298,7 +298,7 @@
 				49451D87284509E500158C6D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

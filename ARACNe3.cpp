@@ -1,7 +1,5 @@
 #include "ARACNe3.hpp"
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
+#include <chrono>
 
 using namespace std;
 extern uint16_t tot_num_samps;
@@ -18,13 +16,21 @@ int main(int argc, char *argv[]) {
 	const vector<string> regs = readRegList(string(argv[1]));
 	genemap matrix = readTransformedGexpMatrix(string(argv[2]));
 
-	ofstream ofs{"output.txt"};
-	auto cout_buff = cout.rdbuf();
-	cout.rdbuf(ofs.rdbuf());
+	//ofstream ofs{"output.txt"};
+	//auto cout_buff = cout.rdbuf();
+	//cout.rdbuf(ofs.rdbuf());
 	
 	if (prune_1) {
 		cout << "REGULATOR\tTARGET\tMI\tP-Value" << endl;
+		
+		auto start = chrono::high_resolution_clock::now();
+		
 		initNullMIs(tot_num_samps);
+		
+		auto end = chrono::high_resolution_clock::now();
+		cout << "DONE WITH NULL" << endl;
+		cout << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
+		
 		reg_web_p reg_edge_tars_p;
 		reg_edge_tars_p.reserve(regs.size());
 		for (auto &reg : regs) {
@@ -49,5 +55,5 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	cout.rdbuf(cout_buff);
+	//cout.rdbuf(cout_buff);
 }

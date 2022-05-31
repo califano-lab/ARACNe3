@@ -1,5 +1,4 @@
 #include "ARACNe3.hpp"
-#include <chrono>
 
 /*
  * This file is the null-model module of ARACNe3.  It is a separate file because
@@ -26,18 +25,16 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 		ref_vec.push_back(((float) i)/(tot_num_samps+1));
 	}
 
-	// an array of vectors, pointer on stack; array on heap
-	std::vector<std::vector<float>> target_vec;
-	target_vec.reserve(1000000);
+	// vector of vectors, 1mil rows
+	std::vector<std::vector<float>> target_vec(1000000, ref_vec);
 
 	auto rng = std::default_random_engine {};
 	for (unsigned int i = 0; i < 1000000; ++i) {
-		target_vec.emplace_back(std::vector<float>(ref_vec));
 		std::shuffle(std::begin(target_vec[i]), std::end(target_vec[i]),
 				rng);
 	}
 
-	// vector is now on heap
+	// get the 1 million MI values
 	std::vector<float> mi_vec = permuteAPMI(ref_vec, target_vec, 7.815, 4);
 	
 	// standard sorting, smallest to largest
@@ -71,5 +68,6 @@ const std::vector<float> getMIPVals(const std::vector<float> &mis) {
 //}
 
 // timing the calculation
+//#include <chrono>
 //auto start = std::chrono::high_resolution_clock::now();
-//std::cout << duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
+//std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
