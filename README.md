@@ -1,4 +1,4 @@
-# ARACNe3 C++
+# ARACNe3
 
 ## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) in C++
 
