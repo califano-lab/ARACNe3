@@ -27,7 +27,7 @@ The program will output an 'output.txt' that contains the regulator-target MI va
  - Compression of gene name identifiers ("\_gxxx\_") from `std::string` -> `uint16_t` and decompression
  - Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
  - **IN PROGRESS** Adjacency matrix insertion after first pruning step of regulators x regulators to determine if edge exists -> will make checking the `reg\_web` map much faster for third edge.
- - Using a `uint16_t` compression of regulators will dramatically increase the speed of adjacency matrix calculations.  We must check if every identifier is in the regulator list (O(n) per regulator), whereas if we had a `uint16_t` compression, we could check if the identifier is less than number of regulators (assuming regulators are numbered 1 - 2000, genes are 2001 - ~18000).
+ - **IN PROGRESS** Using a `uint16_0` compression of regulators will dramatically increase the speed of adjacency matrix calculations.  We must check if every identifier is in the regulator list (O(n) per regulator), whereas if we had a `uint16_t` compression, we could check if the identifier is less than number of regulators (assuming regulators are numbered 1 - 2000, genes are 2001 - ~18000).
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
  
