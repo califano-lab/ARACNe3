@@ -3,8 +3,10 @@
 using namespace std;
 // inferred while reading txt files.  Rcpp will have to compensate
 uint32_t size_of_network = 0;
-extern uint16_t tot_num_samps;
-extern uint16_t tot_num_regulators;
+uint16_t tot_num_samps = 0;
+uint16_t tot_num_regulators = 0;
+bool prune_FDR = false;
+bool prune_DPI = false;
 
 /*
  Convenient function for timing parts of ARACNe3.  Will set last.
@@ -24,8 +26,8 @@ void sinceLast() {
  * e.g. ./ARACNe3 test/regfile.txt test/matrixfile.txt
  */
 int main(int argc, char *argv[]) {
-	bool prune_FDR = true;
-	bool prune_DPI = false;
+	prune_FDR = true;
+	prune_DPI = true;
 	
 	readRegList(string(argv[1]));
 	genemap matrix = readTransformedGexpMatrix(string(argv[2]));
@@ -69,28 +71,12 @@ int main(int argc, char *argv[]) {
 		/*
 		 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
 		 */
-		reg_web pruned = pruneFDR(network, size_of_network, 0.05f);
-		
-		// frees some memory as well
-		reg_web().swap(network);
+		network = pruneFDR(network, size_of_network, 0.05f);
 		
 		//-------time module-------
 		cout << "FDR PRUNING DONE" << endl;
 		sinceLast();
 		cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
-		//-------------------------
-		
-		
-		//-------time module-------
-		cout << "PRINTING NETWORK REG-TAR-MI" << endl;
-		last = chrono::high_resolution_clock::now();
-		//-------------------------
-		
-		printNetworkRegTarMI(pruned, "output.txt");
-		
-		//-------time module-------
-		cout << "PRINTING DONE" << endl;
-		sinceLast();
 		//-------------------------
 		
 		if (prune_DPI) {
@@ -99,17 +85,25 @@ int main(int argc, char *argv[]) {
 			last = chrono::high_resolution_clock::now();
 			//-------------------------
 			
+			network = pruneDPI(network);
+			
 			//-------time module-------
 			cout << "DPI PRUNING DONE" << endl;
 			last = chrono::high_resolution_clock::now();
+			cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
 			//-------------------------
 		}
 	}
+	
+	//-------time module-------
+	cout << "PRINTING NETWORK REG-TAR-MI" << endl;
+	last = chrono::high_resolution_clock::now();
+	//-------------------------
+	
+	printNetworkRegTarMI(network, "output.txt");
+	
+	//-------time module-------
+	cout << "PRINTING DONE" << endl;
+	sinceLast();
+	//-------------------------
 }
-
-/* timing funcs
-#include <chrono>
-auto start = chrono::high_resolution_clock::now();
-auto end = chrono::high_resolution_clock::now();
-cout << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
- */

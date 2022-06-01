@@ -22,15 +22,14 @@ This codebase is currently under development, but the most up-to-date ARACNe3 ex
 The program will output an 'output.txt' that contains the regulator-target MI values estimated via Adaptive Partitioning (APMI), and the associated p-value determined from a null distribution of the APMI between 1 million shuffled gene-expression marginals.  Currently, this is computationally slow, can only run on one CPU core, and will take approximately 10 minutes on a computer with the specifications at the bottom of the page.   
 
 ## Current Developments:
- - **IN PROGRESS** Second DPI-pruning step made optional and implemented
  - Multithreading/non-multithreading option using standard library
- - Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
- - **IN PROGRESS** Adjacency matrix insertion after first pruning step of regulators x regulators to determine if edge exists -> will make checking the `reg_web` map much faster for third edge.
+ - **IN PROGRESS** Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
+ - **IN PROGRESS** DPI pruning could be halved wrt runtime if we loop through the adjacency matrix on a diagonal, as it is implied that if reg1->reg2, that reg2->reg1.  This optimization will be critical for runtime.
  - Remove any references on data types `<=4B`, as references instantiate pointer values which are at least 4B (and typically are 8B on 64-bit systems)
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
  
- Plan of action: Adjacency Matrix -> DPI Pruning -> Overhaul of Low-level algorithms -> Rewriting entire codebase with smarter class design and matured codebase -> Implement multithreading 
+ Plan of action: Overhaul of Low-level algorithms -> Rewriting entire codebase with smarter class design and matured codebase -> Implement multithreading 
 
 ## Tracking Progress
 

@@ -2,6 +2,10 @@
 
 extern uint32_t size_of_network;
 extern uint16_t tot_num_regulators;
+extern bool prune_DPI;
+
+// adjacency matrix for DPI pruning
+extern std::vector<std::vector<float>> reg_reg_edges;
 
 /*
  Prunes a network by control of FDR using the Benjamini-Hochberg Procedure.
@@ -41,12 +45,21 @@ reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR) {
 	size_of_network = static_cast<uint32_t>(pruned_vec.size());
 	
 	/*
-	 Rebuild the network.  This is where we should ideally also fill out an adjacency matrix for the regulators, so we can quickly identify regulators that regulate each other.  It's convenient but highly inefficient due to the push_back.
+	 Rebuild the network.  We also fill out an adjacency matrix for the regulator-regulator interactions, so we can quickly identify regulators that regulate each other.  Rebuilding the network is inefficient due to the push_back.
 	 */
+	if (prune_DPI)
+		reg_reg_edges = std::vector<std::vector<float>>(tot_num_regulators, std::vector<float>(tot_num_regulators, 0.0f));
+		
 	reg_web pruned_net;
 	pruned_net.reserve(tot_num_regulators);
 	for (auto &pair : pruned_vec) {
 		pruned_net[pair.first].push_back(pair.second);
+		if (prune_DPI) {
+			/* Now, for this one, due to compression we know that if the identifier is below tot_num_regulators, we have a regulator!  Blazing fast! */
+			if (pair.first < tot_num_regulators && pair.second.target < tot_num_regulators)
+				reg_reg_edges[pair.first][pair.second.target] = pair.second.mi;
+				
+		}
 	}
 	
 	return pruned_net;

@@ -2,8 +2,8 @@
 
 using namespace std;
 
-uint16_t tot_num_samps = 0;
-uint16_t tot_num_regulators = 0;
+extern uint16_t tot_num_samps;
+extern uint16_t tot_num_regulators;
 
 static unordered_map<string, uint16_t> compression_map;
 static vector<string> decompression_map;
