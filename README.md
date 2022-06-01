@@ -37,11 +37,11 @@ The program will output an 'output.txt' that contains the regulator-target MI va
 Whenever a significant change is made to an existing module of this program, such as MatrixReglistIO.cpp for reading tsv or regulator lists and forming data structures, or NullModel.cpp for creating the null distribution for mutual information, test results are either appended to test/current\_test.txt _or noted in the git commit notes_ (more often noted in commit notes).  The results reflect runtime performance of the most recent version of ARACNe3 or the given executable.  Tests were run on the following computer, and the 'time' program was released in MacOS 12.3 as a utility that conforms to ISO/IEC 9945-2:1993.  Please refer to the MacOS man pages for details in regards to 'time'.
 
 ## System Information
-| Feature | Value |
+| System Feature | Value |
 | :----: | :----: |
 | Model Identifier: | MacBookPro18,1 |
-| Chip | Apple M1 Pro |
-| Total Number of Cores | 10 (8 performance and 2 efficiency) |
+| Chip: | Apple M1 Pro |
+| Total Number of Cores: | 10 (8 performance and 2 efficiency) |
 | Memory: | 32 GB |
 | System Firmware Version: |7459.101.3 |
 | OS Loader Version: | 7459.101.3 |
