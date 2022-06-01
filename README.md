@@ -30,7 +30,7 @@ The program will output an 'output.txt' that contains the regulator-target MI va
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
  
- Plan of action: Adjacency Matrix -> DPI Pruning -> Gene ID Compression -> Overhaul of Low-level algorithms -> Rewriting entire codebase with smarter class design and matured codebase -> Implement multithreading 
+ Plan of action: Adjacency Matrix -> DPI Pruning -> Overhaul of Low-level algorithms -> Rewriting entire codebase with smarter class design and matured codebase -> Implement multithreading 
 
 ## Tracking Progress
 
