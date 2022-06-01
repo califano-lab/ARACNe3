@@ -8,6 +8,8 @@
 #include <random>
 #include <numeric>
 #include <math.h>
+#include <filesystem>
+#include <chrono>
 
 #ifndef _ARACNE3_HPP_
 #define _ARACNE3_HPP_
@@ -19,14 +21,14 @@
  * dictionary so that a regulator can have a group of these associated.
  */
 typedef struct edge_tar{
-	const std::string &target;
-	const float mi;
-	edge_tar(const std::string &t, const float mi) : target(t), mi(mi) {};
+	std::string target;
+	float mi;
+	edge_tar(const std::string &t, const float &mi) : target(t), mi(mi) {};
 } edge_tar;
 
 typedef struct edge_tar_p : edge_tar {
-	const float p_value;
-	edge_tar_p(const std::string &t, const float mi, const float p) :
+	float p_value;
+	edge_tar_p(const std::string &t, const float &mi, const float &p) :
 	edge_tar(t, mi), p_value(p) {};
 } edge_tar_p;
 
@@ -48,6 +50,8 @@ typedef std::unordered_map<std::string, std::vector<float>> genemap;
 std::vector<std::string> readRegList(std::string);
 
 genemap readTransformedGexpMatrix(std::string);
+
+void printNetworkRegTarMI(const reg_web &network, const std::string &filename = "output.txt");
 
 
 //--------------------- APMI.cpp	 		-----------------------
@@ -76,6 +80,8 @@ const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
 
 
 //--------------------- NullModel.cpp	 		-----------------------
+void checkInitNullMIs();
+
 // sets a file static variable of an ordered null distribution
 const std::vector<float> initNullMIs(uint16_t);
 
@@ -83,8 +89,17 @@ const std::vector<float> initNullMIs(uint16_t);
 const float getMIPVal(const float &);
 
 // the function below requires that initNullMIs has been called
-const std::vector<float> getMIPVals(const std::vector<float>);
+const std::vector<float> getMIPVals(const std::vector<float> &);
 
+
+//--------------------- FDRPruning.cpp	 		-----------------------
+reg_web pruneFDR(reg_web &network, uint32_t size, float FDR = 0.05);
+reg_web pruneFDR(reg_web &network, std::vector<std::string> regs, uint32_t network_size, float FDR = 0.05);
+
+//--------------------- DPIPruning.cpp	 		-----------------------
+reg_web pruneDPI(reg_web &network);
+
+//--------------------- ARACNe3.cpp	 		-----------------------
 
 
 #endif /* #ifndef _ARACNE3_HPP_ */

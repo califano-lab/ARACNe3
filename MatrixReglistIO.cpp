@@ -25,7 +25,6 @@ vector<string> readRegList(string filename = "regulators.txt") {
  * Reads a copula-transformed tab-separated (G+1)x(N+1) gene expression matrix and 
  * outputs an unordered hash table corresponding to the {gene, expression} 
  * values
- *
  */
 genemap readTransformedGexpMatrix(string filename = "exp_mat.txt") {
 	fstream f {filename};
@@ -63,6 +62,25 @@ genemap readTransformedGexpMatrix(string filename = "exp_mat.txt") {
 		gm[gene] = expr_vec;
 	}
 	return gm;
+}
+
+/*
+ Function that prints the Regulator, Target, and MI to the given filename.  Does not print to the console.  The data structure input is a reg_web, which is defined in "ARACNe3.hpp".
+ */
+void printNetworkRegTarMI(const reg_web &network, const string &filename) {
+	ofstream ofs{filename};
+	auto cout_buff = cout.rdbuf();
+	cout.rdbuf(ofs.rdbuf());
+	
+	cout << "REGULATOR\tTARGET\tMI\t" << endl;
+	for (auto it = network.begin(); it != network.end(); ++it) {
+		for (auto &edge_tar : it->second) {
+				cout << it->first << '\t' << edge_tar.target << '\t' << edge_tar.mi << '\t' << endl;
+		}
+	}
+	
+	cout.rdbuf(cout_buff);
+	
 }
 
 //int main() {

@@ -12,6 +12,9 @@
 		49451D9328450A1300158C6D /* MatrixReglistIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */; };
 		49451D9428450A1300158C6D /* NullModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8E28450A1300158C6D /* NullModel.cpp */; };
 		49451D9628453A0700158C6D /* ARACNe3.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 49451D8C28450A1300158C6D /* ARACNe3.hpp */; };
+		49F6F59A2846988200C681BC /* RegWebFns.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F5982846988200C681BC /* RegWebFns.cpp */; };
+		49F6F59D2846A73400C681BC /* FDRPruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F59C2846A73400C681BC /* FDRPruning.cpp */; };
+		49F6F5A02846A75100C681BC /* DPIPruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F59E2846A75100C681BC /* DPIPruning.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,6 +40,9 @@
 		49451D8E28450A1300158C6D /* NullModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = NullModel.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8F28450A1300158C6D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; tabWidth = 8; };
 		49451DA7284563D300158C6D /* ARACNe3_R.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3_R.cpp; sourceTree = "<group>"; };
+		49F6F5982846988200C681BC /* RegWebFns.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RegWebFns.cpp; sourceTree = "<group>"; };
+		49F6F59C2846A73400C681BC /* FDRPruning.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FDRPruning.cpp; sourceTree = "<group>"; };
+		49F6F59E2846A75100C681BC /* DPIPruning.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DPIPruning.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,12 +61,15 @@
 			children = (
 				49451D8C28450A1300158C6D /* ARACNe3.hpp */,
 				49451D8928450A1300158C6D /* ARACNe3.cpp */,
+				49451D8E28450A1300158C6D /* NullModel.cpp */,
 				49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */,
 				49451D8828450A1300158C6D /* APMI.cpp */,
-				49451D8E28450A1300158C6D /* NullModel.cpp */,
-				49451DA7284563D300158C6D /* ARACNe3_R.cpp */,
+				49F6F59C2846A73400C681BC /* FDRPruning.cpp */,
+				49F6F59E2846A75100C681BC /* DPIPruning.cpp */,
+				49F6F5982846988200C681BC /* RegWebFns.cpp */,
 				49451D8F28450A1300158C6D /* README.md */,
 				49451D8B28450A1300158C6D /* Makefile */,
+				49451DA7284563D300158C6D /* ARACNe3_R.cpp */,
 				49451D8A28450A1300158C6D /* test */,
 				49451D7F284509E500158C6D /* Products */,
 			);
@@ -146,7 +155,10 @@
 			files = (
 				49451D9428450A1300158C6D /* NullModel.cpp in Sources */,
 				49451D9028450A1300158C6D /* APMI.cpp in Sources */,
+				49F6F59A2846988200C681BC /* RegWebFns.cpp in Sources */,
 				49451D9128450A1300158C6D /* ARACNe3.cpp in Sources */,
+				49F6F5A02846A75100C681BC /* DPIPruning.cpp in Sources */,
+				49F6F59D2846A73400C681BC /* FDRPruning.cpp in Sources */,
 				49451D9328450A1300158C6D /* MatrixReglistIO.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

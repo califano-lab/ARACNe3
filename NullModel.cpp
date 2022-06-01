@@ -9,13 +9,22 @@
  * variable pointer null_mis.  null_mis is to be free'd after the first pruning
  */
 
+static uint32_t num_null_marginals = 1000000;
 static std::vector<float> null_mis;
+
+/*
+ When implemented, should check if there is a NullMIs cached file in the cached/ directory.  If so, returns true; if not, calls initNullMIs.
+ */
+void checkInitNullMIs() {
+	return;
+}
 
 /*
  * Computes 1 million null mutual information values from the number of samples.
  * To reduce runtime, we emulate rowAPMI but 
  */
 const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
+	
 	// make the permute vector, the ref vector, send to permuteAPMI
 	std::vector<float> ref_vec;
 	ref_vec.reserve(tot_num_samps);
@@ -24,11 +33,11 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 	}
 
 	// vector of vectors, 1mil rows
-	std::vector<std::vector<float>> target_vec(1000000, ref_vec);
+	std::vector<std::vector<float>> target_vec(num_null_marginals, ref_vec);
 
 	// consider optimizing this
 	auto rng = std::default_random_engine {};
-	for (unsigned int i = 0; i < 1000000; ++i) {
+	for (unsigned int i = 0; i < num_null_marginals; ++i) {
 		std::shuffle(std::begin(target_vec[i]), std::end(target_vec[i]),
 				rng);
 	}
@@ -49,8 +58,8 @@ const float getMIPVal(const float &mi) {
 	auto it = std::upper_bound(null_mis.begin(), null_mis.end(), mi);
 	
 	// p-value is 1 minus the percentile
-	return (1 - (it-null_mis.begin())/1000000.0);
-};
+	return (1 - (it-null_mis.begin())/(float)num_null_marginals);
+}
 
 const std::vector<float> getMIPVals(const std::vector<float> &mis) {
 	std::vector<float> ps;

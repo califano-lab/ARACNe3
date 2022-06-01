@@ -1,8 +1,20 @@
 #include "ARACNe3.hpp"
-#include <chrono>
 
 using namespace std;
+// inferred while reading txt files.  Rcpp will have to compensate
+uint32_t size_of_network_unpruned = 0;
 extern uint16_t tot_num_samps;
+
+/*
+ Macro for timing parts of ARACNe3.  Will set last.
+ */
+auto last = chrono::high_resolution_clock::now(), cur = chrono::high_resolution_clock::now();
+void sinceLast() {
+	cur = chrono::high_resolution_clock::now();
+	cout << chrono::duration_cast<chrono::milliseconds>(cur-last).count() << "ms" << endl;
+	last = cur;
+}
+
 
 /*
  * Assumes that simply the path to the regulator list and the path to the gene
@@ -11,67 +23,84 @@ extern uint16_t tot_num_samps;
  * e.g. ./ARACNe3 test/regfile.txt test/matrixfile.txt
  */
 int main(int argc, char *argv[]) {
-	bool prune_1 = true;
+	bool prune_FDR = true;
+	bool prune_DPI = false;
 	
-	const vector<string> regs = readRegList(string(argv[1]));
+	vector<string> regs = readRegList(string(argv[1]));
 	genemap matrix = readTransformedGexpMatrix(string(argv[2]));
-
-	//ofstream ofs{"output.txt"};
-	//auto cout_buff = cout.rdbuf();
-	//cout.rdbuf(ofs.rdbuf());
+	size_of_network_unpruned = static_cast<uint32_t>(regs.size()*matrix.size()-regs.size());
 	
-	if (prune_1) {
-		cout << "REGULATOR\tTARGET\tMI\tP-Value" << endl;
-		
-		
-		cout << "INIT NULL" << endl;
+	//-------time module-------
+	cout << "INIT NULL BEGIN" << endl;
+	last = chrono::high_resolution_clock::now();
+	//-------------------------
+	
+	initNullMIs(tot_num_samps);
+	
+	//-------time module-------
+	cout << "INIT NULL DONE" << endl;
+	sinceLast();
+	//-------------------------
+	
+	//-------time module-------
+	cout << "COMPUTING REGULATOR \"WEBS\" NO P BEGIN" << endl;
+	last = chrono::high_resolution_clock::now();
+	//-------------------------
+	
+	reg_web network;
+	network.reserve(regs.size());
+	for (auto &reg : regs) {
+		network[reg] = genemapAPMI(matrix, reg, 7.815, 4);
+	}
+	
+	//-------time module-------
+	cout << "REGULATOR \"WEBS\" DONE" << endl;
+	sinceLast();
+	//-------------------------
+	
+	if (prune_FDR) {
 		//-------time module-------
-		auto last = chrono::high_resolution_clock::now();
+		cout << "FDR PRUNING BEGIN" << endl;
+		last = chrono::high_resolution_clock::now();
+		//-------------------------
+		/*
+		 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
+		 */
+		reg_web pruned = pruneFDR(network, regs, size_of_network_unpruned, 0.05f);
+		
+		// frees some memory as well
+		reg_web().swap(network);
+		
+		//-------time module-------
+		cout << "FDR PRUNING DONE" << endl;
+		sinceLast();
 		//-------------------------
 		
-		initNullMIs(tot_num_samps);
 		
-		cout << "NULL DONE" << endl;
 		//-------time module-------
-		auto cur = chrono::high_resolution_clock::now();
-		cout << chrono::duration_cast<chrono::milliseconds>(cur - last).count() << "ms" << endl;
-		last = cur;
+		cout << "PRINTING NETWORK REG-TAR-MI" << endl;
+		last = chrono::high_resolution_clock::now();
 		//-------------------------
 		
-		cout << "COMPUTING REGULATOR \"WEBS\" WITH P" << endl;
-		reg_web_p reg_edge_tars_p;
-		reg_edge_tars_p.reserve(regs.size());
-		for (auto &reg : regs) {
-			reg_edge_tars_p[reg] = genemapAPMI_p(matrix, reg, 7.815, 4);
-		}
-		cout << "REGULATOR \"WEBS\" DONE" << endl;
+		printNetworkRegTarMI(pruned, "output.txt");
+		
 		//-------time module-------
-		cur = chrono::high_resolution_clock::now();
-		cout << chrono::duration_cast<chrono::milliseconds>(cur - last).count() << "ms" << endl;
-		last = cur;
+		cout << "PRINTING DONE" << endl;
+		sinceLast();
 		//-------------------------
 		
-		for (auto it = reg_edge_tars_p.begin(); it != reg_edge_tars_p.end(); ++it) {
-			for (auto &edge_tar_p : it->second) {
-				cout << it->first << '\t' << edge_tar_p.target << '\t' << edge_tar_p.mi << '\t' << edge_tar_p.p_value << endl;
-			}
-		}
-		
-	} else {
-		cout << "REGULATOR\tTARGET\tMI" << endl;
-		reg_web reg_edge_tars;
-		reg_edge_tars.reserve(regs.size());
-		for (auto &reg : regs) {
-			reg_edge_tars[reg] = genemapAPMI(matrix, reg, 7.815, 4);
-		}
-		for (auto it = reg_edge_tars.begin(); it != reg_edge_tars.end(); ++it) {
-			for (auto &edge_tar : it->second) {
-				cout << it->first << '\t' << edge_tar.target << '\t' << edge_tar.mi << endl;
-			}
+		if (prune_DPI) {
+			//-------time module-------
+			cout << "DPI PRUNING BEGIN" << endl;
+			last = chrono::high_resolution_clock::now();
+			//-------------------------
+			
+			//-------time module-------
+			cout << "DPI PRUNING DONE" << endl;
+			last = chrono::high_resolution_clock::now();
+			//-------------------------
 		}
 	}
-
-	//cout.rdbuf(cout_buff);
 }
 
 /* timing funcs
