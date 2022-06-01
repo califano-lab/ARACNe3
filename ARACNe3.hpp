@@ -21,9 +21,9 @@
  * dictionary so that a regulator can have a group of these associated.
  */
 typedef struct edge_tar{
-	std::string target;
+	uint16_t target;
 	float mi;
-	edge_tar(const std::string &t, const float &mi) : target(t), mi(mi) {};
+	edge_tar(const uint16_t &t, const float &mi) : target(t), mi(mi) {};
 } edge_tar;
 
 /*
@@ -32,17 +32,23 @@ typedef struct edge_tar{
  * implementation) as well as a vector of "ball-on-stick" structs, or all the
  * targets and their MIs.
  */
-typedef std::unordered_map<std::string, std::vector<edge_tar>> reg_web;
+typedef std::unordered_map<uint16_t, std::vector<edge_tar>> reg_web;
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
 /*
- * Maps strings to gene expression matrices
+ * Maps gene identifiers to gene expression matrices
  */
-typedef std::unordered_map<std::string, std::vector<float>> genemap;
+typedef std::unordered_map<uint16_t, std::vector<float>> genemap;
 
-std::vector<std::string> readRegList(std::string);
+/*
+ Does not return a list of regulators as a string vector, as we are using compression
+ */
+void readRegList(std::string filename = "regulators.txt");
 
-genemap readTransformedGexpMatrix(std::string);
+/*
+ Returns a map of gene identifier -> gene expression.
+ */
+genemap readTransformedGexpMatrix(std::string filename = "exp_mat.txt");
 
 void printNetworkRegTarMI(const reg_web &network, const std::string &filename = "output.txt");
 
@@ -63,7 +69,7 @@ typedef struct {const float &x_bound1, &y_bound1, &width;
 float APMI(std::vector<float>, std::vector<float>, const float q_thresh = 7.815, 
 		const uint16_t size_thresh = 4);
 
-std::vector<edge_tar> genemapAPMI(genemap &, const std::string &, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
+std::vector<edge_tar> genemapAPMI(genemap &matrix, uint16_t identifier, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
 
 const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
 		std::vector<std::vector<float>> &target_vec, const float q_thresh = 7.815,
@@ -84,7 +90,7 @@ const std::vector<float> getMIPVals(const std::vector<float> &);
 
 
 //--------------------- FDRPruning.cpp	 		-----------------------
-reg_web pruneFDR(reg_web &network, std::vector<std::string> &regs, uint32_t network_size, float FDR = 0.05);
+reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR = 0.05);
 
 //--------------------- DPIPruning.cpp	 		-----------------------
 reg_web pruneDPI(reg_web &network);

@@ -4,6 +4,7 @@ using namespace std;
 // inferred while reading txt files.  Rcpp will have to compensate
 uint32_t size_of_network = 0;
 extern uint16_t tot_num_samps;
+extern uint16_t tot_num_regulators;
 
 /*
  Convenient function for timing parts of ARACNe3.  Will set last.
@@ -26,9 +27,9 @@ int main(int argc, char *argv[]) {
 	bool prune_FDR = true;
 	bool prune_DPI = false;
 	
-	vector<string> regs = readRegList(string(argv[1]));
+	readRegList(string(argv[1]));
 	genemap matrix = readTransformedGexpMatrix(string(argv[2]));
-	size_of_network = static_cast<uint32_t>(regs.size()*matrix.size()-regs.size());
+	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
 	
 	//-------time module-------
 	cout << "INIT NULL BEGIN" << endl;
@@ -48,9 +49,10 @@ int main(int argc, char *argv[]) {
 	//-------------------------
 	
 	reg_web network;
-	network.reserve(regs.size());
-	for (auto &reg : regs) {
+	network.reserve(tot_num_regulators);
+	for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) {
 		network[reg] = genemapAPMI(matrix, reg, 7.815, 4);
+		
 	}
 	
 	//-------time module-------
@@ -67,7 +69,7 @@ int main(int argc, char *argv[]) {
 		/*
 		 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
 		 */
-		reg_web pruned = pruneFDR(network, regs, size_of_network, 0.05f);
+		reg_web pruned = pruneFDR(network, size_of_network, 0.05f);
 		
 		// frees some memory as well
 		reg_web().swap(network);

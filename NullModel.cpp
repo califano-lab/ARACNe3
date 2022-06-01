@@ -67,9 +67,3 @@ const std::vector<float> getMIPVals(const std::vector<float> &mis) {
 		ps.emplace_back(getMIPVal(mi));
 	return ps;
 }
-
-//int main() {
-//	const std::vector<const float> mis = initNullMIs(100);
-//	//for (auto &num : mis) { std::cerr << num << std::endl; }
-//	return 0;
-//}

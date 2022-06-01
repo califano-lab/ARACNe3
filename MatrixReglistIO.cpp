@@ -3,22 +3,38 @@
 using namespace std;
 
 uint16_t tot_num_samps = 0;
+uint16_t tot_num_regulators = 0;
+
+static unordered_map<string, uint16_t> compression_map;
+static vector<string> decompression_map;
 
 /*
- * Reads a newline-separated regulator list and outputs a vector of strings
+ Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
  */
-vector<string> readRegList(string filename = "regulators.txt") {
+void readRegList(string filename) {
 	fstream f {filename};
 	vector<string> regs;
 	if (!f.is_open()) {
         	cerr << "error: file open failed " << filename << ".\n";
-		return regs;
+		return;
 	}
 	string reg;
 	while (getline(f, reg, '\n')) {
 		regs.push_back(reg);
 	}
-	return regs;
+	
+	compression_map.reserve(regs.size());
+	/* NOTE** This map starts from values i+1 because we are only using it to make the compression step below faster.  The compression map is redundant for every uint16_t greater than the number of regulators (i.e., contents are emptied after readTransformedGexpMatrix
+	*/
+	for (uint16_t i = 0; i < regs.size(); ++i) {
+		compression_map[regs[i]] = i+1; //NOTE** it's "regulator" -> i+1
+	}
+	
+	/* The original regs string vector is also the decompression map.  We index this vector with uint16_t -> "gene", and hence this is how we decompress.
+	 */
+	tot_num_regulators = regs.size();
+	decompression_map = regs;
+	return;
 }
 
 /*
@@ -26,7 +42,7 @@ vector<string> readRegList(string filename = "regulators.txt") {
  * outputs an unordered hash table corresponding to the {gene, expression} 
  * values
  */
-genemap readTransformedGexpMatrix(string filename = "exp_mat.txt") {
+genemap readTransformedGexpMatrix(string filename) {
 	fstream f {filename};
 	genemap gm;
 	if (!f.is_open()) {
@@ -59,7 +75,20 @@ genemap readTransformedGexpMatrix(string filename = "exp_mat.txt") {
 
 		// copy the array to vector
 		vector<float> expr_vec(&expr_vals[0], &expr_vals[tot_num_samps]);
-		gm[gene] = expr_vec;
+		
+		/*
+		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if tehre exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.
+		 */
+		if (compression_map[gene] == 0) {
+			// we must have a target
+			decompression_map.push_back(gene);
+			// the last index of decompression_vec is the new uint16_t
+			gm[decompression_map.size()-1] = expr_vec;
+		} else {
+			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
+			gm[compression_map[gene]-1] = expr_vec;
+		}
+
 	}
 	return gm;
 }
@@ -75,7 +104,7 @@ void printNetworkRegTarMI(const reg_web &network, const string &filename) {
 	cout << "REGULATOR\tTARGET\tMI\t" << endl;
 	for (auto it = network.begin(); it != network.end(); ++it) {
 		for (auto &edge_tar : it->second) {
-				cout << it->first << '\t' << edge_tar.target << '\t' << edge_tar.mi << '\t' << endl;
+				cout << decompression_map[it->first] << '\t' << decompression_map[edge_tar.target] << '\t' << edge_tar.mi << '\t' << endl;
 		}
 	}
 	
