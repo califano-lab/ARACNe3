@@ -31,15 +31,15 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 	for (uint16_t i = 1; i <= tot_num_samps; ++i) {
 		ref_vec.push_back(((float) i)/(tot_num_samps+1));
 	}
-
+	
 	// vector of vectors, 1mil rows
 	std::vector<std::vector<float>> target_vec(num_null_marginals, ref_vec);
 
-	// consider optimizing this
-	auto rng = std::default_random_engine {};
+	// 'rotate' is a shift with wrap around, much more efficient than std::shuffle
+	std::srand(static_cast<uint32_t>(std::time(NULL)));
 	for (unsigned int i = 0; i < num_null_marginals; ++i) {
-		std::shuffle(std::begin(target_vec[i]), std::end(target_vec[i]),
-				rng);
+		uint16_t rand_idx = std::rand() % tot_num_samps;
+		std::rotate(target_vec[i].begin(), target_vec[i].begin() + rand_idx, target_vec[i].end());
 	}
 
 	// get the 1 million MI values
