@@ -25,7 +25,7 @@ The program will output an 'output.txt' that contains the regulator-target MI va
  - **IN PROGRESS** Second DPI-pruning step made optional and implemented
  - Multithreading/non-multithreading option using standard library
  - Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
- - **IN PROGRESS** Adjacency matrix insertion after first pruning step of regulators x regulators to determine if edge exists -> will make checking the `reg\_web` map much faster for third edge.
+ - **IN PROGRESS** Adjacency matrix insertion after first pruning step of regulators x regulators to determine if edge exists -> will make checking the `reg_web` map much faster for third edge.
  - Remove any references on data types `<=4B`, as references instantiate pointer values which are at least 4B (and typically are 8B on 64-bit systems)
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
@@ -37,6 +37,7 @@ The program will output an 'output.txt' that contains the regulator-target MI va
 Whenever a significant change is made to an existing module of this program, such as MatrixReglistIO.cpp for reading tsv or regulator lists and forming data structures, or NullModel.cpp for creating the null distribution for mutual information, test results are either appended to test/current\_test.txt _or noted in the git commit notes_ (more often noted in commit notes).  The results reflect runtime performance of the most recent version of ARACNe3 or the given executable.  Tests were run on the following computer, and the 'time' program was released in MacOS 12.3 as a utility that conforms to ISO/IEC 9945-2:1993.  Please refer to the MacOS man pages for details in regards to 'time'.
 
 ## System Information
+| Feature | Value |
 | :----: | :----: |
 | Model Identifier: | MacBookPro18,1 |
 | Chip | Apple M1 Pro |
@@ -44,4 +45,3 @@ Whenever a significant change is made to an existing module of this program, suc
 | Memory: | 32 GB |
 | System Firmware Version: |7459.101.3 |
 | OS Loader Version: | 7459.101.3 |
-
