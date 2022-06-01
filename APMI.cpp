@@ -161,35 +161,6 @@ vector<edge_tar> genemapAPMI(genemap &matrix, const string &reg,
 	}
 	return edges;
 }
-
-/*
- A version of genemap_APMI that also computes the p-value of each edge
- */
-vector<edge_tar_p> genemapAPMI_p(genemap &matrix, const string &reg, const float q_thresh, const uint16_t size_thresh) {
-	//set file static variables
-	::size_thresh = size_thresh;
-	::q_thresh = q_thresh;
-	::vec_x = &matrix[reg];
-	::tot_num_pts = (*vec_x).size();
-	uint16_t all_pts[tot_num_pts];
-	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }
-	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
-	
-	vector<edge_tar_p> edges;
-	edges.reserve(matrix.size() - 2);
-	for (auto it = matrix.begin(); it != matrix.end(); ++it) {
-		::vec_y = &(it->second);
-		if (it->first != reg) {
-			APMI_split(init);
-			const float mi = std::accumulate(mis.begin(), mis.end(),
-					static_cast<float>(0.0));
-			edges.emplace_back(it->first, mi, getMIPVal(mi));
-			mis.clear();
-		}
-	}
-	return edges;
-	
-}
 	
 /*
  * Computes the MI for a reference vector ref and a vector of vector targets.
@@ -230,11 +201,3 @@ const vector<float> permuteAPMI(vector<float> &ref,
 			&mi_array[targets.size()]);
 	return mi_vec;
 }
-
-//int main() {
-//	vector<float> x = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
-//	vector<float> y = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
-//	const float mi = APMI(x,y);
-//	cout << mi << endl;
-//	return 0;
-//}

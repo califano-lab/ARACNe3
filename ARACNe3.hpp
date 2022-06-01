@@ -26,12 +26,6 @@ typedef struct edge_tar{
 	edge_tar(const std::string &t, const float &mi) : target(t), mi(mi) {};
 } edge_tar;
 
-typedef struct edge_tar_p : edge_tar {
-	float p_value;
-	edge_tar_p(const std::string &t, const float &mi, const float &p) :
-	edge_tar(t, mi), p_value(p) {};
-} edge_tar_p;
-
 /*
  * The regulator and target list is represented by this data type, an unordered
  * hash map between regulator names (string or number in uncompressed/compressed
@@ -39,7 +33,6 @@ typedef struct edge_tar_p : edge_tar {
  * targets and their MIs.
  */
 typedef std::unordered_map<std::string, std::vector<edge_tar>> reg_web;
-typedef std::unordered_map<std::string, std::vector<edge_tar_p>> reg_web_p;
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
 /*
@@ -72,8 +65,6 @@ float APMI(std::vector<float>, std::vector<float>, const float q_thresh = 7.815,
 
 std::vector<edge_tar> genemapAPMI(genemap &, const std::string &, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
 
-std::vector<edge_tar_p> genemapAPMI_p(genemap &, const std::string &, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
-
 const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
 		std::vector<std::vector<float>> &target_vec, const float q_thresh = 7.815,
 		const uint16_t size_thresh = 4);
@@ -93,8 +84,7 @@ const std::vector<float> getMIPVals(const std::vector<float> &);
 
 
 //--------------------- FDRPruning.cpp	 		-----------------------
-reg_web pruneFDR(reg_web &network, uint32_t size, float FDR = 0.05);
-reg_web pruneFDR(reg_web &network, std::vector<std::string> regs, uint32_t network_size, float FDR = 0.05);
+reg_web pruneFDR(reg_web &network, std::vector<std::string> &regs, uint32_t network_size, float FDR = 0.05);
 
 //--------------------- DPIPruning.cpp	 		-----------------------
 reg_web pruneDPI(reg_web &network);

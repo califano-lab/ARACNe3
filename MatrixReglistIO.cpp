@@ -82,19 +82,3 @@ void printNetworkRegTarMI(const reg_web &network, const string &filename) {
 	cout.rdbuf(cout_buff);
 	
 }
-
-//int main() {
-//     string regulator_file = "test/regulators.txt";
-//     string matrix_file = "test/exp_mat.txt";
-//
-//     const vector<string> regulators = readRegList(regulator_file);
-//     for (string reg : regulators) { cout << reg << endl; }
-//     
-//     genemap expression = readTransformedGexpMatrix(matrix_file);
-//     for (string reg : regulators) { cout << reg << " " << 
-//     	expression[reg][0] << " " <<
-//     	expression[reg][tot_num_samps - 1] << endl; }
-//     cout << "tot_num_samps: " << tot_num_samps << endl;
-//
-//     return 0;
-//}

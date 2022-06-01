@@ -34,7 +34,6 @@
 		49451D8828450A1300158C6D /* APMI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = APMI.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8928450A1300158C6D /* ARACNe3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8A28450A1300158C6D /* test */ = {isa = PBXFileReference; lastKnownFileType = folder; path = test; sourceTree = "<group>"; };
-		49451D8B28450A1300158C6D /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8C28450A1300158C6D /* ARACNe3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.h; path = ARACNe3.hpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixReglistIO.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8E28450A1300158C6D /* NullModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = NullModel.cpp; sourceTree = "<group>"; tabWidth = 8; };
@@ -68,7 +67,6 @@
 				49F6F59E2846A75100C681BC /* DPIPruning.cpp */,
 				49F6F5982846988200C681BC /* RegWebFns.cpp */,
 				49451D8F28450A1300158C6D /* README.md */,
-				49451D8B28450A1300158C6D /* Makefile */,
 				49451DA7284563D300158C6D /* ARACNe3_R.cpp */,
 				49451D8A28450A1300158C6D /* test */,
 				49451D7F284509E500158C6D /* Products */,

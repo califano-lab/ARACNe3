@@ -6,7 +6,7 @@ uint32_t size_of_network_unpruned = 0;
 extern uint16_t tot_num_samps;
 
 /*
- Macro for timing parts of ARACNe3.  Will set last.
+ Convenient function for timing parts of ARACNe3.  Will set last.
  */
 auto last = chrono::high_resolution_clock::now(), cur = chrono::high_resolution_clock::now();
 void sinceLast() {
