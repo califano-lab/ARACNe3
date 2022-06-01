@@ -2,7 +2,7 @@
 
 using namespace std;
 // inferred while reading txt files.  Rcpp will have to compensate
-uint32_t size_of_network_unpruned = 0;
+uint32_t size_of_network = 0;
 extern uint16_t tot_num_samps;
 
 /*
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 	
 	vector<string> regs = readRegList(string(argv[1]));
 	genemap matrix = readTransformedGexpMatrix(string(argv[2]));
-	size_of_network_unpruned = static_cast<uint32_t>(regs.size()*matrix.size()-regs.size());
+	size_of_network = static_cast<uint32_t>(regs.size()*matrix.size()-regs.size());
 	
 	//-------time module-------
 	cout << "INIT NULL BEGIN" << endl;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 	//-------------------------
 	
 	//-------time module-------
-	cout << "COMPUTING REGULATOR \"WEBS\" NO P BEGIN" << endl;
+	cout << "COMPUTING UNPRUNED NETWORK BEGIN" << endl;
 	last = chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -54,8 +54,9 @@ int main(int argc, char *argv[]) {
 	}
 	
 	//-------time module-------
-	cout << "REGULATOR \"WEBS\" DONE" << endl;
+	cout << "UNPRUNED NETWORK DONE" << endl;
 	sinceLast();
+	cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
 	//-------------------------
 	
 	if (prune_FDR) {
@@ -66,7 +67,7 @@ int main(int argc, char *argv[]) {
 		/*
 		 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
 		 */
-		reg_web pruned = pruneFDR(network, regs, size_of_network_unpruned, 0.05f);
+		reg_web pruned = pruneFDR(network, regs, size_of_network, 0.05f);
 		
 		// frees some memory as well
 		reg_web().swap(network);
@@ -74,6 +75,7 @@ int main(int argc, char *argv[]) {
 		//-------time module-------
 		cout << "FDR PRUNING DONE" << endl;
 		sinceLast();
+		cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
 		//-------------------------
 		
 		

@@ -41,8 +41,8 @@ void APMI_split(const square &s) {
 	if (num_pts < size_thresh) {mis.push_back(calcMI(s)); return;}
 
 	// thresholds for potential partition of XY plane
-	const float x_thresh = x_bound1 + width/2.0, 
-	      y_thresh = y_bound1 + width/2.0;
+	const float x_thresh = x_bound1 + width*0.5,
+	      y_thresh = y_bound1 + width*0.5;
 
 	// indices for quadrants, to test chi-square, with num_pts for each
 	uint16_t tr_pts[num_pts], br_pts[num_pts], bl_pts[num_pts], 
@@ -63,17 +63,17 @@ void APMI_split(const square &s) {
 	}
 
 	// compute chi-square, more efficient not to use pow()
-	const float E = num_pts / 4.0, chisq = ((tr_num_pts-E)*(tr_num_pts-E) +
+	const float E = num_pts*0.25, chisq = ((tr_num_pts-E)*(tr_num_pts-E) +
 		(br_num_pts-E)*(br_num_pts-E) +
 		(bl_num_pts-E)*(bl_num_pts-E) +
 		(tl_num_pts-E)*(tl_num_pts-E))/E;
 
 	// partition if chi-square or if initial square
 	if (chisq > q_thresh || num_pts == tot_num_pts) {
-		const square tr{x_thresh, y_thresh, width/2, tr_pts, tr_num_pts}, 
-		       br{x_thresh, y_bound1, width/2, br_pts, br_num_pts}, 
-		       bl{x_bound1, y_bound1, width/2, bl_pts, bl_num_pts}, 
-		       tl{x_bound1, y_thresh, width/2, tl_pts, tl_num_pts};
+		const square tr{x_thresh, y_thresh, width*0.5, tr_pts, tr_num_pts},
+		       br{x_thresh, y_bound1, width*0.5, br_pts, br_num_pts},
+		       bl{x_bound1, y_bound1, width*0.5, bl_pts, bl_num_pts},
+		       tl{x_bound1, y_thresh, width*0.5, tl_pts, tl_num_pts};
 
 		APMI_split(tr);
 		APMI_split(br);
@@ -108,8 +108,6 @@ float APMI(vector<float> &vec_x, vector<float> &vec_y,
 	::vec_y = &vec_y;
 	::tot_num_pts = (*::vec_x).size();
 
-	// clear the mis vector -- THIS IS VERY INEFFICIENT AND SHALL CHANGE
-	mis.clear();
 
 	// Make an array of all indices, to be partitioned later
 	uint16_t all_pts[(*::vec_x).size()];
@@ -118,8 +116,11 @@ float APMI(vector<float> &vec_x, vector<float> &vec_y,
 	// Initialize plane and calc all MIs
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};	
 	APMI_split(init);
-
-	return std::accumulate(mis.begin(), mis.end(), static_cast<float>(0.0));
+	
+	float mi = std::accumulate(mis.begin(), mis.end(), static_cast<float>(0.0));
+	mis.clear();
+	
+	return mi;
 }
 
 
@@ -148,7 +149,7 @@ vector<edge_tar> genemapAPMI(genemap &matrix, const string &reg,
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
 	
 	vector<edge_tar> edges;
-	edges.reserve(matrix.size() - 2);
+	edges.reserve(matrix.size() - 2); // minus 1 because size, minus 1 because reg->reg not an edge
 	for (auto it = matrix.begin(); it != matrix.end(); ++it) {
 		::vec_y = &(it->second);
 		if (it->first != reg) {
@@ -183,7 +184,8 @@ const vector<float> permuteAPMI(vector<float> &ref,
 	::vec_x = &ref;
 	::tot_num_pts = ref.size();
 
-	float mi_array[targets.size()];
+	vector<float> mi_vec;
+	mi_vec.reserve(targets.size());
 
 	uint16_t all_pts[tot_num_pts];
 	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }
@@ -192,12 +194,9 @@ const vector<float> permuteAPMI(vector<float> &ref,
 	for (unsigned int i = 0; i < targets.size(); ++i) {
 		::vec_y = &(targets[i]);
 		APMI_split(init);
-		mi_array[i] = std::accumulate(mis.begin(), mis.end(),
-				static_cast<float>(0.0));
+		mi_vec.emplace_back(std::accumulate(mis.begin(), mis.end(), static_cast<float>(0.0)));
 		mis.clear();
 	}
 
-	const vector<float> mi_vec(&mi_array[0],
-			&mi_array[targets.size()]);
 	return mi_vec;
 }

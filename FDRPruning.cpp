@@ -1,6 +1,6 @@
 #include "ARACNe3.hpp"
 
-extern uint32_t size_of_network_unpruned;
+extern uint32_t size_of_network;
 
 /*
  Prunes a network by control of FDR using the Benjamini-Hochberg Procedure.
@@ -37,7 +37,7 @@ reg_web pruneFDR(reg_web &network, std::vector<std::string> &regs, uint32_t netw
 	std::vector<std::pair<std::string, edge_tar>> pruned_vec(&reg_edge_tar[0], &reg_edge_tar[argmax_k+1]);
 	
 	// submit new network size to global variable defined in ARACNe3.cpp
-	size_of_network_unpruned = static_cast<uint32_t>(pruned_vec.size());
+	size_of_network = static_cast<uint32_t>(pruned_vec.size());
 	
 	/*
 	 Rebuild the network.  This is where we should ideally also fill out an adjacency matrix for the regulators, so we can quickly identify regulators that regulate each other.  It's convenient but highly inefficient due to the push_back.

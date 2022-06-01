@@ -19,34 +19,30 @@ This codebase is currently under development, but the most up-to-date ARACNe3 ex
 
 `./ARACNe3 /path/to/regulators.txt /path/to/gexpmatrix.txt`
 
-The program will output an 'output.txt' that contains the regulator-target MI values estimated via Adaptive Partitioning (APMI), and the associated p-value determined from a null distribution of the APMI between 1 million shuffled gene-expression marginals.  Currently, this is computationally slow, can only run on one CPU core, and will take approximately 12 minutes on a computer with the specifications below.   
+The program will output an 'output.txt' that contains the regulator-target MI values estimated via Adaptive Partitioning (APMI), and the associated p-value determined from a null distribution of the APMI between 1 million shuffled gene-expression marginals.  Currently, this is computationally slow, can only run on one CPU core, and will take approximately 10 minutes on a computer with the specifications at the bottom of the page.   
 
-## List of Improvements in Development:
+## Current Developments:
  - **IN PROGRESS** Second DPI-pruning step made optional and implemented
- - Optimize calculation of 1 million null MIs, possibly by shuffling index and sending to APMI(), as opposed to vector matrix by std::shuffle()
  - Multithreading/non-multithreading option using standard library
- - Compression of gene name identifiers ("_gxxx_") from std::string -> uint16_t and decompression
+ - Compression of gene name identifiers ("\_gxxx\_") from `std::string` -> `uint16_t` and decompression
  - Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
- - **IN PROGRESS** Adjacency matrix insertion after first pruning step of regulatiors x regulators to determine if edge exists -> will make checking the reg\_web map much faster for third edge.
+ - **IN PROGRESS** Adjacency matrix insertion after first pruning step of regulators x regulators to determine if edge exists -> will make checking the `reg\_web` map much faster for third edge.
+ - Using a `uint16_t` compression of regulators will dramatically increase the speed of adjacency matrix calculations.  We must check if every identifier is in the regulator list (O(n) per regulator), whereas if we had a `uint16_t` compression, we could check if the identifier is less than number of regulators (assuming regulators are numbered 1 - 2000, genes are 2001 - ~18000).
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
  
- Plan of action: Null Optimization -> Adjacency Matrix -> DPI Pruning -> Gene ID Compression -> Overhaul of Low-level algorithms -> Rewriting entire codebase with smarter class design and matured codebase -> Implement multithreading 
+ Plan of action: Adjacency Matrix -> DPI Pruning -> Gene ID Compression -> Overhaul of Low-level algorithms -> Rewriting entire codebase with smarter class design and matured codebase -> Implement multithreading 
 
 ## Tracking Progress
 
-Whenever a significant change is made to an existing module of this program, such as MatrixReglistIO.cpp for reading tsv or regulator lists and forming data structures, or NullModel.cpp for creating the null distribution for mutual information, test results are appended to test/current\_test.txt _or noted in the git commit notes_.  The results reflect the command run on the most recent version of the given executable.  Tests were run on the following computer, and the 'time' program was released in MacOS 12.3 as a utility that conforms to ISO/IEC 9945-2:1993.  Please refer to the MacOS man pages for details in regards to 'time'.
+Whenever a significant change is made to an existing module of this program, such as MatrixReglistIO.cpp for reading tsv or regulator lists and forming data structures, or NullModel.cpp for creating the null distribution for mutual information, test results are either appended to test/current\_test.txt _or noted in the git commit notes_ (more often noted in commit notes).  The results reflect runtime performance of the most recent version of ARACNe3 or the given executable.  Tests were run on the following computer, and the 'time' program was released in MacOS 12.3 as a utility that conforms to ISO/IEC 9945-2:1993.  Please refer to the MacOS man pages for details in regards to 'time'.
 
+## System Information
 
-Model Identifier:	MacBookPro18,1
-
-Chip:	Apple M1 Pro
-
-Total Number of Cores:	10 (8 performance and 2 efficiency)
-
-Memory:	32 GB
-
-System Firmware Version:	7459.101.3
-
-OS Loader Version:	7459.101.3
+|Model Identifier:|MacBookPro18,1|
+|Chip:|Apple M1 Pro|
+| Total Number of Cores: | 10 (8 performance and 2 efficiency) |
+|Memory:|32 GB|
+|System Firmware Version:|7459.101.3|
+|OS Loader Version:|7459.101.3|
 
