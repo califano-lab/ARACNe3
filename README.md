@@ -5,7 +5,7 @@
 This is a prototype of the C++ implementation of ARACNe3 currently under development.  ARACNe3 presents multiple computational and theoretical improvements to the existing ARACNe-AP algorithm formulated in Java.  
 
 
-Please contact Aaron T. Griffin and Lukas J. Vlahos for any questions regarding this project.
+Please contact Aaron T. Griffin and Lukas J. Vlahos for questions regarding this project.
 
 
 Aaron T. Griffin - atg2142@cumc.columbia.edu 
@@ -24,17 +24,16 @@ The program will output an 'output.txt' that contains the regulator-target MI va
 ## Current Developments:
  - Multithreading/non-multithreading option using standard library
  - **IN PROGRESS** Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
- - **IN PROGRESS** MaxEnt pruning could be halved wrt runtime if we loop through the adjacency matrix on a diagonal, as it is implied that if reg1->reg2, that reg2->reg1.  This optimization will be critical for runtime.
  - Remove any references on data types `<=4B`, as references instantiate pointer values which are at least 4B (and typically are 8B on 64-bit systems)
  - RETURN BY REFERENCE when applicable!!!
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
  
- Plan of action: Overhaul of Low-level algorithms -> Rewriting entire codebase with smarter class design and matured codebase -> Implement multithreading 
+ Plan of action: Overhaul of Low-level algorithms -> Rewriting codebase with highest efficiency class design and matured codebase -> Implement multithreading 
 
 ## Tracking Progress
 
-Whenever a significant change is made to an existing module of this program, such as MatrixReglistIO.cpp for reading tsv or regulator lists and forming data structures, or NullModel.cpp for creating the null distribution for mutual information, test results are either appended to test/current\_test.txt _or noted in the git commit notes_ (more often noted in commit notes).  The results reflect runtime performance of the most recent version of ARACNe3 or the given executable.  Tests were run on the following computer, and the 'time' program was released in MacOS 12.3 as a utility that conforms to ISO/IEC 9945-2:1993.  Please refer to the MacOS man pages for details in regards to 'time'.
+Whenever a significant change is made to an existing module of this program, test results are noted in the git commit notes.  The results reflect runtime performance of the most recent version of ARACNe3 or the given executable.  Tests were run on a computer with the specifications listed below.
 
 ## System Information
 | System Feature | Value |
