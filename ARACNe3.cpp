@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 			
 			//-------time module-------
 			cout << "DPI PRUNING DONE" << endl;
-			last = chrono::high_resolution_clock::now();
+			sinceLast();
 			cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
 			//-------------------------
 		}

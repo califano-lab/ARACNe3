@@ -25,6 +25,24 @@ typedef struct edge_tar{
 	uint16_t target;
 	float mi;
 	edge_tar(const uint16_t &t, const float &mi) : target(t), mi(mi) {};
+	
+	/*
+	 Note, the edge_tar structs are compared based on 'target identifier' and NOT MI
+	 */
+	bool operator<(const edge_tar& et) const
+	{
+	    return target < et.target;
+	}
+	
+	bool operator>(const edge_tar& et) const
+	{
+	    return target > et.target;
+	}
+	
+	bool operator==(const edge_tar& et) const
+	{
+	    return target == et.target;
+	}
 } edge_tar;
 
 /*
@@ -95,6 +113,9 @@ reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR = 0.05);
 
 //--------------------- DPIPruning.cpp	 		-----------------------
 reg_web pruneDPI(reg_web &network);
+
+//--------------------- RegWebFns.cpp	 		-----------------------
+reg_web sort_edge_tars(reg_web &regweb);
 
 //--------------------- ARACNe3.cpp	 		-----------------------
 

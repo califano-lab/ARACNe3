@@ -3,7 +3,9 @@
  */
 
 #include "ARACNe3.hpp"
-namespace regweb {
+
+extern uint16_t tot_num_regulators;
+
 /*
  Simply returns a vector of the same regID duplicated for every edge it has associated
  */
@@ -46,4 +48,13 @@ std::vector<float> get_p_vals(uint16_t regID, reg_web &regweb) {
 	const std::vector<float> mis = get_MIs(regID, regweb);
 	return getMIPVals(mis);
 }
+
+/*
+ Sorts all the edge_tar vectors in a reg_web based on the target identifier, from smallest to largest.
+ */
+reg_web sort_edge_tars(reg_web &regweb) {
+	for (uint16_t i = 0; i < tot_num_regulators; ++i) {
+		std::sort(regweb[i].begin(), regweb[i].end());
+	}
+	return regweb;
 }
