@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 	
 	reg_web network;
 	network.reserve(tot_num_regulators);
-	for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) {
+	for (reg_id_t reg = 0; reg < tot_num_regulators; ++reg) {
 		network[reg] = genemapAPMI(matrix, reg, 7.815, 4);
 		
 	}
