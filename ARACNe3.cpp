@@ -59,7 +59,7 @@ void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_
 	}
 	
 	if (1 /*pruneFDR, but we always pruneFDR*/) {
-		if (!prune_FDR || FDR > 1.00f) FDR = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
+		if (!prune_FDR || FDR >= 1.00f) FDR = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
 		if (verbose) {
 			//-------time module-------
 			cout << "\nFDR PRUNING TIME:" << endl;

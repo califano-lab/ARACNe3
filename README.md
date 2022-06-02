@@ -2,30 +2,99 @@
 
 ## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) in C++
 
-This is a prototype of the C++ implementation of ARACNe3 currently under development.  ARACNe3 presents multiple computational and theoretical improvements to the existing ARACNe-AP algorithm formulated in Java.  
+This is a first prototype of the C++ implementation of `ARACNe3`.  `ARACNe3` presents multiple computational and theoretical improvements to the existing `ARACNe-AP` algorithm formulated in Java.  
 
-
-Please contact Aaron T. Griffin and Lukas J. Vlahos for questions regarding this project.
-
+Please contact Aaron T. Griffin, Lukas J. Vlahos, or Andrew R. Howe for questions regarding this project.
 
 Aaron T. Griffin - atg2142@cumc.columbia.edu 
 
 Lukas J. Vlahos - lv2395@cumc.columbia.edu 
 
-## Running the Most Recent Executable
+Andrew R. Howe - arh2207@columbia.edu
 
-This codebase is currently under development, but the most up-to-date ARACNe3 executable can still be run on any platform.  The executable must be compiled using source files in this directory, but only standard libraries are used, so this can be done by linking all object file dependencies with the ARACNe3 target executable, which can be run using the following commandline arguments: 
+## Download
 
+`git clone https://github.com/arhowe00/ARACNe3 # Clone the repo`
 
-`./ARACNe3 /path/to/regulators.txt /path/to/gexpmatrix.txt`
+## Building ARACNe3
 
-The program will output an 'output.txt' that contains the regulator-target MI values estimated via Adaptive Partitioning (APMI), and the associated p-value determined from a null distribution of the APMI between 1 million shuffled gene-expression marginals.  Currently, this is computationally slow, can only run on one CPU core, and will take approximately 10 minutes on a computer with the specifications at the bottom of the page.   
+The C++20 standard is used when compiling `ARACNe3` into an executable.  Build the executable after compiling all C++ files by linking ARACNe3 with object file dependencies in the manner below:
+```
+g++ -std=c++20 ARACNe3.cpp NullModel.o MatrixReglist.o APMI.o FDRPruning.o MaxEntPruning.o RegWebFns.o -o ARACNe3
+```   
 
-## Current Developments:
+## Using ARACNe3
+### Input files needed to run ARACNe3
+See below for file format specification (or download the test files from our repository)
+1.	Gene expression matrix.
+2.	List of regulators (e.g. Transcription Factors)
+
+### Steps required to run ARACNe3
+1.	Copula Transform the Gene Expression Matrix
+
+### Optional ways to run ARACNe3
+1.	Removing MaxEnt (Maximum Entropy edge preservation) will preserve every edge that passes the FDR Pruning Step
+2.	Customizing the FDR restriction for the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
+
+### Output of ARACNe-AP
+`ARACNe3` will output a file with a filename and directory path provided by the user (e.g. `test/myA3network.txt`). This file shows every significant interaction in three columns.
+1.	The regulator.
+2.	The target.
+3.	The MI (Mutual Information) of the pair.
+
+## Input file format
+### Gene lists
+A text file, containing one gene symbol per line, e.g.
+```
+g_9970_
+g_9971_
+g_9975_
+g_9984_
+g_9987_
+```
+### Dataset
+A copula-transformed expression profile as a `.tsv` (tab separated file), with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal spacing as the rows below. 
+```
+gene    Sample1   Sample2   Sample3
+g_1_	0.99	0.93	0.39
+g_10_   0.58       0.18       0.65       0.73
+g_10006_        0.30        0.05      0.68
+g_10011_        0.055      0.73       0.64
+```
+
+## Parameters
+``-e`` is the expression file
+
+``-r`` is the list of regulators (e.g., TFs)
+
+``-o`` is the output text file
+
+``--FDR`` is the FDR parameter to set (default: `--FDR 0.05`)
+
+``--noFDR`` tells ARACNe3 not to prune based on the FDR (`--FDR 1.00`)
+
+``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
+
+``--noverbose`` removes output messages from ARACNe3 stating elapsed time and resulting edges
+
+## Examples
+Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the copula-transformed expression matrix) and ``test/regulators.txt`` (the list of regulators). 
+
+### Example 1: run ARACNe3 with no pruning steps
+```
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output.txt --noFDR --noMaxEnt
+```
+
+### Example 2: run ARACNe3 with all pruning steps, controlling for FDR < 0.01
+```
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output.txt --FDR 0.01
+``` 
+
+## Currently Under Development:
  - Multithreading/non-multithreading option using standard library
  - **IN PROGRESS** Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
  - Remove any references on data types `<=4B`, as references instantiate pointer values which are at least 4B (and typically are 8B on 64-bit systems)
- - RETURN BY REFERENCE when applicable!!!
+ - Return by reference when applicable!
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
  
