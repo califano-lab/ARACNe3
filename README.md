@@ -4,7 +4,7 @@
 
 This is a first prototype of the C++ implementation of `ARACNe3`.  `ARACNe3` presents multiple computational and theoretical improvements to the existing `ARACNe-AP` algorithm formulated in Java.  
 
-Please contact Aaron T. Griffin, Lukas J. Vlahos, or Andrew R. Howe for questions regarding this project.
+Please contact Aaron Griffin, Lukas Vlahos, or Andrew Howe for questions regarding this project.
 
 Aaron T. Griffin - atg2142@cumc.columbia.edu 
 
