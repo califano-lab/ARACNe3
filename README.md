@@ -102,7 +102,7 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 
 ## Tracking Progress
 
-Whenever a significant change is made to an existing module of this program, test results are noted in the git commit notes.  The results reflect runtime performance of the most recent version of ARACNe3 or the given executable.  Tests were run on a computer with the specifications listed below.
+Whenever a significant change is made to an existing module of this program, test results are noted in the git commit notes.  The results reflect runtime performance of the most recent version of ARACNe3 or the given executable.  Tests were run on a computer with the specifications listed below. 
 
 ## System Information
 | System Feature | Value |
