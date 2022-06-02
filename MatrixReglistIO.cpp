@@ -16,7 +16,7 @@ void readRegList(string filename) {
 	vector<string> regs;
 	if (!f.is_open()) {
         	cerr << "error: file open failed " << filename << ".\n";
-		return;
+		std::exit(2);
 	}
 	string reg;
 	while (getline(f, reg, '\n')) {
@@ -47,7 +47,7 @@ genemap readTransformedGexpMatrix(string filename) {
 	genemap gm;
 	if (!f.is_open()) {
         	cerr << "error: file open failed " << filename << ".\n";
-		return gm;
+		std::exit(2);
 	}
 
 	// for the first line, we simply want to count the number of samples
@@ -98,6 +98,11 @@ genemap readTransformedGexpMatrix(string filename) {
  */
 void printNetworkRegTarMI(const reg_web &network, const string &filename) {
 	ofstream ofs{filename};
+	if (!ofs) {
+		cerr << "error: could not write to file: " << filename << ".\n";
+		cerr << "Try using the working directory. Example \"-o output.text\"." << endl;
+		std::exit(2);
+	}
 	auto cout_buff = cout.rdbuf();
 	cout.rdbuf(ofs.rdbuf());
 	
@@ -109,5 +114,4 @@ void printNetworkRegTarMI(const reg_web &network, const string &filename) {
 	}
 	
 	cout.rdbuf(cout_buff);
-	
 }

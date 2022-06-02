@@ -19,7 +19,7 @@ static void sinceLast() {
 	last = cur;
 }
 
-void ARACNe3(string newline_separated_regulator_list_file = "regulators.txt", string copula_exp_mat_tsv_filename = "exp_mat.txt", string reg_tar_mi_tsv_output_filename = "output.txt", bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
+void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_separated_regulator_list_file = "regulators.txt", string reg_tar_mi_tsv_output_filename = "output.txt", bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
 	readRegList(newline_separated_regulator_list_file);
 	genemap matrix = readTransformedGexpMatrix(copula_exp_mat_tsv_filename);
 	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
@@ -59,7 +59,7 @@ void ARACNe3(string newline_separated_regulator_list_file = "regulators.txt", st
 	}
 	
 	if (1 /*pruneFDR, but we always pruneFDR*/) {
-		if (!prune_FDR || FDR > 1.00f) FDR = 1.00f;
+		if (!prune_FDR || FDR > 1.00f) FDR = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
 		if (verbose) {
 			//-------time module-------
 			cout << "\nFDR PRUNING TIME:" << endl;
@@ -70,7 +70,7 @@ void ARACNe3(string newline_separated_regulator_list_file = "regulators.txt", st
 		/*
 		 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
 		 */
-		network = pruneFDR(network, size_of_network, 0.05f);
+		network = pruneFDR(network, size_of_network, FDR);
 		
 		if (verbose) {
 			//-------time module-------
@@ -122,9 +122,9 @@ void ARACNe3(string newline_separated_regulator_list_file = "regulators.txt", st
 
 //--------------------cmd line parser------------------------
 
-char* getCmdOption(char ** begin, char ** end, const std::string & option)
+char* getCmdOption(char **begin, char **end, const std::string & option)
 {
-    char ** itr = std::find(begin, end, option);
+    char **itr = std::find(begin, end, option);
     if (itr != end && ++itr != end)
     {
 	return *itr;
@@ -132,7 +132,7 @@ char* getCmdOption(char ** begin, char ** end, const std::string & option)
     return 0;
 }
 
-bool cmdOptionExists(char** begin, char** end, const std::string& option)
+bool cmdOptionExists(char **begin, char **end, const std::string& option)
 {
     return std::find(begin, end, option) != end;
 }
@@ -147,6 +147,7 @@ bool cmdOptionExists(char** begin, char** end, const std::string& option)
 int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
 		cout << "usage: ./ARACNe3 -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output.txt --FDR 0.05" << endl;
+		return 1;
 	}
 	
 	string matrix = (string) getCmdOption(argv, argv+argc, "-e");
@@ -158,7 +159,7 @@ int main(int argc, char *argv[]) {
 	bool verbose = true;
 	
 	if (cmdOptionExists(argv, argv+argc, "--FDR"))
-	    FDR = stof((string) getCmdOption(argv, argv+argc, "--FDR"));
+		FDR = stof(getCmdOption(argv, argv+argc, "--FDR"));
 
 	if (cmdOptionExists(argv, argv+argc, "--noFDR"))
 	    prune_FDR = false;
@@ -167,5 +168,7 @@ int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "--noverbose"))
 	    verbose = false;
 
+	
 	ARACNe3(matrix, regulators, output, prune_FDR, FDR, prune_MaxEnt, verbose);
+	return 0;
 }
