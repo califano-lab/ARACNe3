@@ -1,15 +1,5 @@
 #include "ARACNe3.hpp"
 
-/*
- Convenient function for timing parts of ARACNe3.  Will set last.
- */
-static auto last = std::chrono::high_resolution_clock::now(), cur = std::chrono::high_resolution_clock::now();
-static void sinceLast() {
-	cur = std::chrono::high_resolution_clock::now();
-	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(cur-last).count() << "ms" << std::endl;
-	last = cur;
-}
-
 // for MaxEnt pruning, regulator -> regulator -> mi
 map_map tftfNetwork;
 
@@ -27,20 +17,8 @@ reg_web pruneMaxEnt(reg_web &network) {
 	/*
 	 Inefficient conversion operation here.  Makes searching whether a target is contained an O(1) operation due to the hash map of hash maps, as opposed to a hash map of edge_tar vectors, which would make checking for a particular edge_tar.target an O(n) operation.
 	 */
-	//-------time module-------
-	std::cout << "DATA STRUCTURE TRANSFORMATION TIME:" << std::endl;
-	last = std::chrono::high_resolution_clock::now();
-	//-------------------------
 			
 	map_map finalNet = regweb_to_mapmap(network);
-	//-------time module-------
-	sinceLast();
-	//-------------------------
-	
-	//-------time module-------
-	std::cout << "MaxEnt PRUNING TIME:" << std::endl;
-	last = std::chrono::high_resolution_clock::now();
-	//-------------------------
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
 	for (reg_id_t reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
@@ -86,10 +64,6 @@ reg_web pruneMaxEnt(reg_web &network) {
 			}
 		}
 	}
-	//-------time module-------
-	sinceLast();
-	std::cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
-	//-------------------------
 
 	return pruned_net;
 }

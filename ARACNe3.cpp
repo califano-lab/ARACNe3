@@ -1,12 +1,13 @@
 #include "ARACNe3.hpp"
 
 using namespace std;
+
 // inferred while reading txt files.  Rcpp will have to compensate
 uint32_t size_of_network = 0;
 uint16_t tot_num_samps = 0;
 uint16_t tot_num_regulators = 0;
-bool prune_FDR = false;
-bool prune_MaxEnt = false;
+bool prune_FDR = true;
+bool prune_MaxEnt = true;
 
 /*
  Convenient function for timing parts of ARACNe3.  Will set last.
@@ -18,35 +19,30 @@ static void sinceLast() {
 	last = cur;
 }
 
-/*
- * Assumes that simply the path to the regulator list and the path to the gene
- * expression matrix are commandline arguments
- *
- * e.g. ./ARACNe3 test/regfile.txt test/matrixfile.txt
- */
-int main(int argc, char *argv[]) {
-	prune_FDR = true;
-	prune_MaxEnt = true;
-	
-	readRegList(string(argv[1]));
-	genemap matrix = readTransformedGexpMatrix(string(argv[2]));
+void ARACNe3(string newline_separated_regulator_list_file = "regulators.txt", string copula_exp_mat_tsv_filename = "exp_mat.txt", string reg_tar_mi_tsv_output_filename = "output.txt", bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
+	readRegList(newline_separated_regulator_list_file);
+	genemap matrix = readTransformedGexpMatrix(copula_exp_mat_tsv_filename);
 	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
 	
-	//-------time module-------
-	cout << "NULL MI MODEL TIME:" << endl;
-	last = chrono::high_resolution_clock::now();
-	//-------------------------
+	if (verbose) {
+		//-------time module-------
+		cout << "NULL MI MODEL TIME:" << endl;
+		last = chrono::high_resolution_clock::now();
+		//-------------------------
+	}
 	
 	initNullMIs(tot_num_samps);
 	
-	//-------time module-------
-	sinceLast();
-	//-------------------------
+	if (verbose) {
+		//-------time module-------
+		sinceLast();
+		//-------------------------
 	
-	//-------time module-------
-	cout << "RAW NETWORK COMPUTATION TIME:" << endl;
-	last = chrono::high_resolution_clock::now();
-	//-------------------------
+		//-------time module-------
+		cout << "\nRAW NETWORK COMPUTATION TIME:" << endl;
+		last = chrono::high_resolution_clock::now();
+		//-------------------------
+	}
 	
 	reg_web network;
 	network.reserve(tot_num_regulators);
@@ -55,40 +51,121 @@ int main(int argc, char *argv[]) {
 		
 	}
 	
-	//-------time module-------
-	sinceLast();
-	cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
-	//-------------------------
-	
-	if (prune_FDR) {
+	if (verbose) {
 		//-------time module-------
-		cout << "FDR PRUNING TIME:" << endl;
-		last = chrono::high_resolution_clock::now();
+		sinceLast();
+		cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
 		//-------------------------
+	}
+	
+	if (1 /*pruneFDR, but we always pruneFDR*/) {
+		if (!prune_FDR || FDR > 1.00f) FDR = 1.00f;
+		if (verbose) {
+			//-------time module-------
+			cout << "\nFDR PRUNING TIME:" << endl;
+			last = chrono::high_resolution_clock::now();
+			//-------------------------
+		}
+		
 		/*
 		 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
 		 */
 		network = pruneFDR(network, size_of_network, 0.05f);
 		
-		//-------time module-------
-		sinceLast();
-		cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
-		//-------------------------
+		if (verbose) {
+			//-------time module-------
+			sinceLast();
+			cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
+			//-------------------------
+		}
 		
 		if (prune_MaxEnt) {
-			// No time modules because they are embedded in pruneMaxEnt
+			// you _must_ prune FDR to do MaxEnt, but you can always FDR = 1.00
+			if (verbose) {
+				//-------time module-------
+				std::cout << "\nMaxEnt PRUNING TIME:" << std::endl;
+				last = std::chrono::high_resolution_clock::now();
+				//-------------------------
+			}
+
+			
 			network = pruneMaxEnt(network);
+			
+			if (verbose) {
+				//-------time module-------
+				sinceLast();
+				std::cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
+				//-------------------------
+			}
 		}
 	}
 	
-	//-------time module-------
-	cout << "PRINTING NETWORK REG-TAR-MI TIME:" << endl;
-	last = chrono::high_resolution_clock::now();
-	//-------------------------
+	if (verbose) {
+		//-------time module-------
+		cout << "\nPRINTING NETWORK!" << endl;
+		last = chrono::high_resolution_clock::now();
+		//-------------------------
+	}
 	
-	printNetworkRegTarMI(network, "output.txt");
+	printNetworkRegTarMI(network, reg_tar_mi_tsv_output_filename);
 	
-	//-------time module-------
-	sinceLast();
-	//-------------------------
+	if (verbose) {
+		//-------time module-------
+		sinceLast();
+		//-------------------------
+		std::string success_A3 = "Success!";
+		cout << success_A3 << endl;
+	}
+}
+
+
+
+//--------------------cmd line parser------------------------
+
+char* getCmdOption(char ** begin, char ** end, const std::string & option)
+{
+    char ** itr = std::find(begin, end, option);
+    if (itr != end && ++itr != end)
+    {
+	return *itr;
+    }
+    return 0;
+}
+
+bool cmdOptionExists(char** begin, char** end, const std::string& option)
+{
+    return std::find(begin, end, option) != end;
+}
+
+//-----------------------------------------------------------
+
+
+/*
+ Example:
+ ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o output.txt --noFDR --FDR 0.05 --noMaxEnt --noverbose
+ */
+int main(int argc, char *argv[]) {
+	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
+		cout << "usage: ./ARACNe3 -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output.txt --FDR 0.05" << endl;
+	}
+	
+	string matrix = (string) getCmdOption(argv, argv+argc, "-e");
+	string regulators = (string) getCmdOption(argv, argv+argc, "-r");
+	string output = (string) getCmdOption(argv, argv+argc, "-o");
+	bool prune_FDR = true;
+	float FDR = 0.05f;
+	bool prune_MaxEnt = true;
+	bool verbose = true;
+	
+	if (cmdOptionExists(argv, argv+argc, "--FDR"))
+	    FDR = stof((string) getCmdOption(argv, argv+argc, "--FDR"));
+
+	if (cmdOptionExists(argv, argv+argc, "--noFDR"))
+	    prune_FDR = false;
+	if (cmdOptionExists(argv, argv+argc, "--noMaxEnt"))
+	    prune_MaxEnt = false;
+	if (cmdOptionExists(argv, argv+argc, "--noverbose"))
+	    verbose = false;
+
+	ARACNe3(matrix, regulators, output, prune_FDR, FDR, prune_MaxEnt, verbose);
 }
