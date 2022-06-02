@@ -58,7 +58,6 @@ reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR) {
 			/* Now, for this one, due to compression we know that if the identifier is below tot_num_regulators, we have a regulator!  Blazing fast! */
 			if (pair.first < tot_num_regulators && pair.second.target < tot_num_regulators)
 				reg_reg_edges[pair.first][pair.second.target] = pair.second.mi;
-				
 		}
 	}
 	
