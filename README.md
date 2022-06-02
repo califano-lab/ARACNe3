@@ -26,24 +26,24 @@ g++ -std=c++20 ARACNe3.cpp NullModel.o MatrixReglist.o APMI.o FDRPruning.o MaxEn
 ## Using ARACNe3
 ### Input files needed to run ARACNe3
 See below for file format specification (or download the test files from our repository)
-1.	Gene expression matrix.
+1.	Copula-transformed expression matrix
 2.	List of regulators (e.g. Transcription Factors)
 
 ### Steps required to run ARACNe3
 1.	Copula Transform the Gene Expression Matrix
 
 ### Optional ways to run ARACNe3
-1.	Removing MaxEnt (Maximum Entropy edge preservation) will preserve every edge that passes the FDR Pruning Step
+1.	Removing MaxEnt pruning step (Maximum Entropy edge preservation) will preserve every edge that passes the FDR Pruning Step
 2.	Customizing the FDR restriction for the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
-### Output of ARACNe-AP
-`ARACNe3` will output a file with a filename and directory path provided by the user (e.g. `test/myA3network.txt`). This file shows every significant interaction in three columns.
+### Output of ARACNe3
+`ARACNe3` will output a file that has a filename and directory path provided by the user (e.g. `test/myA3network.txt`). This file shows every significant interaction in three columns:
 1.	The regulator.
 2.	The target.
 3.	The MI (Mutual Information) of the pair.
 
 ## Input file format
-### Gene lists
+### Gene/regulator lists
 A text file, containing one gene symbol per line, e.g.
 ```
 g_9970_
@@ -53,7 +53,7 @@ g_9984_
 g_9987_
 ```
 ### Dataset
-A copula-transformed expression profile as a `.tsv` (tab separated file), with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal spacing as the rows below. 
+A copula-transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal spacing as the rows below. 
 ```
 gene    Sample1   Sample2   Sample3
 g_1_	0.99	0.93	0.39
