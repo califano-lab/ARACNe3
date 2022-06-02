@@ -2,6 +2,7 @@
 #include <string>
 #include <tuple>
 #include <unordered_set>
+#include <set>
 #include <unordered_map>
 #include <iostream>
 #include <fstream>
@@ -57,6 +58,7 @@ typedef struct edge_tar{
  * targets and their MIs.
  */
 typedef std::unordered_map<reg_id_t, std::vector<edge_tar>> reg_web;
+typedef std::unordered_map<reg_id_t, std::unordered_map<reg_id_t, float>> map_map;
 
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
@@ -117,13 +119,17 @@ const std::vector<float> getMIPVals(const std::vector<float> &);
 //--------------------- FDRPruning.cpp	 		-----------------------
 reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR = 0.05);
 
-//--------------------- DPIPruning.cpp	 		-----------------------
-reg_web pruneDPI(reg_web &network);
+//--------------------- MaxEntPruning.cpp	 		-----------------------
+reg_web pruneMaxEnt(reg_web &network);
 
 //--------------------- RegWebFns.cpp	 		-----------------------
 reg_web sort_edge_tars(reg_web &regweb);
 
-//--------------------- ARACNe3.cpp	 		-----------------------
+/*
+ Used for MaxEnt pruning to copy ARACNe-AP; we should probably either overhaul our own data structure or find a way to use our own, as any conversion is essentially a memory and runtime cost.
+ */
+std::unordered_map<reg_id_t, std::unordered_map<reg_id_t, float>> regweb_to_mapmap(reg_web &network);
 
+//--------------------- ARACNe3.cpp	 		-----------------------
 
 #endif /* #ifndef _ARACNE3_HPP_ */

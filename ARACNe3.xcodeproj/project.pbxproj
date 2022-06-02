@@ -14,7 +14,7 @@
 		49451D9628453A0700158C6D /* ARACNe3.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 49451D8C28450A1300158C6D /* ARACNe3.hpp */; };
 		49F6F59A2846988200C681BC /* RegWebFns.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F5982846988200C681BC /* RegWebFns.cpp */; };
 		49F6F59D2846A73400C681BC /* FDRPruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F59C2846A73400C681BC /* FDRPruning.cpp */; };
-		49F6F5A02846A75100C681BC /* DPIPruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F59E2846A75100C681BC /* DPIPruning.cpp */; };
+		49F6F5A02846A75100C681BC /* MaxEntPruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F59E2846A75100C681BC /* MaxEntPruning.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,7 +41,7 @@
 		49451DA7284563D300158C6D /* ARACNe3_R.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3_R.cpp; sourceTree = "<group>"; };
 		49F6F5982846988200C681BC /* RegWebFns.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RegWebFns.cpp; sourceTree = "<group>"; };
 		49F6F59C2846A73400C681BC /* FDRPruning.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FDRPruning.cpp; sourceTree = "<group>"; };
-		49F6F59E2846A75100C681BC /* DPIPruning.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DPIPruning.cpp; sourceTree = "<group>"; };
+		49F6F59E2846A75100C681BC /* MaxEntPruning.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MaxEntPruning.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,7 +64,7 @@
 				49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */,
 				49451D8828450A1300158C6D /* APMI.cpp */,
 				49F6F59C2846A73400C681BC /* FDRPruning.cpp */,
-				49F6F59E2846A75100C681BC /* DPIPruning.cpp */,
+				49F6F59E2846A75100C681BC /* MaxEntPruning.cpp */,
 				49F6F5982846988200C681BC /* RegWebFns.cpp */,
 				49451D8F28450A1300158C6D /* README.md */,
 				49451DA7284563D300158C6D /* ARACNe3_R.cpp */,
@@ -155,7 +155,7 @@
 				49451D9028450A1300158C6D /* APMI.cpp in Sources */,
 				49F6F59A2846988200C681BC /* RegWebFns.cpp in Sources */,
 				49451D9128450A1300158C6D /* ARACNe3.cpp in Sources */,
-				49F6F5A02846A75100C681BC /* DPIPruning.cpp in Sources */,
+				49F6F5A02846A75100C681BC /* MaxEntPruning.cpp in Sources */,
 				49F6F59D2846A73400C681BC /* FDRPruning.cpp in Sources */,
 				49451D9328450A1300158C6D /* MatrixReglistIO.cpp in Sources */,
 			);

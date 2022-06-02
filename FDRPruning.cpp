@@ -2,10 +2,10 @@
 
 extern uint32_t size_of_network;
 extern uint16_t tot_num_regulators;
-extern bool prune_DPI;
+extern bool prune_MaxEnt;
 
-// for DPI pruning, copied from ARACNe-AP!
-extern std::unordered_map<reg_id_t, std::unordered_map<reg_id_t, float>> tftfNetwork;
+// for MaxEnt pruning, copied from ARACNe-AP!
+extern map_map tftfNetwork;
 
 /*
  Prunes a network by control of FDR using the Benjamini-Hochberg Procedure.
@@ -51,7 +51,7 @@ reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR) {
 	pruned_net.reserve(tot_num_regulators);
 	for (auto &pair : pruned_vec) {
 		pruned_net[pair.first].push_back(pair.second);
-		if (prune_DPI) {
+		if (prune_MaxEnt) {
 			/* Now, for this one, due to compression we know that if the identifier is below tot_num_regulators, we have a regulator!  Blazing fast! */
 			if (pair.first < tot_num_regulators && pair.second.target < tot_num_regulators)
 				tftfNetwork[pair.first][pair.second.target] = pair.second.mi;

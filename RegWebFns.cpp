@@ -58,3 +58,15 @@ reg_web sort_edge_tars(reg_web &regweb) {
 	}
 	return regweb;
 }
+
+/*
+ Takes a reg_web and returns a hash map of a hash map (for MaxEnt pruning step)
+ */
+map_map regweb_to_mapmap(reg_web &network) {
+	map_map mapmap;
+	for (reg_id_t reg = 0; reg < tot_num_regulators; ++reg) {
+		for (edge_tar &et : network[reg])
+			mapmap[reg][et.target] = et.mi;
+	}
+	return mapmap;
+}

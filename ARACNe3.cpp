@@ -6,18 +6,17 @@ uint32_t size_of_network = 0;
 uint16_t tot_num_samps = 0;
 uint16_t tot_num_regulators = 0;
 bool prune_FDR = false;
-bool prune_DPI = false;
+bool prune_MaxEnt = false;
 
 /*
  Convenient function for timing parts of ARACNe3.  Will set last.
  */
-auto last = chrono::high_resolution_clock::now(), cur = chrono::high_resolution_clock::now();
-void sinceLast() {
-	cur = chrono::high_resolution_clock::now();
-	cout << chrono::duration_cast<chrono::milliseconds>(cur-last).count() << "ms" << endl;
+static auto last = std::chrono::high_resolution_clock::now(), cur = std::chrono::high_resolution_clock::now();
+static void sinceLast() {
+	cur = std::chrono::high_resolution_clock::now();
+	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(cur-last).count() << "ms" << std::endl;
 	last = cur;
 }
-
 
 /*
  * Assumes that simply the path to the regulator list and the path to the gene
@@ -27,7 +26,7 @@ void sinceLast() {
  */
 int main(int argc, char *argv[]) {
 	prune_FDR = true;
-	prune_DPI = true;
+	prune_MaxEnt = true;
 	
 	readRegList(string(argv[1]));
 	genemap matrix = readTransformedGexpMatrix(string(argv[2]));
@@ -79,16 +78,16 @@ int main(int argc, char *argv[]) {
 		cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
 		//-------------------------
 		
-		if (prune_DPI) {
+		if (prune_MaxEnt) {
 			//-------time module-------
-			cout << "DPI PRUNING BEGIN" << endl;
+			cout << "MaxEnt PRUNING BEGIN" << endl;
 			last = chrono::high_resolution_clock::now();
 			//-------------------------
 			
-			network = pruneDPI(network);
+			network = pruneMaxEnt(network);
 			
 			//-------time module-------
-			cout << "DPI PRUNING DONE" << endl;
+			cout << "MaxEnt PRUNING DONE" << endl;
 			sinceLast();
 			cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
 			//-------------------------

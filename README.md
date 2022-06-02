@@ -24,8 +24,9 @@ The program will output an 'output.txt' that contains the regulator-target MI va
 ## Current Developments:
  - Multithreading/non-multithreading option using standard library
  - **IN PROGRESS** Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
- - **IN PROGRESS** DPI pruning could be halved wrt runtime if we loop through the adjacency matrix on a diagonal, as it is implied that if reg1->reg2, that reg2->reg1.  This optimization will be critical for runtime.
+ - **IN PROGRESS** MaxEnt pruning could be halved wrt runtime if we loop through the adjacency matrix on a diagonal, as it is implied that if reg1->reg2, that reg2->reg1.  This optimization will be critical for runtime.
  - Remove any references on data types `<=4B`, as references instantiate pointer values which are at least 4B (and typically are 8B on 64-bit systems)
+ - RETURN BY REFERENCE when applicable!!!
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
  
