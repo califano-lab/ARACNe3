@@ -33,19 +33,18 @@ int main(int argc, char *argv[]) {
 	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
 	
 	//-------time module-------
-	cout << "INIT NULL BEGIN" << endl;
+	cout << "NULL MI MODEL TIME:" << endl;
 	last = chrono::high_resolution_clock::now();
 	//-------------------------
 	
 	initNullMIs(tot_num_samps);
 	
 	//-------time module-------
-	cout << "INIT NULL DONE" << endl;
 	sinceLast();
 	//-------------------------
 	
 	//-------time module-------
-	cout << "COMPUTING UNPRUNED NETWORK BEGIN" << endl;
+	cout << "RAW NETWORK COMPUTATION TIME:" << endl;
 	last = chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -57,14 +56,13 @@ int main(int argc, char *argv[]) {
 	}
 	
 	//-------time module-------
-	cout << "UNPRUNED NETWORK DONE" << endl;
 	sinceLast();
 	cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
 	//-------------------------
 	
 	if (prune_FDR) {
 		//-------time module-------
-		cout << "FDR PRUNING BEGIN" << endl;
+		cout << "FDR PRUNING TIME:" << endl;
 		last = chrono::high_resolution_clock::now();
 		//-------------------------
 		/*
@@ -73,36 +71,24 @@ int main(int argc, char *argv[]) {
 		network = pruneFDR(network, size_of_network, 0.05f);
 		
 		//-------time module-------
-		cout << "FDR PRUNING DONE" << endl;
 		sinceLast();
 		cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
 		//-------------------------
 		
 		if (prune_MaxEnt) {
-			//-------time module-------
-			cout << "MaxEnt PRUNING BEGIN" << endl;
-			last = chrono::high_resolution_clock::now();
-			//-------------------------
-			
+			// No time modules because they are embedded in pruneMaxEnt
 			network = pruneMaxEnt(network);
-			
-			//-------time module-------
-			cout << "MaxEnt PRUNING DONE" << endl;
-			sinceLast();
-			cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << endl;
-			//-------------------------
 		}
 	}
 	
 	//-------time module-------
-	cout << "PRINTING NETWORK REG-TAR-MI" << endl;
+	cout << "PRINTING NETWORK REG-TAR-MI TIME:" << endl;
 	last = chrono::high_resolution_clock::now();
 	//-------------------------
 	
 	printNetworkRegTarMI(network, "output.txt");
 	
 	//-------time module-------
-	cout << "PRINTING DONE" << endl;
 	sinceLast();
 	//-------------------------
 }

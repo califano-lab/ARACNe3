@@ -16,17 +16,31 @@ map_map tftfNetwork;
 extern uint32_t size_of_network;
 extern uint16_t tot_num_regulators;
 
+
+/*
+ Prune the network according to the MaxEnt weakest-edge reduction.
+ */
 reg_web pruneMaxEnt(reg_web &network) {
 	// primed will store the edges that are weakest.  we use a set to eliminate redundancy if the same edge is identified twice; same as hash set?
 	std::unordered_map<reg_id_t, std::set<reg_id_t>> removedEdges;
 	
 	/*
-	 Inefficient conversion operation here.
+	 Inefficient conversion operation here.  Makes searching whether a target is contained an O(1) operation due to the hash map of hash maps, as opposed to a hash map of edge_tar vectors, which would make checking for a particular edge_tar.target an O(n) operation.
 	 */
+	//-------time module-------
 	std::cout << "DATA STRUCTURE TRANSFORMATION TIME:" << std::endl;
 	last = std::chrono::high_resolution_clock::now();
+	//-------------------------
+			
 	map_map finalNet = regweb_to_mapmap(network);
+	//-------time module-------
 	sinceLast();
+	//-------------------------
+	
+	//-------time module-------
+	std::cout << "MaxEnt PRUNING TIME:" << std::endl;
+	last = std::chrono::high_resolution_clock::now();
+	//-------------------------
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
 	for (reg_id_t reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
@@ -60,25 +74,22 @@ reg_web pruneMaxEnt(reg_web &network) {
 	for (const auto &[target, value] : removedEdges) {
 		 size_of_network -= value.size();
 	}
-
-/*
-	// if regulator 1 -> regulator 2.  However then implicitly regulator 1->regulator 2. So this could be halved in terms of runtime
 	
-	 Now, we use 'weakest' to remove weakest edges.
-	 
-	 Consider using erase(remove_if()) idiom
-	 */
-	
-	/*
-	for (auto &p : weakest) {
-		for (auto it = network[p.first].begin(); it != network[p.first].end(); ++it) {
-			if (it->target == p.second)
-			{
-				network[p.first].erase(it--);
+	reg_web pruned_net;
+	pruned_net.reserve(tot_num_regulators);
+	for (const auto &[reg, tarmap] : finalNet) {
+		pruned_net[reg].reserve(network[reg].size());
+		auto &rem = removedEdges[reg];
+		for (const auto &[tar, mi] : tarmap) {
+			if (!rem.contains(tar)) {
+				pruned_net[reg].emplace_back(tar, mi);
 			}
 		}
 	}
-	size_of_network -= weakest.size();
-	 */
-	return network;
+	//-------time module-------
+	sinceLast();
+	std::cout << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
+	//-------------------------
+
+	return pruned_net;
 }
