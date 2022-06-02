@@ -30,10 +30,11 @@ See below for file format specification (or download the test files from our rep
 2.	List of regulators (e.g. Transcription Factors)
 
 ### Steps required to run ARACNe3
-1.	Copula Transform the Gene Expression Matrix
+1.	Copula Transform the expression matrix
+2. 	Run according to commandline arguments below
 
 ### Optional ways to run ARACNe3
-1.	Removing MaxEnt pruning step (Maximum Entropy edge preservation) will preserve every edge that passes the FDR Pruning Step
+1.	Removing the MaxEnt pruning step will preserve every edge that passes the FDR Pruning Step
 2.	Customizing the FDR restriction for the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
 ### Output of ARACNe3
@@ -43,8 +44,8 @@ See below for file format specification (or download the test files from our rep
 3.	The MI (Mutual Information) of the pair.
 
 ## Input file format
-### Gene/regulator lists
-A text file, containing one gene symbol per line, e.g.
+### A gene/regulator list
+A text file, containing one gene symbol per line. E.g.,
 ```
 g_9970_
 g_9971_
@@ -53,7 +54,7 @@ g_9984_
 g_9987_
 ```
 ### Dataset
-A copula-transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal spacing as the rows below. 
+A copula-transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal spacing as the rows below. E.g.,
 ```
 gene    Sample1   Sample2   Sample3
 g_1_	0.99	0.93	0.39
@@ -71,7 +72,7 @@ g_10011_        0.055      0.73       0.64
 
 ``--FDR`` is the FDR parameter to set (default: `--FDR 0.05`)
 
-``--noFDR`` tells ARACNe3 not to prune based on the FDR (`--FDR 1.00`)
+``--noFDR`` tells ARACNe3 not to prune based on the FDR (same as: `--FDR 1.00`)
 
 ``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
 
