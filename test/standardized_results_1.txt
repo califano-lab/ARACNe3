@@ -5,8 +5,7 @@ The time utility executes and times the specified utility.  After the utility fi
 
 The time utility is expected to conform to ISO/IEC 9945-2:1993 (``POSIX'').
 
-Explanation on real, user and sys (from man time):
-
+Explanation on user and system (from man time):
 user: Total number of CPU-seconds that the process used directly (in user mode), in seconds.
 system: Total number of CPU-seconds used by the system on behalf of the process (in kernel mode), in seconds.
 -----------------------------------------------------
