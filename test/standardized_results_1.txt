@@ -1,0 +1,52 @@
+------------About the MacOS 'time' program-----------
+The time utility executes and times the specified utility.  After the utility finishes, time writes to
+     the standard error stream, (in seconds): the total time elapsed, the time used to execute the utility
+     process and the time consumed by system overhead.
+
+The time utility is expected to conform to ISO/IEC 9945-2:1993 (``POSIX'').
+
+Explanation on real, user and sys (from man time):
+
+user: Total number of CPU-seconds that the process used directly (in user mode), in seconds.
+system: Total number of CPU-seconds used by the system on behalf of the process (in kernel mode), in seconds.
+-----------------------------------------------------
+
+-----------------------ARACNe3-----------------------
+% time ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output.txt
+NULL MI MODEL TIME:
+8045ms
+
+RAW NETWORK COMPUTATION TIME:
+264262ms
+SIZE OF NETWORK: 48198359 EDGES.
+
+FDR PRUNING TIME:
+5605ms
+SIZE OF NETWORK: 11173159 EDGES.
+
+MaxEnt PRUNING TIME:
+193334ms
+SIZE OF NETWORK: 125506 EDGES.
+
+PRINTING NETWORK!
+241ms
+Success!
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output.txt  470.33s user 1.63s system 99% cpu 7:52.48 total
+
+-----------------------------------------------------
+
+----------------------ARACNe-AP----------------------
+------------------MI THRESHOLD: 0.02-----------------
+% time java -Xmx32G -jar 'aracne.jar' -e 'test/exp_mat.txt' -o 'output' --tfs 'test/regulators.txt' --pvalue 1E-8 --seed 1 --nobootstrap --threads 1
+
+MI threshold file is present
+Calculate network from: test/exp_mat.txt
+TFs processed: 2491
+Time elapsed for calculating MI: 243 sec
+
+DPI time elapsed: 308 sec
+Edges removed by DPI:	10263568
+Final Network size:	137944
+Total time elapsed: 554 sec
+java -Xmx32G -jar  -e  -o  --tfs  --pvalue 1E-8 --seed 1 --nobootstrap  1  1188.68s user 4.13s system 214% cpu 9:15.03 total
+-----------------------------------------------------
