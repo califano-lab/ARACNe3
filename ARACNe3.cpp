@@ -146,7 +146,7 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
  */
 int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
-		cout << "usage: ./ARACNe3 -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output.txt --FDR 0.05" << endl;
+		cout << "usage: " + ((string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output.txt --FDR 0.05" << endl;
 		return 1;
 	}
 	
