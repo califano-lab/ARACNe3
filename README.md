@@ -13,7 +13,7 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 `git clone https://github.com/arhowe00/ARACNe3 # Clone the repo`
 
 ## Building ARACNe3
-The C++20 standard is used when compiling `ARACNe3` into an executable.  Build the executable by cloning the repository and typing `make` in the commandline (by using the `Makefile` provided in this repository).  For this, we use the GNU C++20 compiler, so you will need it installed as well.  You could also manually build the executable by compiling all C++ files and linking ARACNe3 with object file dependencies in the manner below.  
+The C++20 standard is used when compiling `ARACNe3` into an executable.  Build the executable by cloning the repository and typing `make` in the commandline (by using the `Makefile` provided in this repository).  For this, we use the GNU C++20 compiler, so you will need that installed as well.  You could also manually build the executable by compiling all C++ files and linking `ARACNe3` with object file dependencies in the manner below.  
 ### Compiling:
 ```
 g++ -std=c++20 -O3 -c NullModel.cpp; g++ -std=c++20 -O3 -c MatrixReglistIO.cpp; g++ -std=c++20 -O3 -c APMI.cpp; g++ -std=c++20 -O3 -c FDRPruning.cpp; g++ -std=c++20 -O3 -c MaxEntPruning.cpp; g++ -std=c++20 -O3 -c RegWebFns.cpp 
