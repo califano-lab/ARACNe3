@@ -41,7 +41,7 @@ See below for file format specification (or download the test files from our rep
 2.	Customizing the FDR restriction for the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
 ### Output of ARACNe3
-`ARACNe3` will output a file that has a filename and directory path provided by the user (e.g. `test/myA3network.txt`). This file shows every significant interaction in three columns:
+`ARACNe3` will output a file that has a directory path *and* filename provided by the user (e.g. `test/myA3network.txt`). This file shows every significant interaction in three columns:
 1.	The regulator.
 2.	The target.
 3.	The MI (Mutual Information) of the pair.
