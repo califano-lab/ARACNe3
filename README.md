@@ -2,15 +2,11 @@
 
 ## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) in C++
 
-This is a first prototype of the C++ implementation of `ARACNe3`.  `ARACNe3` presents multiple computational and theoretical improvements to the existing `ARACNe-AP` algorithm formulated in Java.  
+`ARACNe3` is the C++ implementation of `ARACNe` which presents multiple computational and theoretical improvements to the existing `ARACNe-AP` implementation, formulated in Java Lachmann and colleagues in 2016.  
 
-Please contact Aaron Griffin, Lukas Vlahos, or Andrew Howe for questions regarding this project.
+Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information.* **Bioinformatics.** 2016 Jul 15;32(14):2233-5. doi: [10.1093/bioinformatics/btw216](https://dx.doi.org/10.1093/bioinformatics/btw216). Epub 2016 Apr 23.
 
-Aaron T. Griffin - atg2142@cumc.columbia.edu 
-
-Lukas J. Vlahos - lv2395@cumc.columbia.edu 
-
-Andrew R. Howe - arh2207@columbia.edu
+Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Califano A. *ARACNE: an algorithm for the reconstruction of gene regulatory networks in a mammalian cellular context.* **BMC Bioinformatics.** 2006 Mar 20;7 Suppl 1:S7. doi: [10.1186/1471-2105-7-S1-S7](https://dx.doi.org/10.1186/1471-2105-7-S1-S7)
 
 ## Download
 
@@ -45,7 +41,7 @@ See below for file format specification (or download the test files from our rep
 
 ## Input file format
 ### A gene/regulator list
-A text file, containing one gene symbol per line. E.g.,
+A text file, containing one gene symbol per line. Every line has important information. E.g.,
 ```
 g_9970_
 g_9971_
@@ -54,7 +50,7 @@ g_9984_
 g_9987_
 ```
 ### Dataset
-A copula-transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal spacing as the rows below. E.g.,
+A copula-transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal number of columns and spacing as the rows below. E.g.,
 ```
 gene    Sample1   Sample2   Sample3
 g_1_	0.99	0.93	0.39
@@ -114,3 +110,12 @@ Whenever a significant change is made to an existing module of this program, tes
 | Memory: | 32 GB |
 | System Firmware Version: |7459.101.3 |
 | OS Loader Version: | 7459.101.3 |
+
+## Contact
+Please contact Aaron Griffin, Lukas Vlahos, or Andrew Howe for questions regarding this project.
+
+Aaron T. Griffin - atg2142@cumc.columbia.edu 
+
+Lukas J. Vlahos - lv2395@cumc.columbia.edu 
+
+Andrew R. Howe - arh2207@columbia.edu
