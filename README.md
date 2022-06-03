@@ -2,7 +2,7 @@
 
 ## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) in C++
 
-`ARACNe3` is the C++ implementation of `ARACNe`.  `ARACNe3` presents multiple computational and theoretical improvements to the existing `ARACNe-AP` implementation, formulated in Java Lachmann and colleagues in 2016.  
+`ARACNe3` is the C++ implementation of `ARACNe`.  `ARACNe3` presents multiple computational and theoretical improvements to the existing `ARACNe-AP` implementation, formulated in Java by Lachmann and colleagues in 2016.  
 
 Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information.* **Bioinformatics.** 2016 Jul 15;32(14):2233-5. doi: [10.1093/bioinformatics/btw216](https://dx.doi.org/10.1093/bioinformatics/btw216). Epub 2016 Apr 23.
 
@@ -14,7 +14,13 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 
 ## Building ARACNe3
 
-The C++20 standard is used when compiling `ARACNe3` into an executable.  Build the executable after compiling all C++ files by linking ARACNe3 with object file dependencies in the manner below:
+The C++20 standard is used when compiling `ARACNe3` into an executable.  Build the executable by after compiling all C++ files by linking ARACNe3 with object file dependencies in the manner below.  An example Makefile is provided in our repository.
+### Compiling C++ Files:
+```
+g++ -std=c++20 -c NullModel.cpp; g++ -std=c++20 -c MatrixReglistIO.cpp; g++ -std=c++20 -c APMI.cpp; g++ -std=c++20 -c FDRPruning.cpp; g++ -std=c++20 -c MaxEntPruning.cpp; g++ -std=c++20 -c RegWebFns.cpp 
+
+```
+### Linking
 ```
 g++ -std=c++20 ARACNe3.cpp NullModel.o MatrixReglist.o APMI.o FDRPruning.o MaxEntPruning.o RegWebFns.o -o ARACNe3
 ```   
