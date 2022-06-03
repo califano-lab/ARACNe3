@@ -2,7 +2,7 @@
 
 ## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) in C++
 
-`ARACNe3` is the C++ implementation of `ARACNe` which presents multiple computational and theoretical improvements to the existing `ARACNe-AP` implementation, formulated in Java Lachmann and colleagues in 2016.  
+`ARACNe3` is the C++ implementation of `ARACNe`.  `ARACNe3` presents multiple computational and theoretical improvements to the existing `ARACNe-AP` implementation, formulated in Java Lachmann and colleagues in 2016.  
 
 Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information.* **Bioinformatics.** 2016 Jul 15;32(14):2233-5. doi: [10.1093/bioinformatics/btw216](https://dx.doi.org/10.1093/bioinformatics/btw216). Epub 2016 Apr 23.
 
