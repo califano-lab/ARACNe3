@@ -21,7 +21,7 @@ g++ -std=c++20 -O3 -c NullModel.cpp; g++ -std=c++20 -O3 -c MatrixReglistIO.cpp; 
 ```
 ### Linking:
 ```
-g++ -std=c++20 -O3 ARACNe3.cpp NullModel.o MatrixReglist.o APMI.o FDRPruning.o MaxEntPruning.o RegWebFns.o -o ARACNe3
+g++ -std=c++20 -O3 ARACNe3.cpp NullModel.o MatrixReglistIO.o APMI.o FDRPruning.o MaxEntPruning.o RegWebFns.o -o ARACNe3
 ``` 
 ### Debugging Building Issues
 If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the GNU `-O3` compiler optimization option, or repace it with `-O2`. 
