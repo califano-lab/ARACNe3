@@ -13,17 +13,18 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 `git clone https://github.com/arhowe00/ARACNe3 # Clone the repo`
 
 ## Building ARACNe3
+The C++20 standard is used when compiling `ARACNe3` into an executable.  Build the executable by cloning the repository and typing `make` in the commandline (by using the Makefile provided in this repository).  For this you will need the GNU c++20 compiler installed on your system.  Or, you could manually build the executable by compiling all C++ files and linking ARACNe3 with object file dependencies in the manner below.  
+### Compiling:
+```
+g++ -std=c++20 -O3 -c NullModel.cpp; g++ -std=c++20 -O3 -c MatrixReglistIO.cpp; g++ -std=c++20 -O3 -c APMI.cpp; g++ -std=c++20 -O3 -c FDRPruning.cpp; g++ -std=c++20 -O3 -c MaxEntPruning.cpp; g++ -std=c++20 -O3 -c RegWebFns.cpp 
 
-The C++20 standard is used when compiling `ARACNe3` into an executable.  Build the executable by after compiling all C++ files by linking ARACNe3 with object file dependencies in the manner below.  An example Makefile is provided in our repository.
-### Compiling C++ Files:
 ```
-g++ -std=c++20 -c NullModel.cpp; g++ -std=c++20 -c MatrixReglistIO.cpp; g++ -std=c++20 -c APMI.cpp; g++ -std=c++20 -c FDRPruning.cpp; g++ -std=c++20 -c MaxEntPruning.cpp; g++ -std=c++20 -c RegWebFns.cpp 
-
+### Linking:
 ```
-### Linking
-```
-g++ -std=c++20 ARACNe3.cpp NullModel.o MatrixReglist.o APMI.o FDRPruning.o MaxEntPruning.o RegWebFns.o -o ARACNe3
-```   
+g++ -std=c++20 -O3 ARACNe3.cpp NullModel.o MatrixReglist.o APMI.o FDRPruning.o MaxEntPruning.o RegWebFns.o -o ARACNe3
+``` 
+### Debugging Building Issues
+If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the GNU `-O3` compiler optimization option, or repace it with `-O2`. 
 
 ## Using ARACNe3
 ### Input files needed to run ARACNe3

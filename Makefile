@@ -1,7 +1,8 @@
 CC = g++
 CXX = g++
 
-CXXFLAGS = -std=c++20 $(INCLUDES)
+CFLAGS = -std=c++20 -O3 $(INCLUDES)
+CXXFLAGS = -std=c++20 -O3 $(INCLUDES)
 
 INCLUDES =
 LDFLAGS =
@@ -25,8 +26,8 @@ MaxEntPruning.o:
 RegWebFns.o:
 
 .PHONY: all
-all: ARACNe3 APMI MatrixReglistIO
+all: ARACNe3 
 
 .PHONY: clean
 clean: 
-	rm *.o APMI MatrixReglistIO NullModel
+	rm *.o *.dSYM
