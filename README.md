@@ -128,5 +128,7 @@ Lukas J. Vlahos - lv2395@cumc.columbia.edu
 Andrew R. Howe - arh2207@columbia.edu
 
 Previous commits and developments can be found in the following repository:
-`https://github.com/arhowe00/ARACNe3_Prototypes`
+```
+https://github.com/arhowe00/ARACNe3_Prototypes
+```
 
