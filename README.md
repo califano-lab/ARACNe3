@@ -100,6 +100,7 @@ Note: the examples have been written based on the provided test sets: ``test/exp
  - Return by reference when applicable!
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
+ - Can using prime products of each regulator target set immediately identify which targets are shared?  Explore making O(N^3) MaxEnt pruning step into an O(N^2) step
  
  Plan of action: Overhaul of Low-level algorithms -> Rewriting codebase with highest efficiency class design and matured codebase -> Implement multithreading 
 

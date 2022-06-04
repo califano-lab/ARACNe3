@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
 	
 	//------------------------------------------------------------
 
-	cached_dir = hiddenfpre + "ARACNe3_cached/";
+	cached_dir = output_dir + hiddenfpre + "ARACNe3_cached/";
 	
 	makeOutputDir(output_dir);
 	makeCachedDir(cached_dir);
