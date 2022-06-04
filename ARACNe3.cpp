@@ -8,6 +8,7 @@ uint16_t tot_num_samps = 0;
 uint16_t tot_num_regulators = 0;
 bool prune_FDR = true;
 float FDR = 0.05f;
+double subsampling_percent = 1 - std::exp(-1);
 bool prune_MaxEnt = true;
 bool verbose = true;
 std::string cached_dir = "output/" + hiddenfpre + "ARACNe3_cached/";
@@ -21,7 +22,7 @@ static void sinceLast() {
 	last = cur;
 }
 
-void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_separated_regulator_list_file = "regulators.txt", string output_dir = "output", bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
+void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_separated_regulator_list_file = "regulators.txt", string output_dir = "output", double subsampling_percent = (1 - std::exp(-1)), bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
 	if (verbose) {
 		// we don't print "... TIME:" here because we have prints in the function below
 		//-------time module-------
@@ -30,7 +31,7 @@ void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_
 	}
 	
 	readRegList(newline_separated_regulator_list_file);
-	genemap matrix = readExpMatrix(copula_exp_mat_tsv_filename);
+	genemap matrix = readExpMatrix(copula_exp_mat_tsv_filename, subsampling_percent);
 	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
 	
 	if (verbose) {
@@ -73,7 +74,7 @@ void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_
 	}
 	
 	if (1 /*pruneFDR, but we always pruneFDR*/) {
-		if (!prune_FDR || FDR >= 1.00f) FDR = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
+		if (!prune_FDR) FDR = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
 		if (verbose) {
 			//-------time module-------
 			cout << "\nFDR PRUNING TIME:" << endl;
@@ -156,7 +157,7 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
 
 /*
  Example:
- ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --noverbose
+ ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --sample 0.6321 --noverbose
  */
 int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
@@ -175,6 +176,14 @@ int main(int argc, char *argv[]) {
 	
 	if (cmdOptionExists(argv, argv+argc, "--FDR"))
 		FDR = stof(getCmdOption(argv, argv+argc, "--FDR"));
+	if (FDR >= 1.00f || FDR <= 0)
+		FDR = 1.01f
+	
+	if (cmdOptionExists(argv, argv+argc, "--sample"))
+		subsampling_percent = stod(getCmdOption(argv, argv+argc, "--sample"));
+	
+	if (subsampling_percent >= 1.00 || subsampling_percent <= 0)
+		subsampling_percent = 1.00;
 
 	if (cmdOptionExists(argv, argv+argc, "--noFDR"))
 	    prune_FDR = false;
@@ -184,12 +193,13 @@ int main(int argc, char *argv[]) {
 	    verbose = false;
 	
 	//------------------------------------------------------------
+	
 
 	cached_dir = output_dir + hiddenfpre + "ARACNe3_cached/";
 	
 	makeOutputDir(output_dir);
 	makeCachedDir(cached_dir);
 	
-	ARACNe3(matrix, regulators, output_dir, prune_FDR, FDR, prune_MaxEnt, verbose);
+	ARACNe3(matrix, regulators, output_dir, subsampling_percent, prune_FDR, FDR, prune_MaxEnt, verbose);
 	return 0;
 }

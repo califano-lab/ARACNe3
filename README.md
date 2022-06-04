@@ -29,14 +29,15 @@ If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if yo
 ## Using ARACNe3
 ### Input files needed to run ARACNe3
 See below for file format specification (or download the test files from our repository)
-1.	Copula-transformed expression matrix
+1.	A normalized expression matrix (CPM, TPM, etc.)
 2.	List of regulators (e.g. Transcription Factors)
 
 ### Steps required to run ARACNe3
-1.	Copula Transform the expression matrix
-2. 	Run according to commandline arguments below
+1.	Normalize a gene expression profile for sequencing depth in each sample, which could be CPM or TPM
+2. 	Run `ARACNe3` according to command line instructions below
 
 ### Optional ways to run ARACNe3
+1.	Customizing the population percentage from which to subsample for network generation, or to remove subsampling (`--subsample 1.00`).
 1.	Removing the MaxEnt pruning step will preserve every edge that passes the FDR Pruning Step
 2.	Customizing the FDR restriction for the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
@@ -57,13 +58,13 @@ g_9984_
 g_9987_
 ```
 ### Dataset
-A copula-transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal number of columns and spacing as the rows below. E.g.,
+A normalized transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal number of columns and spacing as the rows below. E.g.,
 ```
 gene    Sample1   Sample2   Sample3
-g_1_	0.99	0.93	0.39
-g_10_   0.58       0.18       0.65       0.73
-g_10006_        0.30        0.05      0.68
-g_10011_        0.055      0.73       0.64
+g_1_	4.99	2.93	0.39
+g_10_   0.58       0.18       2.65       0.73
+g_10006_        1.30        0.05      0.68
+g_10011_        0.055      0.73       4.64
 ```
 
 ## Parameters
@@ -72,6 +73,8 @@ g_10011_        0.055      0.73       0.64
 ``-r`` is the list of regulators (e.g., TFs)
 
 ``-o`` is the output directory
+
+``--sample`` is the population percentage to subsample (default `--sample 0.6321205588`)
 
 ``--FDR`` is the FDR parameter to set (default: `--FDR 0.05`)
 
@@ -82,19 +85,20 @@ g_10011_        0.055      0.73       0.64
 ``--noverbose`` removes console messages from ARACNe3 stating elapsed time and resulting edges
 
 ## Examples
-Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the copula-transformed expression matrix) and ``test/regulators.txt`` (the list of regulators). 
+Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators). 
 
-### Example 1: run ARACNe3 with no pruning steps
+### Example 1: run ARACNe3 with no pruning steps, no subsampling
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --noFDR --noMaxEnt
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --sample 1.00 --noFDR --noMaxEnt
 ```
 
-### Example 2: run ARACNe3 with all pruning steps, controlling for FDR < 0.01
+### Example 2: run ARACNe3 with all pruning steps, subsampling 33.3% of profiles, controlling for FDR < 0.01
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --FDR 0.01
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --sample 0.333 --FDR 0.01
 ``` 
 
 ## Currently Under Development:
+ - Replace `test/exp_mat.txt` with a normalized expression profile, as opposed to a copula-transformed one
  - Multithreading/non-multithreading option using standard library
  - Remove any references on data types `<=4B`, as references instantiate pointer values which are at least 4B (and typically are 8B on 64-bit systems)
  - Return by reference when applicable!
