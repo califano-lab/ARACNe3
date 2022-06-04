@@ -160,7 +160,7 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 	}
 	
 	if (verbose) {
-		std::cout << "Initial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
+		std::cout << "\nInitial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
 		std::cout << "Sampled Num Samples: " + std::to_string(subsample_quant) << std::endl;
 	}
 	

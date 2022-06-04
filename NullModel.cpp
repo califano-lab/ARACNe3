@@ -9,7 +9,7 @@
  * variable pointer null_mis.  null_mis is to be free'd after the first pruning
  */
 
-static const uint32_t num_null_marginals = 10000;
+static const uint32_t num_null_marginals = 1000000;
 static std::vector<float> null_mis;
 
 extern bool verbose;
