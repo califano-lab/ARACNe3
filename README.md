@@ -31,6 +31,7 @@ If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if yo
 See below for file format specification (or download the test files from our repository)
 1.	A normalized expression matrix (CPM, TPM, etc.)
 2.	List of regulators (e.g. Transcription Factors)
+
 *Note: All regulators must have a defined expression profile in the expression matrix*.
 
 ### Steps required to run ARACNe3
