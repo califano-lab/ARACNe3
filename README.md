@@ -41,7 +41,7 @@ See below for file format specification (or download the test files from our rep
 2.	Customizing the FDR restriction for the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
 ### Output of ARACNe3
-`ARACNe3` will output a file that has a directory path *and* filename provided by the user (e.g. `test/myA3network.txt`). This file shows every significant interaction in three columns:
+`ARACNe3` will output a file `output_(FINAL NETWORK SIZE).txt` in a directory path provided by the user (e.g. `test/output/output_127304.txt`). This file shows every significant interaction in three columns:
 1.	The regulator.
 2.	The target.
 3.	The MI (Mutual Information) of the pair.
@@ -71,7 +71,7 @@ g_10011_        0.055      0.73       0.64
 
 ``-r`` is the list of regulators (e.g., TFs)
 
-``-o`` is the output text file
+``-o`` is the output directory
 
 ``--FDR`` is the FDR parameter to set (default: `--FDR 0.05`)
 
@@ -79,19 +79,19 @@ g_10011_        0.055      0.73       0.64
 
 ``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
 
-``--noverbose`` removes output messages from ARACNe3 stating elapsed time and resulting edges
+``--noverbose`` removes console messages from ARACNe3 stating elapsed time and resulting edges
 
 ## Examples
 Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the copula-transformed expression matrix) and ``test/regulators.txt`` (the list of regulators). 
 
 ### Example 1: run ARACNe3 with no pruning steps
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output.txt --noFDR --noMaxEnt
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --noFDR --noMaxEnt
 ```
 
 ### Example 2: run ARACNe3 with all pruning steps, controlling for FDR < 0.01
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output.txt --FDR 0.01
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --FDR 0.01
 ``` 
 
 ## Currently Under Development:

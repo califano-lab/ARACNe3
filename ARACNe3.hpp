@@ -16,6 +16,17 @@
 #ifndef _ARACNE3_HPP_
 #define _ARACNE3_HPP_
 
+/*
+ I assume we will need conditional compilation for multithreading and stuff later on.
+ */
+#if defined __linux__ || defined __APPLE__
+const std::string hiddenfpre = ".";
+#elif defined _WIN32 // in windows you must set a hidden file via properties
+const std::string hiddenfpre = "";
+#else
+const std::string hiddenfpre = "";
+#endif /* __linux__ || __APPLE__ */
+
 
 //--------------------- Overhead Data Structures	 -----------------------
 /*
@@ -62,6 +73,9 @@ typedef std::unordered_map<reg_id_t, std::unordered_map<reg_id_t, float>> map_ma
 
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
+void makeOutputDir(const std::string &output_dir);
+void makeCachedDir(const std::string &cached_dir);
+
 /*
  * Maps gene identifiers to gene expression matrices
  */
@@ -77,7 +91,7 @@ void readRegList(std::string filename = "regulators.txt");
  */
 genemap readTransformedGexpMatrix(std::string filename = "exp_mat.txt");
 
-void printNetworkRegTarMI(const reg_web &network, const std::string &filename = "output.txt");
+void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir = "output", const std::string &output_suffix = "0");
 
 
 //--------------------- APMI.cpp	 		-----------------------
@@ -104,7 +118,7 @@ const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
 
 
 //--------------------- NullModel.cpp	 		-----------------------
-void checkInitNullMIs();
+bool checkInitNullMIs(uint16_t tot_num_samps);
 
 // sets a file static variable of an ordered null distribution
 const std::vector<float> initNullMIs(uint16_t);

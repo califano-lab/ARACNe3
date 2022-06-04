@@ -7,8 +7,10 @@ uint32_t size_of_network = 0;
 uint16_t tot_num_samps = 0;
 uint16_t tot_num_regulators = 0;
 bool prune_FDR = true;
+float FDR = 0.05f;
 bool prune_MaxEnt = true;
-
+bool verbose = true;
+std::string cached_dir = "output/" + hiddenfpre + "ARACNe3_cached/";
 /*
  Convenient function for timing parts of ARACNe3.  Will set last.
  */
@@ -19,7 +21,7 @@ static void sinceLast() {
 	last = cur;
 }
 
-void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_separated_regulator_list_file = "regulators.txt", string reg_tar_mi_tsv_output_filename = "output.txt", bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
+void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_separated_regulator_list_file = "regulators.txt", string output_dir = "output", bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
 	readRegList(newline_separated_regulator_list_file);
 	genemap matrix = readTransformedGexpMatrix(copula_exp_mat_tsv_filename);
 	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
@@ -107,7 +109,7 @@ void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_
 		//-------------------------
 	}
 	
-	printNetworkRegTarMI(network, reg_tar_mi_tsv_output_filename);
+	writeNetworkRegTarMI(network, output_dir, std::to_string(size_of_network));
 	
 	if (verbose) {
 		//-------time module-------
@@ -142,21 +144,22 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
 
 /*
  Example:
- ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o output.txt --noFDR --FDR 0.05 --noMaxEnt --noverbose
+ ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --noverbose
  */
 int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
-		cout << "usage: " + ((string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output.txt --FDR 0.05" << endl;
+		cout << "usage: " + ((string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --FDR 0.05" << endl;
 		return 1;
 	}
 	
+	//--------------------cmd line parsing------------------------
+	
 	string matrix = (string) getCmdOption(argv, argv+argc, "-e");
 	string regulators = (string) getCmdOption(argv, argv+argc, "-r");
-	string output = (string) getCmdOption(argv, argv+argc, "-o");
-	bool prune_FDR = true;
-	float FDR = 0.05f;
-	bool prune_MaxEnt = true;
-	bool verbose = true;
+	string output_dir = (string) getCmdOption(argv, argv+argc, "-o");
+	// make sure output_dir has a trailing slash
+	if (output_dir.back() != '/')
+	    output_dir += '/';
 	
 	if (cmdOptionExists(argv, argv+argc, "--FDR"))
 		FDR = stof(getCmdOption(argv, argv+argc, "--FDR"));
@@ -167,8 +170,14 @@ int main(int argc, char *argv[]) {
 	    prune_MaxEnt = false;
 	if (cmdOptionExists(argv, argv+argc, "--noverbose"))
 	    verbose = false;
-
 	
-	ARACNe3(matrix, regulators, output, prune_FDR, FDR, prune_MaxEnt, verbose);
+	//------------------------------------------------------------
+
+	cached_dir = hiddenfpre + "ARACNe3_cached/";
+	
+	makeOutputDir(output_dir);
+	makeCachedDir(cached_dir);
+	
+	ARACNe3(matrix, regulators, output_dir, prune_FDR, FDR, prune_MaxEnt, verbose);
 	return 0;
 }

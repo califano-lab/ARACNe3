@@ -11,7 +11,7 @@ system: Total number of CPU-seconds used by the system on behalf of the process 
 -----------------------------------------------------
 
 -----------------------ARACNe3-----------------------
-% time ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output.txt
+% time ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test
 NULL MI MODEL TIME:
 8045ms
 
@@ -30,7 +30,7 @@ SIZE OF NETWORK: 125506 EDGES.
 PRINTING NETWORK!
 241ms
 Success!
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output.txt  470.33s user 1.63s system 99% cpu 7:52.48 total
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test  470.33s user 1.63s system 99% cpu 7:52.48 total
 
 -----------------------------------------------------
 

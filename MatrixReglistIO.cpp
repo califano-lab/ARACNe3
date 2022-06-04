@@ -4,9 +4,40 @@ using namespace std;
 
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_regulators;
+extern bool verbose;
 
 static unordered_map<string, uint16_t> compression_map;
 static vector<string> decompression_map;
+
+/*
+ Will automatically checked if there already is an output directory.  Then creates the output directory.
+ */
+void makeOutputDir(const std::string &output_dir) {
+	if (!std::filesystem::exists(output_dir)) {
+		if (std::filesystem::create_directory(output_dir)) {
+			if (verbose) std::cout << "Directory Created: " + output_dir << std::endl;
+		} else {
+			std::cerr << "failed to create directory: " + output_dir << std::endl;
+			std::exit(2);
+		}
+	}
+	return;
+}
+
+/*
+ Will automatically checked if there already is a cached directory.  Then creates the cached directory.
+ */
+void makeCachedDir(const std::string &cached_dir) {
+	if (!std::filesystem::exists(cached_dir)) {
+		if (std::filesystem::create_directory(cached_dir)) {
+			if (verbose) std::cout << "Directory Created: " + cached_dir << std::endl;
+		} else {
+			std::cerr << "failed to create directory: " + cached_dir << std::endl;
+			std::exit(2);
+		}
+	}
+	return;
+}
 
 /*
  Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
@@ -94,9 +125,10 @@ genemap readTransformedGexpMatrix(string filename) {
 }
 
 /*
- Function that prints the Regulator, Target, and MI to the given filename.  Does not print to the console.  The data structure input is a reg_web, which is defined in "ARACNe3.hpp".
+ Function that prints the Regulator, Target, and MI to the output_dir given the output_suffix.  Does not print to the console.  The data structure input is a reg_web, which is defined in "ARACNe3.hpp".
  */
-void printNetworkRegTarMI(const reg_web &network, const string &filename) {
+void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir, const std::string &output_suffix) {
+	const string filename = output_dir + "output_" + output_suffix + ".txt";
 	ofstream ofs{filename};
 	if (!ofs) {
 		cerr << "error: could not write to file: " << filename << ".\n";
