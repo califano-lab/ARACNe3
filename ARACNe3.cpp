@@ -11,7 +11,7 @@ float FDR = 0.05f;
 double subsampling_percent = 1 - std::exp(-1);
 bool prune_MaxEnt = true;
 bool verbose = true;
-std::string cached_dir = "output/" + hiddenfpre + "ARACNe3_cached/";
+std::string cached_dir;
 /*
  Convenient function for timing parts of ARACNe3.  Will set last.
  */
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
 	//------------------------------------------------------------
 	
 
-	cached_dir = output_dir + hiddenfpre + "ARACNe3_cached/";
+	cached_dir = "./"+ hiddenfpre + "ARACNe3_cached/";
 	
 	makeOutputDir(output_dir);
 	makeCachedDir(cached_dir);
