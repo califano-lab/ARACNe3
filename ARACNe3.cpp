@@ -22,7 +22,7 @@ static void sinceLast() {
 	last = cur;
 }
 
-void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_separated_regulator_list_file = "regulators.txt", string output_dir = "output", double subsampling_percent = (1 - std::exp(-1)), bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
+void ARACNe3(string normalized_exp_mat_tsv_filename = "exp_mat.txt", string newline_separated_regulator_list_file = "regulators.txt", string output_dir = "output", double subsampling_percent = (1 - std::exp(-1)), bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
 	if (verbose) {
 		// we don't print "... TIME:" here because we have prints in the function below
 		//-------time module-------
@@ -31,7 +31,7 @@ void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_
 	}
 	
 	readRegList(newline_separated_regulator_list_file);
-	genemap matrix = readExpMatrix(copula_exp_mat_tsv_filename, subsampling_percent);
+	genemap matrix = readExpMatrix(normalized_exp_mat_tsv_filename, subsampling_percent);
 	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
 	
 	if (verbose) {
@@ -157,7 +157,7 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
 
 /*
  Example:
- ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --sample 0.6321 --noverbose
+ ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --subsample 0.6321 --noverbose
  */
 int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
@@ -177,10 +177,10 @@ int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "--FDR"))
 		FDR = stof(getCmdOption(argv, argv+argc, "--FDR"));
 	if (FDR >= 1.00f || FDR <= 0)
-		FDR = 1.01f
+		FDR = 1.01f;
 	
-	if (cmdOptionExists(argv, argv+argc, "--sample"))
-		subsampling_percent = stod(getCmdOption(argv, argv+argc, "--sample"));
+	if (cmdOptionExists(argv, argv+argc, "--subsample"))
+		subsampling_percent = stod(getCmdOption(argv, argv+argc, "--subsample"));
 	
 	if (subsampling_percent >= 1.00 || subsampling_percent <= 0)
 		subsampling_percent = 1.00;

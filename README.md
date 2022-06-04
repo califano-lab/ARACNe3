@@ -74,7 +74,7 @@ g_10011_        0.055      0.73       4.64
 
 ``-o`` is the output directory
 
-``--sample`` is the population percentage to subsample (default `--sample 0.6321205588`)
+``--subsample`` is the population percentage to subsample (default `--subsample 0.6321205588`)
 
 ``--FDR`` is the FDR parameter to set (default: `--FDR 0.05`)
 
@@ -89,12 +89,12 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 
 ### Example 1: run ARACNe3 with no pruning steps, no subsampling
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --sample 1.00 --noFDR --noMaxEnt
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 1.00 --noFDR --noMaxEnt
 ```
 
 ### Example 2: run ARACNe3 with all pruning steps, subsampling 33.3% of profiles, controlling for FDR < 0.01
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --sample 0.333 --FDR 0.01
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 0.333 --FDR 0.01
 ``` 
 
 ## Currently Under Development:

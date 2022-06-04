@@ -69,7 +69,7 @@ void readRegList(string filename) {
 }
 
 /*
- * Reads a copula-transformed tab-separated (G+1)x(N+1) gene expression matrix and 
+ * Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and 
  * outputs an unordered hash table corresponding to the {gene, expression} 
  * values
  */
