@@ -9,7 +9,7 @@
  * variable pointer null_mis.  null_mis is to be free'd after the first pruning
  */
 
-static const uint32_t num_null_marginals = 1000000;
+static const uint32_t num_null_marginals = 10000;
 static std::vector<float> null_mis;
 
 extern bool verbose;
@@ -23,7 +23,7 @@ void cacheNullModel(uint16_t tot_num_samps, const std::vector<float> &mi_vec) {
 	std::ofstream cached(filename, std::ios::out | std::ios::binary);
 
 	//tab-delinate the data
-	std::ostream_iterator<float> cached_iterator(cached, "\t");
+	std::ostream_iterator<float> cached_iterator(cached, "\n");
 	std::copy(mi_vec.begin(), mi_vec.end(), cached_iterator);
 	return;
 }

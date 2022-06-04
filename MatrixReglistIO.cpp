@@ -90,7 +90,9 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 	
 	// find subsample number **NOTE** must update tot_num_samps after subsampling
 	uint16_t subsample_quant = std::round(subsampling_percent * tot_num_samps);
-	std::vector<uint16_t> samps_idx(tot_num_samps), fold(subsample_quant);
+	std::vector<uint16_t> samps_idx(tot_num_samps);
+	std::vector<uint16_t> fold(subsample_quant);
+	
 	std::iota(samps_idx.begin(), samps_idx.end(), 0U); /* 0, 1, ..., size-1 */
 	// now, fold is a vector with subsample_quant indices sampled from [0,tot_num_samps).
 	std::sample(samps_idx.begin(), samps_idx.end(), fold.begin(), subsample_quant, std::mt19937{std::random_device{}()});
@@ -128,9 +130,10 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 		std::sort(rank_vec.begin(), rank_vec.end(), [&expr_vec_sampled](const uint16_t &num1, const uint16_t &num2) -> bool { return expr_vec_sampled[num1] < expr_vec_sampled[num2];}); /* sort ascending */
 		
 		/*
-		 Lambda function to copula transform rank_vec, store in expr_vec_sampled.  Note that rank_vec goes from 0...size-1, so we must add 1 and then divide by size + 1
+		 This function copula transforms the expr_vec values.  It's a brain teaser to think about, but rank_vec spits out the index of the rank r'th element.  So rank_vec[0] is the index of expr_vec for the least value, and we set that accordingly, in the manner below.
 		 */
-		std::transform(rank_vec.begin(), rank_vec.end(), expr_vec_sampled.begin(), [&subsample_quant](const uint16_t &rank) -> const float { return (rank+1)/((float) subsample_quant+1); });
+		for (uint16_t r = 0; r < subsample_quant; ++r)
+			expr_vec_sampled[rank_vec[r]] = (r + 1)/((float)subsample_quant + 1);
 		
 		/*
 		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if tehre exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.

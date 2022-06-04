@@ -36,12 +36,12 @@ void ARACNe3(string normalized_exp_mat_tsv_filename = "exp_mat.txt", string newl
 	
 	if (verbose) {
 		//-------time module-------
-		std::cout << "MATRIX & REGULATORS READ TIME:" << std::endl;
+		std::cout << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
 		sinceLast();
 		//-------------------------
 		
 		//-------time module-------
-		cout << "NULL MI MODEL TIME:" << endl;
+		cout << "\nNULL MI MODEL TIME:" << endl;
 		last = chrono::high_resolution_clock::now();
 		//-------------------------
 	}
