@@ -50,16 +50,18 @@ void readRegList(string filename) {
 		std::exit(2);
 	}
 	string reg;
-	while (getline(f, reg, '\n')) {
+	while (std::getline(f, reg, '\n')) {
+		if (reg.back() == '\r') /* Alert! We have a Windows dweeb! */
+			reg.pop_back();
 		regs.push_back(reg);
 	}
+	
 	
 	compression_map.reserve(regs.size());
 	/* NOTE** This map starts from values i+1 because we are only using it to make the compression step below faster.  The compression map is redundant for every uint16_t greater than the number of regulators (i.e., contents are emptied after readExpMatrix
 	*/
-	for (uint16_t i = 0; i < regs.size(); ++i) {
+	for (uint16_t i = 0; i < regs.size(); ++i)
 		compression_map[regs[i]] = i+1; //NOTE** it's "regulator" -> i+1
-	}
 	
 	/* The original regs string vector is also the decompression map.  We index this vector with uint16_t -> "gene", and hence this is how we decompress.
 	 */
@@ -84,9 +86,14 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 	// for the first line, we simply want to count the number of samples
 	string line;
 	getline(f, line, '\n');
-	for (size_t i = 0; (i = line.find('\t', i)) != string::npos; ++i) {
+	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+		line.pop_back();
+	
+	/*
+	 Count number of samples from the number of columns in the first line
+	 */
+	for (size_t i = 0; (i = line.find('\t', i)) != string::npos; ++i)
 		++tot_num_samps;
-	}
 	
 	// find subsample number **NOTE** must update tot_num_samps after subsampling
 	uint16_t subsample_quant = std::round(subsampling_percent * tot_num_samps);
@@ -100,20 +107,22 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 	// now, we can more efficiently load
 	string gene;
 	while(getline(f, line, '\n')) {
+		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+			line.pop_back();
 		vector<float> expr_vec;
 		expr_vec.reserve(tot_num_samps);
 		
-		size_t prev = 0U, pos = line.find_first_of("\t", prev);
+		size_t prev = 0U, pos = line.find_first_of("\t, ", prev);
 		gene = line.substr(prev, pos-prev);
 		prev = pos + 1;
-		while ((pos = line.find_first_of("\t", prev)) != string::npos) {
+		while ((pos = line.find_first_of("\t, ", prev)) != string::npos) {
 			if (pos > prev) {
 				expr_vec.emplace_back(stof(line.substr(prev, pos-prev)));
 			}
 			prev = pos + 1;
 		}
 		expr_vec.emplace_back(stof(line.substr(prev, string::npos)));
-
+		
 		// subsample
 		vector <float> expr_vec_sampled;
 		expr_vec_sampled.reserve(subsample_quant);

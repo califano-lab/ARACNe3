@@ -32,6 +32,8 @@ void ARACNe3(string normalized_exp_mat_tsv_filename = "exp_mat.txt", string newl
 	
 	readRegList(newline_separated_regulator_list_file);
 	genemap matrix = readExpMatrix(normalized_exp_mat_tsv_filename, subsampling_percent);
+	for (reg_id_t i = 0; i < tot_num_regulators; ++i)
+		matrix[i];
 	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
 	
 	if (verbose) {

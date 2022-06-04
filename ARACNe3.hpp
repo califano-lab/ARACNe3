@@ -79,7 +79,7 @@ void makeCachedDir(const std::string &cached_dir);
 /*
  * Maps gene identifiers to gene expression matrices
  */
-typedef std::unordered_map<reg_id_t, std::vector<float>> genemap;
+typedef std::unordered_map<uint16_t, std::vector<float>> genemap;
 
 /*
  Does not return a list of regulators as a string vector, as we are using compression
