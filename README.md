@@ -96,7 +96,6 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 
 ## Currently Under Development:
  - Multithreading/non-multithreading option using standard library
- - **IN PROGRESS** Make null MI value independent of rest and stored on disk for ### subnet operations.  Maybe, check IF the file exists, if not, compute initNullMI
  - Remove any references on data types `<=4B`, as references instantiate pointer values which are at least 4B (and typically are 8B on 64-bit systems)
  - Return by reference when applicable!
  - Optimize p-value calculation for each MI value
