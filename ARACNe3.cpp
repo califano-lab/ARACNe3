@@ -22,11 +22,23 @@ static void sinceLast() {
 }
 
 void ARACNe3(string copula_exp_mat_tsv_filename = "exp_mat.txt", string newline_separated_regulator_list_file = "regulators.txt", string output_dir = "output", bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
+	if (verbose) {
+		// we don't print "... TIME:" here because we have prints in the function below
+		//-------time module-------
+		last = chrono::high_resolution_clock::now();
+		//-------------------------
+	}
+	
 	readRegList(newline_separated_regulator_list_file);
-	genemap matrix = readTransformedGexpMatrix(copula_exp_mat_tsv_filename);
+	genemap matrix = readExpMatrix(copula_exp_mat_tsv_filename);
 	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
 	
 	if (verbose) {
+		//-------time module-------
+		std::cout << "MATRIX & REGULATORS READ TIME:" << std::endl;
+		sinceLast();
+		//-------------------------
+		
 		//-------time module-------
 		cout << "NULL MI MODEL TIME:" << endl;
 		last = chrono::high_resolution_clock::now();

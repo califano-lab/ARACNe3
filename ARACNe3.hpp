@@ -89,7 +89,7 @@ void readRegList(std::string filename = "regulators.txt");
 /*
  Returns a map of gene identifier -> gene expression.
  */
-genemap readTransformedGexpMatrix(std::string filename = "exp_mat.txt");
+genemap readExpMatrix(std::string filename = "exp_mat.txt", double subsampling_percent = (1 - std::exp(-1)));
 
 void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir = "output", const std::string &output_suffix = "0");
 
