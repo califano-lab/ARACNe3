@@ -35,7 +35,7 @@ See below for file format specification (or download the test files from our rep
 *Note: All regulators must have a defined expression profile in the expression matrix*.
 
 ### Steps required to run ARACNe3
-1.	Normalize a gene expression profile for sequencing depth in each sample, which could be CPM or TPM
+1.	Normalize a gene expression profile for sequencing depth in each sample
 2. 	Run `ARACNe3` according to command line instructions below
 
 ### Optional ways to run ARACNe3
