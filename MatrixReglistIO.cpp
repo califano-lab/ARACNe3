@@ -91,7 +91,7 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 	
 	/*
 	 Count number of samples from the number of columns in the first line
-	 */
+	 */ 
 	for (size_t pos = 0; (pos = line.find_first_of("\t, ", pos)) != string::npos; ++pos)
 		++tot_num_samps;
 	
