@@ -60,7 +60,7 @@ g_1_
 ### Dataset
 A normalized transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal number of columns and spacing as the rows below. E.g.,
 ```
-gene    Sample1   Sample2   Sample3
+gene	Sample1	Sample2	Sample3
 g_1_	4.99	2.93	0.39
 g_10_   0.58       0.18       2.65
 g_9432_	3.00	1.27	7.63
