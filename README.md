@@ -75,7 +75,7 @@ g_10011_        0.055      0.73       4.64
 
 ``-o`` is the output directory
 
-``--subsample`` is the population percentage to subsample (default is \[1-exp(-1)\]: `--subsample 0.63212...`)
+``--subsample`` is the population percentage to subsample ($1-e^{-1}$ is default: `--subsample 0.63212...`)
 
 ``--FDR`` is the FDR parameter to set (default: `--FDR 0.05`)
 
