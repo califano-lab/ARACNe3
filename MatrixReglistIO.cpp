@@ -145,13 +145,13 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 			expr_vec_sampled[rank_vec[r]] = (r + 1)/((float)subsample_quant + 1);
 		
 		/*
-		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if tehre exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.
+		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if there exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.
 		 */
 		if (compression_map[gene] == 0) {
+			// the last index of decompression_vec is the new uint16_t
+			gm[decompression_map.size()] = expr_vec_sampled;
 			// we must have a target
 			decompression_map.push_back(gene);
-			// the last index of decompression_vec is the new uint16_t
-			gm[decompression_map.size()-1] = expr_vec_sampled;
 		} else {
 			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
 			gm[compression_map[gene]-1] = expr_vec_sampled;
