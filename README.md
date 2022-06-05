@@ -75,7 +75,7 @@ g_10011_        0.055      0.73       4.64
 
 ``-o`` is the output directory
 
-``--subsample`` is the population percentage to subsample ($1-e^{-1}$ is default: `--subsample 0.63212...`)
+``--subsample`` is the population percentage to subsample (<img src="https://render.githubusercontent.com/render/math?math={1-e^{-1}}#gh-light-mode-only"><img src="https://render.githubusercontent.com/render/math?math={\color{white}1-e^{-1}}#gh-dark-mode-only"> is default: `--subsample 0.63212...`)
 
 ``--FDR`` is the FDR parameter to set (default: `--FDR 0.05`)
 
