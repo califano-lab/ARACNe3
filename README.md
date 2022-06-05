@@ -53,11 +53,9 @@ See below for file format specification (or download the test files from our rep
 ### A gene/regulator list
 A text file, containing one gene symbol per line. Every line has important information. E.g.,
 ```
-g_9970_
-g_9971_
-g_9975_
-g_9984_
-g_9987_
+g_10_
+g_10011_
+g_1_
 ```
 ### Dataset
 A normalized transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for equal number of columns and spacing as the rows below. E.g.,
@@ -65,6 +63,7 @@ A normalized transformed expression profile as a `.tsv` (tab separated value) fi
 gene    Sample1   Sample2   Sample3
 g_1_	4.99	2.93	0.39
 g_10_   0.58       0.18       2.65       0.73
+g_9432_ 3.00	1.27	7.63	3.81
 g_10006_        1.30        0.05      0.68
 g_10011_        0.055      0.73       4.64
 ```
