@@ -39,9 +39,9 @@ See below for file format specification (or download the test files from our rep
 2. 	Run `ARACNe3` according to command line instructions below
 
 ### Optional ways to run ARACNe3
-1.	Customizing the population percentage from which to subsample for network generation, or to remove subsampling (`--subsample 1.00`).
+1.	Customizing the population percentage from which to subsample for network generation, or to remove subsampling (`--subsample 1`).
 1.	Removing the MaxEnt pruning step will preserve every edge that passes the FDR Pruning Step
-2.	Customizing the FDR restriction for the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
+2.	Customizing the FDR restriction for the first pruning step.  The first pruning step rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
 ### Output of ARACNe3
 `ARACNe3` will output a file `output_(FINAL NETWORK SIZE).txt` in a directory path provided by the user (e.g. `test/output/output_127304.txt`). This file shows every significant interaction in three columns:
@@ -79,7 +79,7 @@ g_10011_        0.055      0.73       4.64
 
 ``--FDR`` is the FDR parameter to set (default: `--FDR 0.05`)
 
-``--noFDR`` tells ARACNe3 not to prune based on the FDR (same as: `--FDR 1.00`)
+``--noFDR`` tells ARACNe3 not to prune based on the FDR (same as: `--FDR 1`)
 
 ``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
 

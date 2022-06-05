@@ -96,7 +96,9 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 		++tot_num_samps;
 	
 	// find subsample number **NOTE** must update tot_num_samps after subsampling
-	uint16_t subsample_quant = std::round(subsampling_percent * tot_num_samps);
+	uint16_t subsample_quant = std::ceil(subsampling_percent * tot_num_samps);
+	if (subsample_quant >= tot_num_samps || subsample_quant < 0)
+		subsample_quant = tot_num_samps;
 	std::vector<uint16_t> samps_idx(tot_num_samps);
 	std::vector<uint16_t> fold(subsample_quant);
 	
