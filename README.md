@@ -62,8 +62,8 @@ A normalized transformed expression profile as a `.tsv` (tab separated value) fi
 ```
 gene    Sample1   Sample2   Sample3
 g_1_	4.99	2.93	0.39
-g_10_   0.58       0.18       2.65       0.73
-g_9432_ 3.00	1.27	7.63	3.81
+g_10_   0.58       0.18       2.65
+g_9432_	3.00	1.27	7.63
 g_10006_        1.30        0.05      0.68
 g_10011_        0.055      0.73       4.64
 ```
