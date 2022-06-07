@@ -179,7 +179,7 @@ void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir,
 	ofstream ofs{filename};
 	if (!ofs) {
 		cerr << "error: could not write to file: " << filename << ".\n";
-		cerr << "Try using the working directory. Example \"-o output.text\"." << endl;
+		cerr << "Try a subdirectory of the working directory. Example \"-o ./output\"." << endl;
 		std::exit(2);
 	}
 	auto cout_buff = cout.rdbuf();
