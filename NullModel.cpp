@@ -14,6 +14,7 @@ static std::vector<float> null_mis;
 
 extern bool verbose;
 extern std::string cached_dir;
+extern uint32_t global_seed;
 
 /*
  Will cache the null_mis vector in the cached directory.  The vector will be a BLOB named 'Null_tot_num_samps_###'.
@@ -55,7 +56,7 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 		// vector of vectors, 1mil rows
 		std::vector<std::vector<float>> target_vec(num_null_marginals, ref_vec);
 
-		auto rng = std::default_random_engine {};
+		auto rng = std::default_random_engine{global_seed};
 		for (unsigned int i = 0; i < num_null_marginals; ++i) {
 			std::shuffle(std::begin(target_vec[i]), std::end(target_vec[i]),
 					rng);

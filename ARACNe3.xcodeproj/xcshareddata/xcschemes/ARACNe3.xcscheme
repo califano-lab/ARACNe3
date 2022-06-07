@@ -54,11 +54,11 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o test/output --subsample 0.50"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e test/debug/ap_exp_mat.txt -r test/debug/ap_regulators.txt -o test/output --subsample 0.50"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e /Users/andrew/Desktop/a3/test/fun_mat.txt -r /Users/andrew/Desktop/a3/test/fun_reg.txt -o /Users/andrew/Desktop/a3/outputfun"

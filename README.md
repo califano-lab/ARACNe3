@@ -83,14 +83,16 @@ g_10011_	0.055	0.73	4.64
 
 ``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
 
+``--seed`` sets the seed for pseudorandom behavior (null shuffle, subsampling) 
+
 ``--noverbose`` removes console messages from ARACNe3 stating elapsed time and resulting edges
 
 ## Examples
 Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators). 
 
-### Example 1: run ARACNe3 with no pruning steps, no subsampling
+### Example 1: run ARACNe3 with no pruning steps, no subsampling, and seed equal to 343
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 1.00 --noFDR --noMaxEnt
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 1.00 --noFDR --noMaxEnt --seed 343
 ```
 
 ### Example 2: run ARACNe3 with all pruning steps, subsampling 33.3% of profiles, controlling for FDR < 0.01

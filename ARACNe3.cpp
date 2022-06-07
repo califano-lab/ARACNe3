@@ -12,6 +12,7 @@ double subsampling_percent = 1 - std::exp(-1);
 bool prune_MaxEnt = true;
 bool verbose = true;
 std::string cached_dir;
+uint32_t global_seed = 0;
 /*
  Convenient function for timing parts of ARACNe3.  Will set last.
  */
@@ -157,7 +158,7 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
 
 /*
  Example:
- ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --subsample 0.6321 --noverbose
+ ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --subsample 0.6321 --noverbose --seed 1
  */
 int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
@@ -178,6 +179,9 @@ int main(int argc, char *argv[]) {
 		FDR = stof(getCmdOption(argv, argv+argc, "--FDR"));
 	if (FDR >= 1.00f || FDR <= 0)
 		FDR = 1.01f;
+	
+	if (cmdOptionExists(argv, argv+argc, "--seed"))
+		global_seed = stoi(getCmdOption(argv, argv+argc, "--seed"));
 	
 	if (cmdOptionExists(argv, argv+argc, "--subsample"))
 		subsampling_percent = stod(getCmdOption(argv, argv+argc, "--subsample"));

@@ -5,6 +5,7 @@ using namespace std;
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_regulators;
 extern bool verbose;
+extern uint32_t global_seed;
 
 static unordered_map<string, uint16_t> compression_map;
 static vector<string> decompression_map;
@@ -104,7 +105,8 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 	
 	std::iota(samps_idx.begin(), samps_idx.end(), 0U); /* 0, 1, ..., size-1 */
 	// now, fold is a vector with subsample_quant indices sampled from [0,tot_num_samps).
-	std::sample(samps_idx.begin(), samps_idx.end(), fold.begin(), subsample_quant, std::mt19937{std::random_device{}()});
+	/* verify that seeding is done properly.  Replaced std::random_device{}() w/ global_seed*/
+	std::sample(samps_idx.begin(), samps_idx.end(), fold.begin(), subsample_quant, std::mt19937{global_seed});
 	
 	// now, we can more efficiently load
 	string gene;
