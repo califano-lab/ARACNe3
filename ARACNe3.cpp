@@ -13,6 +13,7 @@ bool prune_MaxEnt = true;
 bool verbose = true;
 std::string cached_dir;
 uint32_t global_seed = 0;
+float EXPERIMENTAL_mi_cutoff = 0;
 /*
  Convenient function for timing parts of ARACNe3.  Will set last.
  */
@@ -33,7 +34,6 @@ void ARACNe3(string normalized_exp_mat_tsv_filename = "exp_mat.txt", string newl
 	
 	readRegList(newline_separated_regulator_list_file);
 	genemap matrix = readExpMatrix(normalized_exp_mat_tsv_filename, subsampling_percent);
-	size_of_network = static_cast<uint32_t>(tot_num_regulators*matrix.size()-tot_num_regulators);
 	
 	if (verbose) {
 		//-------time module-------
@@ -177,8 +177,10 @@ int main(int argc, char *argv[]) {
 	
 	if (cmdOptionExists(argv, argv+argc, "--FDR"))
 		FDR = stof(getCmdOption(argv, argv+argc, "--FDR"));
-	if (FDR >= 1.00f || FDR <= 0)
+	if (FDR >= 1.00f || FDR <= 0) {
+		std::cout << "FDR not on range [0,1], setting to 1.00" << std::endl;
 		FDR = 1.01f;
+	}
 	
 	if (cmdOptionExists(argv, argv+argc, "--seed"))
 		global_seed = stoi(getCmdOption(argv, argv+argc, "--seed"));
@@ -187,7 +189,10 @@ int main(int argc, char *argv[]) {
 		subsampling_percent = stod(getCmdOption(argv, argv+argc, "--subsample"));
 	
 	if (subsampling_percent >= 1.00 || subsampling_percent <= 0)
-		subsampling_percent = 1.00;
+		{
+			std::cout << "Subsampling percent not on range [0,1]; setting to 1.00." << std::endl;
+			subsampling_percent = 1.00;
+	}
 
 	if (cmdOptionExists(argv, argv+argc, "--noFDR"))
 	    prune_FDR = false;
@@ -195,6 +200,14 @@ int main(int argc, char *argv[]) {
 	    prune_MaxEnt = false;
 	if (cmdOptionExists(argv, argv+argc, "--noverbose"))
 	    verbose = false;
+	//----------------------EXPERIMENTAL--------------------------
+	
+	if (cmdOptionExists(argv, argv+argc, "--mithresh"))
+		EXPERIMENTAL_mi_cutoff = stof(getCmdOption(argv, argv+argc, "--mithresh"));
+	if (EXPERIMENTAL_mi_cutoff < 0)
+		EXPERIMENTAL_mi_cutoff = 0.0f;
+	
+	//------------------------------------------------------------
 	
 	//------------------------------------------------------------
 	
