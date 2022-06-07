@@ -7,7 +7,6 @@
 
 using namespace Rcpp;
 
-// [[Rcpp::export]]
 static float q_thresh;
 static vector<float> *vec_x, *vec_y;
 static vector<float> mis;
