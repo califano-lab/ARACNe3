@@ -83,7 +83,7 @@ g_10011_	0.055	0.73	4.64
 
 ``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
 
-``--seed`` sets the seed for pseudorandom behavior (null shuffle, subsampling) 
+``--seed`` sets the seed for pseudorandom behavior for null model marginals and subsampling (default: `--seed 0`)
 
 ``--noverbose`` removes console messages from ARACNe3 stating elapsed time and resulting edges
 
