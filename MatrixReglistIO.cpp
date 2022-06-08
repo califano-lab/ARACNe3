@@ -2,13 +2,19 @@
 
 using namespace std;
 
+/*
+ Compression (gene (string) to uint16_t) and decompression (uint16_t back to gene (string)) mapping.  When doing the matrix/regulator list IO, this application automatically compresses all gene identifiers into unsigned short (2B) 0-65535, as this substantially can decrease the memory load of data structures which must copy the initial values (strings, for the gene identifiers these are anywhere from 5B-25B), or refer to them through pointers (8B).  Reading less memory also can speed up computation.
+ */
+static unordered_map<string, uint16_t> compression_map;
+static vector<string> decompression_map;
+
+/*
+ Global variables are passed from ARACNe3.cpp, which are the user-defined parameters.
+ */
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_regulators;
 extern bool verbose;
 extern uint32_t global_seed;
-
-static unordered_map<string, uint16_t> compression_map;
-static vector<string> decompression_map;
 
 /*
  Will automatically checked if there already is an output directory.  Then creates the output directory.
