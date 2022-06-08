@@ -2,10 +2,16 @@
 
 using namespace std;
 
-// inferred while reading txt files.  Rcpp will have to compensate
+/*
+ These variables are inferred while reading text files.
+ */
 uint32_t size_of_network = 0;
 uint16_t tot_num_samps = 0;
 uint16_t tot_num_regulators = 0;
+
+/*
+ These variables are tuned according to user preferences.  Some of these the user doesn't choose, such as the cached_dir, which is always the working directory of the ARACNe3 script.
+ */
 bool prune_FDR = true;
 float FDR = 0.05f;
 double subsampling_percent = 1 - std::exp(-1);
@@ -14,8 +20,9 @@ bool verbose = true;
 std::string cached_dir;
 uint32_t global_seed = 0;
 float EXPERIMENTAL_mi_cutoff = 0;
+
 /*
- Convenient function for timing parts of ARACNe3.  Will set last.
+ Convenient function for timing parts of ARACNe3.  It's only used to time from the pipeline function, so it's included in ARACNe3.cpp.
  */
 static auto last = std::chrono::high_resolution_clock::now(), cur = std::chrono::high_resolution_clock::now();
 static void sinceLast() {
@@ -24,6 +31,9 @@ static void sinceLast() {
 	last = cur;
 }
 
+/*
+ This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
+ */
 void ARACNe3(string normalized_exp_mat_tsv_filename = "exp_mat.txt", string newline_separated_regulator_list_file = "regulators.txt", string output_dir = "output", double subsampling_percent = (1 - std::exp(-1)), bool prune_FDR = true, float FDR = 0.05f, bool prune_MaxEnt = true, bool verbose = true) {
 	if (verbose) {
 		// we don't print "... TIME:" here because we have prints in the function below
@@ -157,6 +167,8 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
 
 
 /*
+ Main function is the command line executable; this primes the global variables and parses the command line.  It will also return usage notes if the user incorrectly calls ./ARACNe3.
+ 
  Example:
  ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --subsample 0.6321 --noverbose --seed 1
  */
@@ -171,6 +183,7 @@ int main(int argc, char *argv[]) {
 	string matrix = (string) getCmdOption(argv, argv+argc, "-e");
 	string regulators = (string) getCmdOption(argv, argv+argc, "-r");
 	string output_dir = (string) getCmdOption(argv, argv+argc, "-o");
+	
 	// make sure output_dir has a trailing slash
 	if (output_dir.back() != '/')
 	    output_dir += '/';
