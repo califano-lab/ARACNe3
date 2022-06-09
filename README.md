@@ -35,12 +35,12 @@ See below for file format specification (or download the test files from our rep
 *Note: All regulators must have a defined expression profile in the expression matrix*.
 
 ### Steps required to run ARACNe3
-1.	Normalize a gene expression profile for sequencing depth in each sample
-2. 	Run `ARACNe3` according to command line instructions below
+1.	Normalize a gene expression profile for sequencing depth in each sample.
+2. Run `ARACNe3` according to command line instructions below.
 
 ### Optional ways to run ARACNe3
 1.	Customizing the population percentage from which to subsample for network generation, or to remove subsampling (`--subsample 1`).
-1.	Removing the MaxEnt pruning step will preserve every edge that passes the FDR Pruning Step
+1.	Removing the MaxEnt pruning step will preserve every edge that passes the FDR Pruning Step.
 2.	Customizing the FDR restriction for the first pruning step.  The first pruning step rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
 ### Output of ARACNe3
@@ -107,7 +107,7 @@ Note: the examples have been written based on the provided test sets: ``test/exp
  - Return by reference when applicable!
  - Optimize p-value calculation for each MI value
  - Low-level optimization and parallel for loop processing. Namely, minimizing heap allocation and using caches, as well as using the most efficient data structures required to store edge information (hashmaps, linked lists, adjacency matrices, etc.)
- - Can using prime products of each regulator target set immediately identify which targets are shared?  Explore making O(N^3) MaxEnt pruning step into an O(N^2) step
+ - Can using prime products of each regulator target set immediately identify which targets are shared?  Explore making O(N^3) MaxEnt pruning step into an O(N^2) step.  Dividing prime1 / prime2 can infer shared edges without search?
  
  Plan of action: Overhaul of Low-level algorithms -> Rewriting codebase with highest efficiency class design and matured codebase -> Implement multithreading 
 
