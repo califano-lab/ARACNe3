@@ -101,7 +101,7 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 ``` 
 
 ## Currently Under Development:
- - Replace `test/exp_mat.txt` with a normalized expression profile, as opposed to a copula-transformed one
+ - Replace example data with a normalized expression profile, as opposed to a copula-transformed one
  - Multithreading/non-multithreading option using standard library
  - Remove any references on data types `<=4B`, as references instantiate pointer values which are at least 4B (and typically are 8B on 64-bit systems)
  - Return by reference when applicable!
@@ -115,7 +115,6 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 
 Whenever a significant change is made to an existing module of this program, test results are noted in the git commit notes.  Standardized comparisons with the Java `ARACNe-AP` are also found in the `test/` directory.  The results reflect runtime performance of the most recent version of `ARACNe3` or a given executable.  Tests were run on a computer with the specifications listed below. 
 
-## System Information
 | System Feature | Value |
 | :----: | :----: |
 | Model Identifier: | MacBookPro18,1 |
