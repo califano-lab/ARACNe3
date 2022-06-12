@@ -15,7 +15,7 @@ static vector<float> *vec_x, *vec_y;
 static vector<float> mis;
 static uint16_t tot_num_pts, size_thresh;
 
-extern float EXPERIMENTAL_mi_cutoff;
+extern float DEVELOPER_mi_cutoff;
 extern uint32_t size_of_network;
 
 /*
@@ -159,7 +159,7 @@ vector<edge_tar> genemapAPMI(genemap &matrix, reg_id_t reg,
 			APMI_split(init);
 			const float mi = std::accumulate(mis.begin(), mis.end(),
 					static_cast<float>(0.0));
-			if (mi >= EXPERIMENTAL_mi_cutoff) {
+			if (mi >= DEVELOPER_mi_cutoff) {
 				edges.emplace_back(it->first, mi);
 			}
 			mis.clear();
