@@ -3,7 +3,7 @@
 /*
  This file contains the null-model module of ARACNe3.  We store the 1,000,000 null MI values in a file static variable vector (which is really a file static pointer to the vector on the heap).  Storing this as a global variable makes it efficient to get p-values because we don't need to pass a pointer each time we calculate p, but we can refer to the file static variable.  We could get around using file static variables by making this entire file into more of a class system, but what we have here is fine.
  */
-static const uint32_t num_null_marginals = 1000000; // number of marginals (1 mil.)
+uint32_t num_null_marginals = 1000000; // number of marginals (1 mil.)
 static std::vector<float> null_mis; // pointer to null MI vec
 
 /*
@@ -16,8 +16,7 @@ extern uint32_t global_seed;
 /*
  Will cache the null_mis vector in the cached directory.  The vector will be a BLOB named 'Null_tot_num_samps_###'.
  */
-void cacheNullModel(uint16_t tot_num_samps, const std::vector<float> &mi_vec) {
-	std::string filename = cached_dir + "Null_tot_num_samps_" + std::to_string(tot_num_samps);
+void cacheNullModel(const std::vector<float>& mi_vec, const std::string& filename) {
 	std::ofstream cached(filename, std::ios::out | std::ios::binary);
 
 	//tab-delinate the data
@@ -29,8 +28,8 @@ void cacheNullModel(uint16_t tot_num_samps, const std::vector<float> &mi_vec) {
 /*
  Computes 1 million null mutual information values for the sample size.  Checks whether there already exists a null_mi vector (filename) in the cached directory.
  */
-const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
-	std::string filename = cached_dir + "Null_tot_num_samps_" + std::to_string(tot_num_samps);
+const std::vector<float> initNullMIs(const uint16_t& tot_num_samps) {
+	std::string filename = cached_dir + "numnulls_" + std::to_string(num_null_marginals) + "numsamps_" + std::to_string(tot_num_samps);
 	/*
 	 If there already is a null model for this number of samples cached in the cached_dir, then we just pull values from that.
 	 */
@@ -69,7 +68,7 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 		std::sort(mi_vec.begin(), mi_vec.end(), std::less<float>());
 		
 		// cache the null model in memory for future calculations
-		cacheNullModel(tot_num_samps, mi_vec);
+		cacheNullModel(mi_vec, filename);
 		
 		
 		// finally, set file static variable and/or return mi_vec to caller
@@ -83,7 +82,7 @@ const std::vector<float> initNullMIs(uint16_t tot_num_samps) {
 /*
  This function uses the sorted null distribution vector to calculate the p-value of a MI value.
  */
-const float getMIPVal(const float &mi) {
+const float getMIPVal(const float& mi) {
 	// returns an iterator to the highest index mi is less than
 	auto it = std::upper_bound(null_mis.begin(), null_mis.end(), mi);
 	
@@ -94,7 +93,7 @@ const float getMIPVal(const float &mi) {
 /*
  This is a wrapper for getMIPVal which vectorizes the getMIPVal calculation.  This will mainly be used for Rcpp.
  */
-const std::vector<float> getMIPVals(const std::vector<float> &mis) {
+const std::vector<float> getMIPVals(const std::vector<float>& mis) {
 	std::vector<float> ps;
 	ps.reserve(mis.size());
 	for (auto &mi : mis)

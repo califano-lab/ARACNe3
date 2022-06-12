@@ -19,7 +19,9 @@ bool prune_MaxEnt = true;
 bool verbose = true;
 std::string cached_dir;
 uint32_t global_seed = 0;
-float EXPERIMENTAL_mi_cutoff = 0;
+float DEVELOPER_mi_cutoff = 0;
+
+extern uint32_t num_null_marginals;
 
 /*
  Convenient function for timing parts of ARACNe3.  It's only used to time from the pipeline function, so it's included in ARACNe3.cpp.
@@ -128,7 +130,7 @@ void ARACNe3(string normalized_exp_mat_tsv_filename = "exp_mat.txt", string newl
 	
 	if (verbose) {
 		//-------time module-------
-		cout << "\nPRINTING NETWORK!" << endl;
+		std::cout << "\nPRINTING NETWORK IN DIRECTORY \"" + output_dir + "\"....." << std::endl;
 		last = chrono::high_resolution_clock::now();
 		//-------------------------
 	}
@@ -139,8 +141,25 @@ void ARACNe3(string normalized_exp_mat_tsv_filename = "exp_mat.txt", string newl
 		//-------time module-------
 		sinceLast();
 		//-------------------------
-		std::string success_A3 = "Success!";
-		cout << success_A3 << endl;
+		using namespace std::string_literals;
+		const char* success_A3 =
+R"(
+
+              |
+              |
+              |                              Aaron T. Griffin
+              |                              Lukas J. Vlahos
+              |                              Andrew R. Howe
+           /  |   \
+          ;_/,L-,\_;
+         \._/3  E\_./
+         \_./(::)\._/                        Andrea Califano
+              ''
+
+
+Success!
+)";
+		std::cout << success_A3 << std::endl;
 	}
 }
 
@@ -170,7 +189,7 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
  Main function is the command line executable; this primes the global variables and parses the command line.  It will also return usage notes if the user incorrectly calls ./ARACNe3.
  
  Example:
- ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --subsample 0.6321 --noverbose --seed 1
+ ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --subsample 0.6321 --noverbose --seed 1 --mithresh 0.2 --numnulls 1000000
  */
 int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
@@ -201,9 +220,8 @@ int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "--subsample"))
 		subsampling_percent = stod(getCmdOption(argv, argv+argc, "--subsample"));
 	
-	if (subsampling_percent >= 1.00 || subsampling_percent <= 0)
-		{
-			std::cout << "Subsampling percent not on range [0,1]; setting to 1.00." << std::endl;
+	if (subsampling_percent > 1.0000001 || subsampling_percent <= 0) {
+			std::cout << "Subsampling percent not on range (0,1]; setting to 1.00." << std::endl;
 			subsampling_percent = 1.00;
 	}
 
@@ -213,12 +231,19 @@ int main(int argc, char *argv[]) {
 	    prune_MaxEnt = false;
 	if (cmdOptionExists(argv, argv+argc, "--noverbose"))
 	    verbose = false;
-	//----------------------EXPERIMENTAL--------------------------
+	//----------------------DEVELOPER--------------------------
 	
 	if (cmdOptionExists(argv, argv+argc, "--mithresh"))
-		EXPERIMENTAL_mi_cutoff = stof(getCmdOption(argv, argv+argc, "--mithresh"));
-	if (EXPERIMENTAL_mi_cutoff < 0)
-		EXPERIMENTAL_mi_cutoff = 0.0f;
+		DEVELOPER_mi_cutoff = stof(getCmdOption(argv, argv+argc, "--mithresh"));
+	if (DEVELOPER_mi_cutoff < 0)
+		DEVELOPER_mi_cutoff = 0.0f;
+	
+	if (cmdOptionExists(argv, argv+argc, "--numnulls"))
+		num_null_marginals = stoi(getCmdOption(argv, argv+argc, "--numnulls"));
+	if (num_null_marginals < 0) {
+		std::cout << "Number of null marginals not on range (0,inf); setting to 1000000." << std::endl;
+		num_null_marginals = 1000000;
+	}
 	
 	//------------------------------------------------------------
 	
