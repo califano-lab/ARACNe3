@@ -8,6 +8,7 @@
 #include <fstream>
 #include <algorithm>
 #include <random>
+#include <thread>
 #include <numeric>
 #include <math.h>
 #include <filesystem>
@@ -118,16 +119,14 @@ const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
 
 
 //--------------------- NullModel.cpp	 		-----------------------
-bool checkInitNullMIs(uint16_t tot_num_samps);
-
 // sets a file static variable of an ordered null distribution
-const std::vector<float> initNullMIs(uint16_t);
+const std::vector<float> initNullMIs(const uint16_t& tot_num_samps);
 
 // the function below requires that initNullMIs has been called
-const float getMIPVal(const float &);
+const float getMIPVal(const float& mi);
 
 // the function below requires that initNullMIs has been called
-const std::vector<float> getMIPVals(const std::vector<float> &);
+const std::vector<float> getMIPVals(const std::vector<float>& mis);
 
 
 //--------------------- FDRPruning.cpp	 		-----------------------
