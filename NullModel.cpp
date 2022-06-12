@@ -29,7 +29,7 @@ void cacheNullModel(const std::vector<float>& mi_vec, const std::string& filenam
  Computes 1 million null mutual information values for the sample size.  Checks whether there already exists a null_mi vector (filename) in the cached directory.
  */
 const std::vector<float> initNullMIs(const uint16_t& tot_num_samps) {
-	std::string filename = cached_dir + "numnulls_" + std::to_string(num_null_marginals) + "numsamps_" + std::to_string(tot_num_samps);
+	std::string filename = cached_dir + "numnulls-" + std::to_string(num_null_marginals) + "_numsamps-" + std::to_string(tot_num_samps);
 	/*
 	 If there already is a null model for this number of samples cached in the cached_dir, then we just pull values from that.
 	 */
