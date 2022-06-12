@@ -145,16 +145,16 @@ void ARACNe3(string normalized_exp_mat_tsv_filename = "exp_mat.txt", string newl
 		const char* success_A3 =
 R"(
 
-              |
-              |
-              |                              Aaron T. Griffin
-              |                              Lukas J. Vlahos
-              |                              Andrew R. Howe
-           /  |   \
-          ;_/,L-,\_;
-         \._/3  E\_./
-         \_./(::)\._/                        Andrea Califano
-              ''
+                |
+                |
+                ;                            Aaron T. Griffin
+                ;                            Lukas J. Vlahos
+                |                            Andrew R. Howe
+           ,  / | \   ,
+         , ;_/ ,L-, `_;  ,
+         \._/.ARACNe3.\_./
+	   \_./(::)\._/                      Andrea Califano
+                ''
 
 
 Success!
