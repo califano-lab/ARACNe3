@@ -3,7 +3,7 @@
  */
 
 // [[Rcpp::depends(BH)]]
-// [[Rcpp::plugins("cpp20")]]
+// [[Rcpp::plugins("cpp17")]]
 
 using namespace Rcpp;
 
