@@ -40,8 +40,8 @@ reg_web pruneMaxEnt(reg_web &network) {
 								rem2.insert(target);
 							else {
 								// is ARACNe-AP removing the r1-r2 edge?
-								rem1.insert(reg2);
-								rem2.insert(reg1);
+								//rem1.insert(reg2);
+								//rem2.insert(reg1);
 							}
 						}
 					}
