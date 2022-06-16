@@ -275,9 +275,9 @@ R"(
 
                 |
                 |
-                ;                            Aaron T. Griffin
-                ;                            Lukas J. Vlahos
-                |                            Andrew R. Howe
+                ;                            
+                ;                            
+                |                            
            ,  / | \   ,
          , ;_/ ,L-, `_;  ,
          \._/.ARACNe3.\_./
