@@ -16,35 +16,24 @@ extern uint16_t tot_num_regulators;
 extern bool verbose;
 extern uint32_t global_seed;
 
+extern uint16_t num_subnets;
+extern double subsampling_percent;
+
 /*
- Will automatically checked if there already is an output directory.  Then creates the output directory.
+ Will automatically checked if there already is a directory.  Then creates the output directory.
  */
-void makeOutputDir(const std::string &output_dir) {
-	if (!std::filesystem::exists(output_dir)) {
-		if (std::filesystem::create_directory(output_dir)) {
-			if (verbose) std::cout << "Directory Created: " + output_dir << std::endl;
+void makeDir(const std::string &dir_name) {
+	if (!std::filesystem::exists(dir_name)) {
+		if (std::filesystem::create_directory(dir_name)) {
+			if (verbose) std::cout << "Directory Created: " + dir_name << std::endl;
 		} else {
-			std::cerr << "failed to create directory: " + output_dir << std::endl;
+			std::cerr << "failed to create directory: " + dir_name << std::endl;
 			std::exit(2);
 		}
 	}
 	return;
 }
 
-/*
- Will automatically checked if there already is a cached directory.  Then creates the cached directory.
- */
-void makeCachedDir(const std::string &cached_dir) {
-	if (!std::filesystem::exists(cached_dir)) {
-		if (std::filesystem::create_directory(cached_dir)) {
-			if (verbose) std::cout << "Directory Created: " + cached_dir << std::endl;
-		} else {
-			std::cerr << "failed to create directory: " + cached_dir << std::endl;
-			std::exit(2);
-		}
-	}
-	return;
-}
 
 /*
  Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
@@ -82,9 +71,9 @@ void readRegList(string filename) {
  * outputs an unordered hash table corresponding to the {gene, expression} 
  * values
  */
-genemap readExpMatrix(string filename, double subsampling_percent) {
+std::vector<genemap> readExpMatrix(std::string filename) {
 	fstream f {filename};
-	genemap gm;
+	std::vector<genemap> gm_folds(num_subnets);
 	if (!f.is_open()) {
         	cerr << "error: file open failed " << filename << ".\n";
 		std::exit(2);
@@ -107,12 +96,16 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 	if (subsample_quant >= tot_num_samps || subsample_quant < 0)
 		subsample_quant = tot_num_samps;
 	std::vector<uint16_t> samps_idx(tot_num_samps);
-	std::vector<uint16_t> fold(subsample_quant);
 	
 	std::iota(samps_idx.begin(), samps_idx.end(), 0U); /* 0, 1, ..., size-1 */
 	// now, fold is a vector with subsample_quant indices sampled from [0,tot_num_samps).
 	/* verify that seeding is done properly.  Replaced std::random_device{}() w/ global_seed*/
-	std::sample(samps_idx.begin(), samps_idx.end(), fold.begin(), subsample_quant, std::mt19937{global_seed});
+	
+	// This is a vector of folds for every subnet requested
+	std::vector<std::vector<uint16_t>> folds(num_subnets, std::vector<uint16_t>(subsample_quant));
+	for (uint16_t i = 0; i < num_subnets; ++i) {
+		std::sample(samps_idx.begin(), samps_idx.end(), folds[i].begin(), subsample_quant, std::mt19937{global_seed});
+	}
 	
 	// now, we can more efficiently load
 	string gene;
@@ -133,38 +126,44 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 		}
 		expr_vec.emplace_back(stof(line.substr(prev, string::npos)));
 		
-		// subsample
-		vector <float> expr_vec_sampled;
-		expr_vec_sampled.reserve(subsample_quant);
-		for (uint16_t i = 0U; i < subsample_quant; ++i)
-			expr_vec_sampled.emplace_back(expr_vec[fold[i]]);
-		
-		/*
-		 A ranking is formed in the following way.  Indices index = [0,subsample_quant) are sorted based on the ranking of expr_vec_sampled[index], so that we get some new sorted set of indexes (5, 2, 9, ... ) that is the rank of each element in expr_vec_sampled
-		 
-		 For a lambda function, brackets indicate the scope of the function.
-		 */
-		std::vector<uint16_t> rank_vec(subsample_quant);
-		std::iota(rank_vec.begin(), rank_vec.end(), 0U); /* 0, 1, ..., size-1 */
-		std::sort(rank_vec.begin(), rank_vec.end(), [&expr_vec_sampled](const uint16_t &num1, const uint16_t &num2) -> bool { return expr_vec_sampled[num1] < expr_vec_sampled[num2];}); /* sort ascending */
-		
-		/*
-		 This function copula transforms the expr_vec values.  It's a brain teaser to think about, but rank_vec spits out the index of the rank r'th element.  So rank_vec[0] is the index of expr_vec for the least value, and we set that accordingly, in the manner below.
-		 */
-		for (uint16_t r = 0; r < subsample_quant; ++r)
-			expr_vec_sampled[rank_vec[r]] = (r + 1)/((float)subsample_quant + 1);
+		// subsample.  create expr_vec subsamples for each "fold" (subnetwork) requested.
+		std::vector<std::vector<float>> expr_vec_folds;
+		for (uint16_t subnet_idx = 0; subnet_idx < num_subnets; ++subnet_idx) {
+			vector <float> expr_vec_sampled;
+			expr_vec_sampled.reserve(subsample_quant);
+			for (uint16_t i = 0U; i < subsample_quant; ++i)
+				expr_vec_sampled.emplace_back(expr_vec[folds[subnet_idx][i]]);
+			
+			/*
+			 A ranking is formed in the following way.  Indices index = [0,subsample_quant) are sorted based on the ranking of expr_vec_sampled[index], so that we get some new sorted set of indexes (5, 2, 9, ... ) that is the rank of each element in expr_vec_sampled
+			 
+			 For a lambda function, brackets indicate the scope of the function.
+			 */
+			std::vector<uint16_t> rank_vec(subsample_quant);
+			std::iota(rank_vec.begin(), rank_vec.end(), 0U); /* 0, 1, ..., size-1 */
+			std::sort(rank_vec.begin(), rank_vec.end(), [&expr_vec_sampled](const uint16_t &num1, const uint16_t &num2) -> bool { return expr_vec_sampled[num1] < expr_vec_sampled[num2];}); /* sort ascending */
+			
+			/*
+			 This function copula transforms the expr_vec values.  It's a brain teaser to think about, but rank_vec spits out the index of the rank r'th element.  So rank_vec[0] is the index of expr_vec for the least value, and we set that accordingly, in the manner below.
+			 */
+			for (uint16_t r = 0; r < subsample_quant; ++r)
+				expr_vec_sampled[rank_vec[r]] = (r + 1)/((float)subsample_quant + 1);
+			expr_vec_folds.push_back(expr_vec_sampled);
+		}
 		
 		/*
 		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if there exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.
 		 */
 		if (compression_map[gene] == 0) {
 			// the last index of decompression_vec is the new uint16_t
-			gm[decompression_map.size()] = expr_vec_sampled;
+			for (uint16_t i = 0; i < num_subnets; ++i)
+				gm_folds[i][decompression_map.size()] = expr_vec_folds[i];
 			// we must have a target
 			decompression_map.push_back(gene);
 		} else {
 			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
-			gm[compression_map[gene]-1] = expr_vec_sampled;
+			for (uint16_t i = 0; i < num_subnets; ++i)
+				gm_folds[i][compression_map[gene]-1] = expr_vec_folds[i];
 		}
 
 	}
@@ -176,7 +175,7 @@ genemap readExpMatrix(string filename, double subsampling_percent) {
 	
 	// update tot_num_samps because of **NOTE** above
 	tot_num_samps = subsample_quant;
-	return gm;
+	return gm_folds;
 }
 
 /*
