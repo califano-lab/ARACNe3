@@ -33,16 +33,16 @@ const std::string hiddenfpre = "";
 /*
  Switching to this type alias to reduce confusion in other parts of the program
  */
-typedef uint16_t reg_id_t;
+typedef uint16_t gene_id_t;
 
 /*
  * The "ball on stick" data structure for edges in network.  Will be used with
  * dictionary so that a regulator can have a group of these associated.
  */
 typedef struct edge_tar{
-	reg_id_t target;
+	gene_id_t target;
 	float mi;
-	edge_tar(const reg_id_t &t, const float &mi) : target(t), mi(mi) {};
+	edge_tar(const gene_id_t &t, const float &mi) : target(t), mi(mi) {};
 	
 	/*
 	 Note, the edge_tar structs are compared based on 'target identifier' and NOT MI
@@ -69,8 +69,8 @@ typedef struct edge_tar{
  * implementation) as well as a vector of "ball-on-stick" structs, or all the
  * targets and their MIs.
  */
-typedef std::unordered_map<reg_id_t, std::vector<edge_tar>> reg_web;
-typedef std::unordered_map<reg_id_t, std::unordered_map<reg_id_t, float>> map_map;
+typedef std::unordered_map<gene_id_t, std::vector<edge_tar>> reg_web;
+typedef std::unordered_map<gene_id_t, std::unordered_map<gene_id_t, float>> map_map;
 
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
@@ -80,7 +80,7 @@ void makeCachedDir(const std::string &cached_dir);
 /*
  * Maps gene identifiers to gene expression matrices
  */
-typedef std::unordered_map<uint16_t, std::vector<float>> genemap;
+typedef std::unordered_map<gene_id_t, std::vector<float>> genemap;
 
 /*
  Does not return a list of regulators as a string vector, as we are using compression
@@ -111,7 +111,7 @@ typedef struct {const float &x_bound1, &y_bound1, &width;
 float APMI(std::vector<float>, std::vector<float>, const float q_thresh = 7.815, 
 		const uint16_t size_thresh = 4);
 
-std::vector<edge_tar> genemapAPMI(genemap &matrix, reg_id_t identifier, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
+std::vector<edge_tar> genemapAPMI(genemap &matrix, gene_id_t identifier, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
 
 const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
 		std::vector<std::vector<float>> &target_vec, const float q_thresh = 7.815,
@@ -141,7 +141,7 @@ reg_web sort_edge_tars(reg_web &regweb);
 /*
  Used for MaxEnt pruning to copy ARACNe-AP; we should probably either overhaul our own data structure or find a way to use our own, as any conversion is essentially a memory and runtime cost.
  */
-std::unordered_map<reg_id_t, std::unordered_map<reg_id_t, float>> regweb_to_mapmap(reg_web &network);
+std::unordered_map<gene_id_t, std::unordered_map<gene_id_t, float>> regweb_to_mapmap(reg_web &network);
 
 //--------------------- ARACNe3.cpp	 		-----------------------
 

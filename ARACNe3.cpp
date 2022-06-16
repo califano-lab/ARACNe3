@@ -74,7 +74,7 @@ void ARACNe3(string normalized_exp_mat_tsv_filename = "exp_mat.txt", string newl
 	
 	reg_web network;
 	network.reserve(tot_num_regulators);
-	for (reg_id_t reg = 0; reg < tot_num_regulators; ++reg) {
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
 		network[reg] = genemapAPMI(matrix, reg, 7.815, 4);
 		
 	}

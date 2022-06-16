@@ -12,7 +12,7 @@ extern uint16_t tot_num_regulators;
  */
 reg_web pruneMaxEnt(reg_web &network) {
 	// primed will store the edges that are weakest.  we use a set to eliminate redundancy if the same edge is identified twice; same as hash set?
-	std::unordered_map<reg_id_t, std::set<reg_id_t>> removedEdges;
+	std::unordered_map<gene_id_t, std::set<gene_id_t>> removedEdges;
 	
 	/*
 	 Inefficient conversion operation here.  Makes searching whether a target is contained an O(1) operation due to the hash map of hash maps, as opposed to a hash map of edge_tar vectors, which would make checking for a particular edge_tar.target an O(n) operation.
@@ -21,12 +21,12 @@ reg_web pruneMaxEnt(reg_web &network) {
 	map_map finalNet = regweb_to_mapmap(network);
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
-	for (reg_id_t reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
+	for (gene_id_t reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.contains(reg1)) {
 			auto &fin1 = finalNet[reg1];
 			auto &tft1 = tftfNetwork[reg1];
 			auto &rem1 = removedEdges[reg1];
-			for (reg_id_t reg2 = reg1 + 1; reg2 < tot_num_regulators; ++reg2) {
+			for (gene_id_t reg2 = reg1 + 1; reg2 < tot_num_regulators; ++reg2) {
 				if (tft1.contains(reg2)) {
 					auto &fin2 = finalNet[reg2];
 					auto &rem2 = removedEdges[reg2];

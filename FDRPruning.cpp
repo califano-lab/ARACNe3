@@ -12,10 +12,10 @@ extern map_map tftfNetwork;
  */
 reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR) {
 
-	std::vector<std::pair<reg_id_t, edge_tar>> reg_edge_tar;
+	std::vector<std::pair<gene_id_t, edge_tar>> reg_edge_tar;
 	reg_edge_tar.reserve(network_size);
 	
-	for (reg_id_t reg = 0; reg < tot_num_regulators; ++reg) {
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
 		for (auto &et : network[reg]) {
 			reg_edge_tar.emplace_back(reg, et);
 		}
@@ -24,7 +24,7 @@ reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR) {
 	/*
 	 Sort using the Comparator as a Lambda function.  std::sort sends < to sort in ascending order, so we use > for descending order.
 	 */
-	std::sort(reg_edge_tar.begin(), reg_edge_tar.end(), [](const std::pair<reg_id_t, edge_tar> &ret1, const std::pair<reg_id_t, edge_tar> &ret2) -> bool {return ret1.second.mi > ret2.second.mi;});
+	std::sort(reg_edge_tar.begin(), reg_edge_tar.end(), [](const std::pair<gene_id_t, edge_tar> &ret1, const std::pair<gene_id_t, edge_tar> &ret2) -> bool {return ret1.second.mi > ret2.second.mi;});
 	
 	/*
 	 Apply the Benjamini-Hochberg principle; find argmax_k, the index to which we will prune.  We will include everything up to reg_tar_mi[argmax_k].
@@ -39,7 +39,7 @@ reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR) {
 	}
 	
 	// create the new vector that is a pruned version of original
-	std::vector<std::pair<reg_id_t, edge_tar>> pruned_vec(&reg_edge_tar[0], &reg_edge_tar[argmax_k+1]);
+	std::vector<std::pair<gene_id_t, edge_tar>> pruned_vec(&reg_edge_tar[0], &reg_edge_tar[argmax_k+1]);
 	
 	// submit new network size to global variable defined in ARACNe3.cpp
 	size_of_network = static_cast<uint32_t>(pruned_vec.size());
