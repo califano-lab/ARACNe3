@@ -1,0 +1,14 @@
+.DS_Store
+arh_APMI
+APMI
+arh_MatrixReglistIO
+MatrixReglistIO
+output.txt
+output
+output/*
+arh_APMI.o
+APMI.o
+arh_MatrixReglistIO.o
+MatrixReglistIO.o
+NullModel
+*.DS_Store
