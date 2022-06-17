@@ -104,7 +104,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 	// This is a vector of folds for every subnet requested
 	std::vector<std::vector<uint16_t>> folds(num_subnets, std::vector<uint16_t>(subsample_quant));
 	for (uint16_t i = 0; i < num_subnets; ++i) {
-		std::sample(samps_idx.begin(), samps_idx.end(), folds[i].begin(), subsample_quant, std::mt19937{global_seed});
+		std::sample(samps_idx.begin(), samps_idx.end(), folds[i].begin(), subsample_quant, std::mt19937{global_seed++});
 	}
 	
 	// now, we can more efficiently load
@@ -126,7 +126,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 		}
 		expr_vec.emplace_back(stof(line.substr(prev, string::npos)));
 		
-		// subsample.  create expr_vec subsamples for each "fold" (subnetwork) requested.
+		// subsample. create expr_vec subsamples for each "fold" (subnetwork) requested.
 		std::vector<std::vector<float>> expr_vec_folds;
 		for (uint16_t subnet_idx = 0; subnet_idx < num_subnets; ++subnet_idx) {
 			vector <float> expr_vec_sampled;
