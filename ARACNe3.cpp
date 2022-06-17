@@ -47,7 +47,6 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	
 	genemap matrix = *matrix_ptr;
 	
-	
 	/*
 	 Log file header
 	 */
@@ -66,14 +65,12 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	/*
 	 Begin Network computation
 	 */
-	uint32_t size_of_network = 0;
-	if (verbose) {
-		//-------time module-------
-		log_output << "\nRAW NETWORK COMPUTATION TIME:" << std::endl;
-		last = std::chrono::high_resolution_clock::now();
-		//-------------------------
-	}
+	//-------time module-------
+	log_output << "\nRAW NETWORK COMPUTATION TIME:" << std::endl;
+	last = std::chrono::high_resolution_clock::now();
+	//-------------------------
 	
+	uint32_t size_of_network = 0;
 	reg_web network;
 	network.reserve(tot_num_regulators);
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
@@ -81,20 +78,17 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 		size_of_network += network[reg].size();
 	}
 	
-	if (verbose) {
-		//-------time module-------
-		sinceLast(log_output);
-		log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
-		//-------------------------
-	}
+	//-------time module-------
+	sinceLast(log_output);
+	log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
+	//-------------------------
 	
 	if (!prune_alpha) alpha = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
-	if (verbose) {
-		//-------time module-------
-		log_output << "\nALPHA PRUNING TIME (" + method + "): " << std::endl;
-		last = std::chrono::high_resolution_clock::now();
-		//-------------------------
-	}
+	
+	//-------time module-------
+	log_output << "\nALPHA PRUNING TIME (" + method + "): " << std::endl;
+	last = std::chrono::high_resolution_clock::now();
+	//-------------------------
 	
 	/*
 	 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
@@ -103,47 +97,37 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	network = pair.first;
 	map_map& tftfNetwork = pair.second;
 	
-	if (verbose) {
+	//-------time module-------
+	sinceLast(log_output);
+	log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
+	//-------------------------
+	
+	if (prune_MaxEnt) {
+		//-------time module-------
+		log_output << "\nMaxEnt PRUNING TIME:" << std::endl;
+		last = std::chrono::high_resolution_clock::now();
+		//-------------------------
+
+		
+		network = pruneMaxEnt(network, tftfNetwork, size_of_network);
+		
 		//-------time module-------
 		sinceLast(log_output);
 		log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
 		//-------------------------
 	}
 	
-	if (prune_MaxEnt) {
-		if (verbose) {
-			//-------time module-------
-			log_output << "\nMaxEnt PRUNING TIME:" << std::endl;
-			last = std::chrono::high_resolution_clock::now();
-			//-------------------------
-		}
-
-		
-		network = pruneMaxEnt(network, tftfNetwork, size_of_network);
-		
-		if (verbose) {
-			//-------time module-------
-			sinceLast(log_output);
-			log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
-			//-------------------------
-		}
-	}
-	
-	if (verbose) {
-		//-------time module-------
-		log_output << "\nPRINTING NETWORK IN DIRECTORY \"" + output_dir + "\"....." << std::endl;
-		last = chrono::high_resolution_clock::now();
-		//-------------------------
-	}
+	//-------time module-------
+	log_output << "\nPRINTING NETWORK IN DIRECTORY \"" + output_dir + "\"....." << std::endl;
+	last = chrono::high_resolution_clock::now();
+	//-------------------------
 	
 	// writes the individual subnet output
 	writeNetworkRegTarMI(network, output_dir, "subnet" + std::to_string(subnet_idx));
 	
-	if (verbose) {
-		//-------time module-------
-		sinceLast(log_output);
-		//-------------------------
-	}
+	//-------time module-------
+	sinceLast(log_output);
+	//-------------------------
 }
 
 

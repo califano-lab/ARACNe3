@@ -75,6 +75,8 @@ g_10011_	0.055	0.73	4.64
 
 ``-o`` is the output directory
 
+``-x`` is the number of subnetworks to generate (default: `-x 1`)
+
 ``-a`` or ``--alpha`` is the alpha parameter for FDR or FWER pruning (default: `--alpha 0.05`)
 
 ``--FWER`` tells ARACNe3 to prune by control of FWER instead of the default FDR
