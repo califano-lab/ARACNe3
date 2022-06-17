@@ -28,7 +28,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 	std::sort(reg_edge_tar.begin(), reg_edge_tar.end(), [](const std::pair<gene_id_t, edge_tar> &ret1, const std::pair<gene_id_t, edge_tar> &ret2) -> bool {return ret1.second.mi > ret2.second.mi;});
 	
 	uint32_t argmax_k = 0;
-	uint32_t &m = size_of_network;
+	uint32_t m = size_of_network;
 	if (method == "FDR") {
 		/*
 		Apply the Benjamini-Hochberg principle; find argmax_k, the index to which we will prune.  We will include everything up to reg_tar_mi[argmax_k].
