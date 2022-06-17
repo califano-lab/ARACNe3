@@ -1,8 +1,9 @@
 #include "ARACNe3.hpp"
 
-extern uint32_t size_of_network;
 extern uint16_t tot_num_regulators;
 extern bool prune_MaxEnt;
+extern float alpha;
+extern std::string method; 
 
 // for MaxEnt pruning, copied from ARACNe-AP!
 extern map_map tftfNetwork;
@@ -10,10 +11,10 @@ extern map_map tftfNetwork;
 /*
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if method = FDR, or FWER if method = FWER..
  */
-reg_web pruneAlpha(reg_web &network, uint32_t network_size, float alpha, std::string method) {
+std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_network) {
 
 	std::vector<std::pair<gene_id_t, edge_tar>> reg_edge_tar;
-	reg_edge_tar.reserve(network_size);
+	reg_edge_tar.reserve(size_of_network);
 	
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
 		for (auto &et : network[reg]) {
@@ -27,7 +28,7 @@ reg_web pruneAlpha(reg_web &network, uint32_t network_size, float alpha, std::st
 	std::sort(reg_edge_tar.begin(), reg_edge_tar.end(), [](const std::pair<gene_id_t, edge_tar> &ret1, const std::pair<gene_id_t, edge_tar> &ret2) -> bool {return ret1.second.mi > ret2.second.mi;});
 	
 	uint32_t argmax_k = 0;
-	uint32_t &m = network_size;
+	uint32_t &m = size_of_network;
 	if (method == "FDR") {
 		/*
 		Apply the Benjamini-Hochberg principle; find argmax_k, the index to which we will prune.  We will include everything up to reg_tar_mi[argmax_k].
@@ -60,6 +61,7 @@ reg_web pruneAlpha(reg_web &network, uint32_t network_size, float alpha, std::st
 	 Rebuild the network.  We also fill out a data structure for the regulator-regulator interactions, so we can quickly identify regulators that regulate each other.  Rebuilding the network is inefficient due to the push_back.
 	 */
 	reg_web pruned_net;
+	map_map tftfNetwork;
 	pruned_net.reserve(tot_num_regulators);
 	for (auto &pair : pruned_vec) {
 		pruned_net[pair.first].push_back(pair.second);
@@ -70,5 +72,5 @@ reg_web pruneAlpha(reg_web &network, uint32_t network_size, float alpha, std::st
 		}
 	}
 	
-	return pruned_net;
+	return std::make_pair(pruned_net, tftfNetwork);
 }

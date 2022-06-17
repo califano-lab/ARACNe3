@@ -110,7 +110,7 @@ typedef struct {const float &x_bound1, &y_bound1, &width;
 float APMI(std::vector<float>, std::vector<float>, const float q_thresh = 7.815, 
 		const uint16_t size_thresh = 4);
 
-std::vector<edge_tar> genemapAPMI(genemap &matrix, gene_id_t identifier, const float q_thresh = 7.815, const uint16_t size_thresh = 4);
+std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& identifier, const float& q_thresh = 7.815, const uint16_t& size_thresh = 4);
 
 const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
 		std::vector<std::vector<float>> &target_vec, const float q_thresh = 7.815,
@@ -129,10 +129,10 @@ const std::vector<float> getMIPVals(const std::vector<float>& mis, const float& 
 
 
 //--------------------- AlphaPruning.cpp	 		-----------------------
-reg_web pruneAlpha(reg_web &network, uint32_t network_size, float alpha = 0.05, std::string method = "FDR");
+std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_network);
 
 //--------------------- MaxEntPruning.cpp	 		-----------------------
-reg_web pruneMaxEnt(reg_web &network);
+reg_web pruneMaxEnt(reg_web &network, map_map& tftfNetwork, uint32_t &size_of_network);
 
 //--------------------- RegWebFns.cpp	 		-----------------------
 reg_web sort_edge_tars(reg_web &regweb);

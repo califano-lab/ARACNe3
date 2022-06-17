@@ -1,16 +1,13 @@
 #include "ARACNe3.hpp"
 
 // for MaxEnt pruning, regulator -> regulator -> mi
-map_map tftfNetwork;
-
-extern uint32_t size_of_network;
 extern uint16_t tot_num_regulators;
 
 
 /*
  Prune the network according to the MaxEnt weakest-edge reduction.
  */
-reg_web pruneMaxEnt(reg_web &network) {
+reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_network) {
 	// primed will store the edges that are weakest.  we use a set to eliminate redundancy if the same edge is identified twice; same as hash set?
 	std::unordered_map<gene_id_t, std::set<gene_id_t>> removedEdges;
 	

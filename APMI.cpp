@@ -16,7 +16,6 @@ static vector<float> mis;
 static uint16_t tot_num_pts, size_thresh;
 
 extern float DEVELOPER_mi_cutoff;
-extern uint32_t size_of_network;
 
 /*
  * Calculate the MI for a square struct
@@ -139,9 +138,9 @@ float APMI(vector<float> &vec_x, vector<float> &vec_y,
  * Returns a vector of 'edge' structs
  * corresponding to each edge and their MI.
  */
-vector<edge_tar> genemapAPMI(genemap &matrix, gene_id_t reg,
-		    const float q_thresh,
-		    const uint16_t size_thresh) {
+vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
+		    const float& q_thresh,
+		    const uint16_t& size_thresh) {
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
@@ -165,7 +164,6 @@ vector<edge_tar> genemapAPMI(genemap &matrix, gene_id_t reg,
 			mis.clear();
 		}
 	}
-	size_of_network += edges.size();
 	return edges;
 }
 	

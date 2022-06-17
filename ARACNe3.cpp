@@ -5,7 +5,6 @@ using namespace std;
 /*
  These variables are inferred while reading text files.
  */
-uint32_t size_of_network = 0;
 uint16_t tot_num_samps_pre_subsample = 0;
 uint16_t tot_num_samps = 0;
 uint16_t tot_num_regulators = 0;
@@ -64,6 +63,7 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	/*
 	 Begin Network computation
 	 */
+	uint32_t size_of_network = 0;
 	if (verbose) {
 		//-------time module-------
 		log_output << "\nRAW NETWORK COMPUTATION TIME:" << std::endl;
@@ -75,6 +75,7 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	network.reserve(tot_num_regulators);
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
 		network[reg] = genemapAPMI(matrix, reg, 7.815, 4);
+		size_of_network += network[reg].size();
 	}
 	
 	if (verbose) {
@@ -95,7 +96,9 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	/*
 	 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
 	 */
-	network = pruneAlpha(network, size_of_network, alpha);
+	std::pair<reg_web, map_map> pair = pruneAlpha(network, size_of_network);
+	network = pair.first;
+	map_map& tftfNetwork = pair.second;
 	
 	if (verbose) {
 		//-------time module-------
@@ -113,7 +116,7 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 		}
 
 		
-		network = pruneMaxEnt(network);
+		network = pruneMaxEnt(network, tftfNetwork, size_of_network);
 		
 		if (verbose) {
 			//-------time module-------
@@ -215,6 +218,8 @@ int main(int argc, char *argv[]) {
 	    	prune_MaxEnt = false;
 	if (cmdOptionExists(argv, argv+argc, "--noverbose"))
 	    	verbose = false;
+	if (cmdOptionExists(argv, argv+argc, "--FDR"))
+		method = "FDR";
 	if (cmdOptionExists(argv, argv+argc, "--FWER"))
 		method = "FWER";
 
@@ -233,9 +238,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	//------------------------------------------------------------
-	
-	//------------------------------------------------------------
-	
 
 	cached_dir = "./"+ hiddenfpre + "ARACNe3_cached/";
 	
