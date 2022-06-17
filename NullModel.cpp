@@ -109,13 +109,20 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_samps) {
 		/* Fit an ordinary least squares regression log(p) vs. MI values for MI values with with eCDF p < 0.01
 		 */
 		uint32_t p_99th_percentile_idx = std::ceil(num_null_marginals/100.0);
-		std::vector<float> indices(p_99th_percentile_idx), log_ps(p_99th_percentile_idx);
+
+		// we will be doing a linear regression of the log(mi_ps)
+		std::vector<float> indices(p_99th_percentile_idx), mi_ps(p_99th_percentile_idx);
 		
-		std::iota(indices.begin(), indices.end(), 0.0f);
-		std::transform(mi_vec.begin(), mi_vec.begin()+p_99th_percentile_idx, log_ps.begin(), [](const auto &mi) -> float { return std::log(mi); });
+		for (uint32_t i = 0; i < p_99th_percentile_idx; ++i) {
+			indices[i] = (float) i;
+			mi_ps[i] = ((i+1)/(float)num_null_marginals);
+		}
+		
+		// mi_ps turned into log(mi_ps)
+		std::transform(mi_ps.begin(), mi_ps.begin()+p_99th_percentile_idx, mi_ps.begin(), [](const auto &p) -> float { return std::log(p); });
 		
 		
-		std::pair<float, float> sol = linreg(p_99th_percentile_idx, indices, log_ps);
+		std::pair<float, float> sol = linreg(p_99th_percentile_idx, indices, mi_ps);
 		m = sol.first;
 		b = sol.second;
 		
