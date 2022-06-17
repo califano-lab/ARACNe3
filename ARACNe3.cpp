@@ -51,12 +51,15 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	/*
 	 Log file header
 	 */
+	std::time_t t = std::time(nullptr);
+	log_output << "\n-----------" << std::put_time(std::localtime(&t), "%c %Z") << "-----------\n" << std::endl;
 	log_output << "Subnetwork #: " + std::to_string(subnet_idx) << std::endl;
 	log_output << "Total # regulators: " + std::to_string(tot_num_regulators) << std::endl;
 	log_output << "Total # targets: " + std::to_string(matrix.size()) << std::endl;
 	log_output << "Total # samples: " + std::to_string(tot_num_samps_pre_subsample) << std::endl;
 	log_output << "Subsampled quantity: " + std::to_string(tot_num_samps) << std::endl;
 	log_output << "Total possible edges: " + std::to_string(tot_num_regulators*matrix.size()-tot_num_regulators) << std::endl;
+	log_output << "Method of first pruning step: " + method << std::endl;
 	log_output << "Alpha: " + std::to_string(alpha) << std::endl;
 	log_output << "\n-----------Begin Network Generation-----------\n" << std::endl;
 	
