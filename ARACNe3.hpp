@@ -122,10 +122,10 @@ const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
 const std::vector<float> initNullMIs(const uint16_t& tot_num_samps);
 
 // the function below requires that initNullMIs has been called
-const float getMIPVal(const float& mi);
+const float getMIPVal(const float& mi, const float& p_precise = 0.001f);
 
 // the function below requires that initNullMIs has been called
-const std::vector<float> getMIPVals(const std::vector<float>& mis);
+const std::vector<float> getMIPVals(const std::vector<float>& mis, const float& p_precise = 0.001f);
 
 
 //--------------------- FDRPruning.cpp	 		-----------------------
