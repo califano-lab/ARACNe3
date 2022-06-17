@@ -47,8 +47,10 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	
 	genemap matrix = *matrix_ptr;
 	
-	//output a log file for each of the subsampled networks with the total regulator number, total target number, total sample number, number of possible edges, number of statistically significant edges, FDR alpha (or FWER alpha), and number of edges after MaxEnt pruning
 	
+	/*
+	 Log file header
+	 */
 	log_output << "Subnetwork #: " + std::to_string(subnet_idx) << std::endl;
 	log_output << "Total # regulators: " + std::to_string(tot_num_regulators) << std::endl;
 	log_output << "Total # targets: " + std::to_string(matrix.size()) << std::endl;
@@ -58,7 +60,9 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	log_output << "Alpha: " + std::to_string(FDR) << std::endl;
 	log_output << "\n-----------Begin Network Generation-----------\n" << std::endl;
 	
-	
+	/*
+	 Begin Network computation
+	 */
 	if (verbose) {
 		//-------time module-------
 		log_output << "\nRAW NETWORK COMPUTATION TIME:" << std::endl;
