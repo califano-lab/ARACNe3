@@ -45,7 +45,7 @@ See below for file format specification (or download the test files from our rep
 4. 	Control for the Family Wise Error Rate (FWER) instead of the FDR during the first pruning step (`--FWER`).  If chosen, `--alpha` will be chosen as the FWER control parameter. 
 
 ### Output of ARACNe3
-`ARACNe3` will output a file for each subnetwork (`-x`) requested with the name "`output_subnet#.txt`Q in a directory path provided by the user. Each file shows every significant interaction in three columns:
+`ARACNe3` will output a file for each subnetwork (`-x`) requested with the name "`output_subnet#.txt`" in a directory path provided by the user. Each file shows every significant interaction in three columns:
 1.	The regulator.
 2.	The target.
 3.	The MI (Mutual Information) of the pair.
