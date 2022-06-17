@@ -6,6 +6,7 @@ using namespace std;
  These variables are inferred while reading text files.
  */
 uint32_t size_of_network = 0;
+uint16_t tot_num_samps_pre_subsample = 0;
 uint16_t tot_num_samps = 0;
 uint16_t tot_num_regulators = 0;
 
@@ -46,6 +47,17 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	
 	genemap matrix = *matrix_ptr;
 	
+	//output a log file for each of the subsampled networks with the total regulator number, total target number, total sample number, number of possible edges, number of statistically significant edges, FDR alpha (or FWER alpha), and number of edges after MaxEnt pruning
+	
+	log_output << "Subnetwork #: " + std::to_string(subnet_idx) << std::endl;
+	log_output << "Total # regulators: " + std::to_string(tot_num_regulators) << std::endl;
+	log_output << "Total # targets: " + std::to_string(matrix.size()) << std::endl;
+	log_output << "Total # samples: " + std::to_string(tot_num_samps_pre_subsample) << std::endl;
+	log_output << "Subsampled quantity: " + std::to_string(tot_num_samps) << std::endl;
+	log_output << "Total possible edges: " + std::to_string(tot_num_regulators*matrix.size()-tot_num_regulators) << std::endl;
+	log_output << "Alpha: " + std::to_string(FDR) << std::endl;
+	log_output << "\n-----------Begin Network Generation-----------\n" << std::endl;
+	
 	
 	if (verbose) {
 		//-------time module-------
@@ -58,7 +70,6 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	network.reserve(tot_num_regulators);
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
 		network[reg] = genemapAPMI(matrix, reg, 7.815, 4);
-		
 	}
 	
 	if (verbose) {

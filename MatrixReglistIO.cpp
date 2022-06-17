@@ -11,11 +11,11 @@ static vector<string> decompression_map;
 /*
  Global variables are passed from ARACNe3.cpp, which are the user-defined parameters.
  */
+extern uint16_t tot_num_samps_pre_subsample;
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_regulators;
 extern bool verbose;
 extern uint32_t global_seed;
-
 extern uint16_t num_subnets;
 extern double subsampling_percent;
 
@@ -174,6 +174,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 	}
 	
 	// update tot_num_samps because of **NOTE** above
+	tot_num_samps_pre_subsample = tot_num_samps;
 	tot_num_samps = subsample_quant;
 	return gm_folds;
 }
