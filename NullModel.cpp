@@ -111,18 +111,16 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_samps) {
 		uint32_t p_99th_percentile_idx = std::ceil(num_null_marginals/100.0);
 
 		// we will be doing a linear regression of the log(mi_ps)
-		std::vector<float> indices(p_99th_percentile_idx), mi_ps(p_99th_percentile_idx);
+		std::vector<float> mis(mi_vec.begin(), mi_vec.begin() + p_99th_percentile_idx), mi_ps(p_99th_percentile_idx);
 		
-		for (uint32_t i = 0; i < p_99th_percentile_idx; ++i) {
-			indices[i] = (float) i;
+		for (uint32_t i = 0; i < p_99th_percentile_idx; ++i)
 			mi_ps[i] = ((i+1)/(float)num_null_marginals);
-		}
 		
 		// mi_ps turned into log(mi_ps)
 		std::transform(mi_ps.begin(), mi_ps.begin()+p_99th_percentile_idx, mi_ps.begin(), [](const auto &p) -> float { return std::log(p); });
 		
 		
-		std::pair<float, float> sol = linreg(p_99th_percentile_idx, indices, mi_ps);
+		std::pair<float, float> sol = linreg(p_99th_percentile_idx, mis, mi_ps);
 		m = sol.first;
 		b = sol.second;
 		
@@ -151,7 +149,7 @@ const float getMIPVal(const float& mi, const float& p_precise) {
 	const float p = (it-null_mis.begin()+1)/(float)num_null_marginals;
 	
 	if (p < p_precise)
-		return std::exp(m*std::logf(p)+b); // invert log
+		return std::exp(m*mi+b); // invert log
 	else
 		return p;
 }
