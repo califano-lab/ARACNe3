@@ -128,8 +128,8 @@ const float getMIPVal(const float& mi, const float& p_precise = 0.001f);
 const std::vector<float> getMIPVals(const std::vector<float>& mis, const float& p_precise = 0.001f);
 
 
-//--------------------- FDRPruning.cpp	 		-----------------------
-reg_web pruneFDR(reg_web &network, uint32_t network_size, float FDR = 0.05);
+//--------------------- AlphaPruning.cpp	 		-----------------------
+reg_web pruneAlpha(reg_web &network, uint32_t network_size, float alpha = 0.05, std::string method = "FDR");
 
 //--------------------- MaxEntPruning.cpp	 		-----------------------
 reg_web pruneMaxEnt(reg_web &network);

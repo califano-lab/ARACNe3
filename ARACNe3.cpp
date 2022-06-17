@@ -14,8 +14,8 @@ uint16_t tot_num_regulators = 0;
 /*
  These variables are tuned according to user preferences.  Some of these the user doesn't choose, such as the cached_dir, which is always the working directory of the ARACNe3 script.
  */
-bool prune_FDR = true;
-float FDR = 0.05f;
+bool prune_alpha = true;
+float alpha = 0.05f;
 double subsampling_percent = 1 - std::exp(-1);
 bool prune_MaxEnt = true;
 bool verbose = true;
@@ -23,6 +23,7 @@ std::string cached_dir;
 std::string output_dir;
 std::string log_dir;
 uint32_t global_seed = 0;
+std::string method = "FDR";
 float DEVELOPER_mi_cutoff = 0;
 uint16_t num_subnets = 1;
 
@@ -57,7 +58,7 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	log_output << "Total # samples: " + std::to_string(tot_num_samps_pre_subsample) << std::endl;
 	log_output << "Subsampled quantity: " + std::to_string(tot_num_samps) << std::endl;
 	log_output << "Total possible edges: " + std::to_string(tot_num_regulators*matrix.size()-tot_num_regulators) << std::endl;
-	log_output << "Alpha: " + std::to_string(FDR) << std::endl;
+	log_output << "Alpha: " + std::to_string(alpha) << std::endl;
 	log_output << "\n-----------Begin Network Generation-----------\n" << std::endl;
 	
 	/*
@@ -83,45 +84,42 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 		//-------------------------
 	}
 	
-	if (1 /*pruneFDR, but we always pruneFDR*/) {
-		if (!prune_FDR) FDR = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
+	if (!prune_alpha) alpha = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
+	if (verbose) {
+		//-------time module-------
+		log_output << "\nALPHA PRUNING TIME (" + method + "): " << std::endl;
+		last = std::chrono::high_resolution_clock::now();
+		//-------------------------
+	}
+	
+	/*
+	 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
+	 */
+	network = pruneAlpha(network, size_of_network, alpha);
+	
+	if (verbose) {
+		//-------time module-------
+		sinceLast(log_output);
+		log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
+		//-------------------------
+	}
+	
+	if (prune_MaxEnt) {
 		if (verbose) {
 			//-------time module-------
-			log_output << "\nFDR PRUNING TIME:" << std::endl;
+			log_output << "\nMaxEnt PRUNING TIME:" << std::endl;
 			last = std::chrono::high_resolution_clock::now();
 			//-------------------------
 		}
+
 		
-		/*
-		 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
-		 */
-		network = pruneFDR(network, size_of_network, FDR);
+		network = pruneMaxEnt(network);
 		
 		if (verbose) {
 			//-------time module-------
 			sinceLast(log_output);
 			log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
 			//-------------------------
-		}
-		
-		if (prune_MaxEnt) {
-			// you _must_ prune FDR to do MaxEnt, but you can always FDR = 1.00
-			if (verbose) {
-				//-------time module-------
-				log_output << "\nMaxEnt PRUNING TIME:" << std::endl;
-				last = std::chrono::high_resolution_clock::now();
-				//-------------------------
-			}
-
-			
-			network = pruneMaxEnt(network);
-			
-			if (verbose) {
-				//-------time module-------
-				sinceLast(log_output);
-				log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
-				//-------------------------
-			}
 		}
 	}
 	
@@ -168,11 +166,11 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
  Main function is the command line executable; this primes the global variables and parses the command line.  It will also return usage notes if the user incorrectly calls ./ARACNe3.
  
  Example:
- ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noFDR --FDR 0.05 --noMaxEnt --subsample 0.6321 --noverbose --seed 1 --mithresh 0.2 --numnulls 1000000
+ ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noAlpha -a 0.05 --alpha 0.05 --noMaxEnt --subsample 0.6321 --noverbose --seed 1 --mithresh 0.2 --numnulls 1000000
  */
 int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
-		cout << "usage: " + ((string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --FDR 0.05" << endl;
+		cout << "usage: " + ((string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05" << endl;
 		return 1;
 	}
 	
@@ -187,11 +185,11 @@ int main(int argc, char *argv[]) {
 	if (output_dir.back() != '/')
 	    output_dir += '/';
 	
-	if (cmdOptionExists(argv, argv+argc, "--FDR"))
-		FDR = stof(getCmdOption(argv, argv+argc, "--FDR"));
-	if (FDR >= 1.00f || FDR <= 0) {
-		std::cout << "FDR not on range [0,1], setting to 1.00" << std::endl;
-		FDR = 1.01f;
+	if (cmdOptionExists(argv, argv+argc, "--alpha"))
+		alpha = stof(getCmdOption(argv, argv+argc, "--alpha"));
+	if (alpha >= 1.00f || alpha <= 0) {
+		std::cout << "alpha not on range [0,1], setting to 1.00" << std::endl;
+		alpha = 1.01f;
 	}
 	
 	if (cmdOptionExists(argv, argv+argc, "--seed"))
@@ -211,12 +209,14 @@ int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "--numNetworks"))
 		num_subnets = stoi(getCmdOption(argv, argv+argc, "--numNetworks"));
 
-	if (cmdOptionExists(argv, argv+argc, "--noFDR"))
-	    prune_FDR = false;
+	if (cmdOptionExists(argv, argv+argc, "--noAlpha"))
+	    	prune_alpha = false;
 	if (cmdOptionExists(argv, argv+argc, "--noMaxEnt"))
-	    prune_MaxEnt = false;
+	    	prune_MaxEnt = false;
 	if (cmdOptionExists(argv, argv+argc, "--noverbose"))
-	    verbose = false;
+	    	verbose = false;
+	if (cmdOptionExists(argv, argv+argc, "--FWER"))
+		method = "FWER";
 
 	//----------------------DEVELOPER--------------------------
 	

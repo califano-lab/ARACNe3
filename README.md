@@ -16,12 +16,12 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 The C++20 standard is used when compiling `ARACNe3` into an executable.  Build the executable by cloning the repository and typing `make` in the command line, while in the repository base directory.  You could also manually build the executable by compiling all C++ files and linking `ARACNe3` with object file dependencies in the manner below.  Make sure to utilize all available runtime optimization compiler options.  
 ### Compiling:
 ```
-g++ -std=c++20 -O3 -c NullModel.cpp; g++ -std=c++20 -O3 -c MatrixReglistIO.cpp; g++ -std=c++20 -O3 -c APMI.cpp; g++ -std=c++20 -O3 -c FDRPruning.cpp; g++ -std=c++20 -O3 -c MaxEntPruning.cpp; g++ -std=c++20 -O3 -c RegWebFns.cpp 
+g++ -std=c++20 -O3 -c NullModel.cpp; g++ -std=c++20 -O3 -c MatrixReglistIO.cpp; g++ -std=c++20 -O3 -c APMI.cpp; g++ -std=c++20 -O3 -c AlphaPruning.cpp; g++ -std=c++20 -O3 -c MaxEntPruning.cpp; g++ -std=c++20 -O3 -c RegWebFns.cpp 
 
 ```
 ### Linking:
 ```
-g++ -std=c++20 -O3 ARACNe3.cpp NullModel.o MatrixReglistIO.o APMI.o FDRPruning.o MaxEntPruning.o RegWebFns.o -o ARACNe3
+g++ -std=c++20 -O3 ARACNe3.cpp NullModel.o MatrixReglistIO.o APMI.o AlphaPruning.o MaxEntPruning.o RegWebFns.o -o ARACNe3
 ``` 
 ### Troubleshooting Build Issues
 If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the GNU `-O3` compiler optimization option, or repace it with `-O2`. 
@@ -40,8 +40,8 @@ See below for file format specification (or download the test files from our rep
 
 ### Optional ways to run ARACNe3
 1.	Customizing the population percentage from which to subsample for network generation, or to remove subsampling (`--subsample 1`).
-1.	Removing the MaxEnt pruning step will preserve every edge that passes the FDR Pruning Step.
-2.	Customizing the FDR restriction for the first pruning step.  The first pruning step rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
+1.	Removing the MaxEnt pruning step will preserve every edge that passes the FDR/FWER Pruning Step.
+2.	Customizing the FDR/FWER restriction for the first pruning step.  For an FDR restriction, the first pruning step rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.  For a FWER restriction, this pruning step rejects the null hypothesis based on control of the Family Wise Error Rate.
 
 ### Output of ARACNe3
 `ARACNe3` will output a file `output_(FINAL NETWORK SIZE).txt` in a directory path provided by the user (e.g. `test/output/output_127304.txt`). This file shows every significant interaction in three columns:
@@ -75,11 +75,13 @@ g_10011_	0.055	0.73	4.64
 
 ``-o`` is the output directory
 
+``-a`` or ``--alpha`` is the alpha parameter for FDR or FWER pruning (default: `--alpha 0.05`)
+
+``--FWER`` tells ARACNe3 to prune by control of FWER instead of the default FDR
+
 ``--subsample`` is the population percentage to subsample ($1-e^{-1}$ is default: `--subsample 0.63212...`)
 
-``--FDR`` is the FDR parameter to set (default: `--FDR 0.05`)
-
-``--noFDR`` tells ARACNe3 not to prune based on the FDR (same as: `--FDR 1`)
+``--noAlpha`` tells ARACNe3 not to prune based on the FDR or FWER (same as: `--alpha 1`)
 
 ``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
 
@@ -92,12 +94,12 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 
 ### Example 1: run ARACNe3 with no pruning steps, no subsampling, and seed equal to 343
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 1.00 --noFDR --noMaxEnt --seed 343
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 1.00 --noAlpha --noMaxEnt --seed 343
 ```
 
 ### Example 2: run ARACNe3 with all pruning steps, subsampling 33.3% of profiles, controlling for FDR < 0.01
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 0.333 --FDR 0.01
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 0.333 --alpha 0.01
 ``` 
 
 ## Currently Under Development:
