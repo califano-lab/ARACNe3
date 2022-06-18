@@ -33,9 +33,8 @@ extern uint32_t num_null_marginals;
 /*
  Convenient function for timing parts of ARACNe3.  It's only used to time from the pipeline function, so it's included in ARACNe3.cpp.
  */
-static auto last = std::chrono::high_resolution_clock::now(), cur = std::chrono::high_resolution_clock::now();
-static void sinceLast(std::ostream &ostream) {
-	cur = std::chrono::high_resolution_clock::now();
+static void sinceLast(decltype(std::chrono::high_resolution_clock::now()) &last, std::ostream &ostream) {
+	auto cur = std::chrono::high_resolution_clock::now();
 	ostream << std::chrono::duration_cast<std::chrono::milliseconds>(cur-last).count() << "ms" << std::endl;
 	last = cur;
 }
@@ -44,6 +43,8 @@ static void sinceLast(std::ostream &ostream) {
  This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
  */
 reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
+	auto last = std::chrono::high_resolution_clock::now(), cur = std::chrono::high_resolution_clock::now();
+	
 	// set the individual subnet log file
 	std::ofstream log_output(log_dir + "log_subnet" + std::to_string(subnet_idx) + ".txt");
 	
@@ -79,7 +80,7 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
 	}
 	
 	//-------time module-------
-	sinceLast(log_output);
+	sinceLast(last, log_output);
 	log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
 	//-------------------------
 	
@@ -98,7 +99,7 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
 	map_map& tftfNetwork = pair.second;
 	
 	//-------time module-------
-	sinceLast(log_output);
+	sinceLast(last, log_output);
 	log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
 	//-------------------------
 	
@@ -112,7 +113,7 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
 		network = pruneMaxEnt(network, tftfNetwork, size_of_network);
 		
 		//-------time module-------
-		sinceLast(log_output);
+		sinceLast(last, log_output);
 		log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
 		//-------------------------
 	}
@@ -126,7 +127,7 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
 	writeNetworkRegTarMI(network, subnets_dir, "subnet" + std::to_string(subnet_idx));
 	
 	//-------time module-------
-	sinceLast(log_output);
+	sinceLast(last, log_output);
 	//-------------------------
 	
 	return network;
@@ -164,6 +165,8 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
  ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noAlpha -a 0.05 --alpha 0.05 --noMaxEnt --subsample 0.6321 --noverbose --seed 1 --mithresh 0.2 --numnulls 1000000
  */
 int main(int argc, char *argv[]) {
+	auto last = std::chrono::high_resolution_clock::now(), cur = std::chrono::high_resolution_clock::now();
+	
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
 		cout << "usage: " + ((string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05" << endl;
 		return 1;
@@ -258,7 +261,7 @@ int main(int argc, char *argv[]) {
 	if (verbose) {
 		//-------time module-------
 		std::cout << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
-		sinceLast(std::cout);
+		sinceLast(last, std::cout);
 		//-------------------------
 		
 		//-------time module-------
@@ -271,11 +274,11 @@ int main(int argc, char *argv[]) {
 	
 	if(verbose) {
 		//-------time module-------
-		sinceLast(std::cout);
+		sinceLast(last, std::cout);
 		//-------------------------
 		
 		//-------time module-------
-		std::cout << "\nCREATING NETWORK(s)..." << std::endl;
+		std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
 		//-------------------------
 	}
 	
@@ -284,8 +287,26 @@ int main(int argc, char *argv[]) {
 	for (uint16_t i = 0; i < num_subnets; ++i)
 		subnets[i] = ARACNe3_subnet(matrices[i], i);
 	
+	if(verbose) {
+		//-------time module-------
+		sinceLast(last, std::cout);
+		//-------------------------
+		
+		//-------time module-------
+		std::cout << "\nCONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
+		//-------------------------
+	}
 	std::vector<consolidated_df> final_df = consolidate(subnets);
 	
+	if(verbose) {
+		//-------time module-------
+		sinceLast(last, std::cout);
+		//-------------------------
+		
+		//-------time module-------
+		std::cout << "\nWRITING FINAL NETWORK..." << std::endl;
+		//-------------------------
+	}
 	writeConsolidatedNetwork(final_df, output_dir);
 	
 	if (verbose) {
@@ -305,7 +326,7 @@ R"(
                 ''
 
 
-Success!
+SUCCESS!
 )";
 		std::cout << success_A3 << std::endl;
 	}

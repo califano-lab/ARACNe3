@@ -64,13 +64,13 @@ typedef struct edge_tar{
 } edge_tar;
 
 typedef struct consolidated_df {
-	gene_id_t regulator;
-	gene_id_t target;
-	float final_mi;
-	float final_scc;
-	uint16_t num_subnets_incident;
-	float final_p;
-	consolidated_df(const gene_id_t& r, const gene_id_t& t, const float& mi, const float& scc, const uint16_t& n, const float& p) : regulator(r), target(t), num_subnets_incident(n), final_mi(mi), final_scc(scc), final_p(p) {};
+	const gene_id_t regulator;
+	const gene_id_t target;
+	const float final_mi;
+	const float final_scc;
+	const uint16_t num_subnets_incident;
+	const double final_p;
+	consolidated_df(const gene_id_t& r, const gene_id_t& t, const float& mi, const float& scc, const uint16_t& n, const double& p) : regulator(r), target(t), num_subnets_incident(n), final_mi(mi), final_scc(scc), final_p(p) {};
 } consolidated_df;
 
 /*
