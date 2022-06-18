@@ -22,8 +22,24 @@ float consolidate_scc(const std::vector<float>& vec_x, const std::vector<float>&
 			(float) (vec_x.size() * sigmasq - sigma*sigma);
 }
 
-float consolidate_p(const uint16_t& num_occurrences) {
-	return 0.0f;
+
+/*
+ We can do factorial on at most an 8-bit integer.
+ */
+uint32_t factorial(const uint8_t& n) {
+	return n == 1U ? n : n * factorial(n - 1);
+}
+
+uint32_t n_choose_r(uint8_t n, uint8_t r) {
+	return factorial(n) / (factorial(n - r) * factorial(r));
+}
+
+double right_tail_binomial_p(const uint16_t& num_occurrences) {
+	float theta = 1.5E-4f;
+	double p = 0.0f;
+	for (uint16_t i = num_subnets; i >= num_occurrences; --i) 
+		p += n_choose_r(num_subnets, i) * std::pow(theta, i) * std::pow(1-theta,num_subnets-i);
+	return p;
 }
 
 std::vector<consolidated_df> consolidate(std::vector<reg_web> &subnets) {
@@ -47,7 +63,7 @@ std::vector<consolidated_df> consolidate(std::vector<reg_web> &subnets) {
 				if (num_occurrences > 0) {
 					const float final_mi = APMI(global_gm[reg], global_gm[tar]);
 					const float final_scc = consolidate_scc(global_gm[reg], global_gm[tar]);
-					const float final_p = consolidate_p(num_occurrences);
+					const double final_p = right_tail_binomial_p(num_occurrences);
 					
 					final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences, final_p);
 				}
