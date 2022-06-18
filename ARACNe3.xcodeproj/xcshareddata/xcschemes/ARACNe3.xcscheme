@@ -54,7 +54,7 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o test/output --subsample 0.63 --seed 23 --mithresh 0 --numnulls 500001 -x 5 --alpha 0.05 --FWER"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e test/debug/ap_exp_mat.txt -r test/debug/ap_regulators.txt -o test/output --subsample 0.50"
@@ -63,6 +63,10 @@
          <CommandLineArgument
             argument = "-e /Users/andrew/Desktop/a3/test/fun_mat.txt -r /Users/andrew/Desktop/a3/test/fun_reg.txt -o /Users/andrew/Desktop/a3/outputfun"
             isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-e /Users/andrew/Desktop/a3/test/exp_mat.txt -r /Users/andrew/Desktop/a3/test/regulators.txt -o /Users/andrew/Desktop/a3/output"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>
