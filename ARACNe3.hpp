@@ -63,6 +63,16 @@ typedef struct edge_tar{
 	}
 } edge_tar;
 
+typedef struct consolidated_df {
+	gene_id_t regulator;
+	gene_id_t target;
+	uint16_t num_subnets_incident;
+	float final_mi;
+	float final_scc;
+	float final_p;
+	consolidated_df(const gene_id_t& r, const gene_id_t& t, const uint16_t& n, const float& mi, const float& scc, const float& p) : regulator(r), target(t), num_subnets_incident(n), final_mi(mi), final_scc(scc), final_p(p) {};
+} consolidated_df;
+
 /*
  * The regulator and target list is represented by this data type, an unordered
  * hash map between regulator names (string or number in uncompressed/compressed
@@ -107,7 +117,7 @@ void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir 
 typedef struct {const float &x_bound1, &y_bound1, &width; 
 	uint16_t *pts, &num_pts;} square;
 
-float APMI(std::vector<float>, std::vector<float>, const float q_thresh = 7.815, 
+float APMI(const std::vector<float>& vec_x, const std::vector<float>& vec_y, const float q_thresh = 7.815, 
 		const uint16_t size_thresh = 4);
 
 std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& identifier, const float& q_thresh = 7.815, const uint16_t& size_thresh = 4);
@@ -128,19 +138,22 @@ const float getMIPVal(const float& mi, const float& p_precise = 0.001f);
 const std::vector<float> getMIPVals(const std::vector<float>& mis, const float& p_precise = 0.001f);
 
 
-//--------------------- AlphaPruning.cpp	 		-----------------------
+//--------------------- AlphaPruning.cpp	 	-----------------------
 std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_network);
 
-//--------------------- MaxEntPruning.cpp	 		-----------------------
+//--------------------- MaxEntPruning.cpp	 	-----------------------
 reg_web pruneMaxEnt(reg_web &network, map_map& tftfNetwork, uint32_t &size_of_network);
 
 //--------------------- RegWebFns.cpp	 		-----------------------
-reg_web sort_edge_tars(reg_web &regweb);
+reg_web sort_edge_tars(reg_web &regweb);	
 
 /*
  Used for MaxEnt pruning to copy ARACNe-AP; we should probably either overhaul our own data structure or find a way to use our own, as any conversion is essentially a memory and runtime cost.
  */
 std::unordered_map<gene_id_t, std::unordered_map<gene_id_t, float>> regweb_to_mapmap(reg_web &network);
+//--------------------- Consolidator.cpp	 	-----------------------
+std::vector<consolidated_df> consolidate(std::vector<reg_web> &subnets);
+
 
 //--------------------- ARACNe3.cpp	 		-----------------------
 

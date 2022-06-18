@@ -2,14 +2,6 @@
 
 using namespace std;
 
-/*
- These variables represent the original data and do not change after matrix files are read.
- */
-extern uint16_t tot_num_samps_pre_subsample;
-extern uint16_t tot_num_samps;
-extern uint16_t tot_num_regulators;
-extern genemap global_gm;
-
 
 /*
  These variables are tuned according to user preferences.  Some of these the user doesn't choose, such as the cached_dir, which is always the working directory of the ARACNe3 script.
@@ -26,6 +18,14 @@ uint32_t global_seed = 0;
 std::string method = "FDR";
 float DEVELOPER_mi_cutoff = 0;
 uint16_t num_subnets = 1;
+
+/*
+ These variables represent the original data and do not change after matrix files are read.
+ */
+extern uint16_t tot_num_samps_pre_subsample;
+extern uint16_t tot_num_samps;
+extern uint16_t tot_num_regulators;
+extern genemap global_gm;
 
 extern uint32_t num_null_marginals;
 

@@ -11,7 +11,7 @@ LDLIBS =
 .PHONY: release
 release: ARACNe3 clean
 
-ARACNe3: NullModel.o MatrixReglistIO.o APMI.o FDRPruning.o MaxEntPruning.o RegWebFns.o
+ARACNe3: NullModel.o MatrixReglistIO.o APMI.o FDRPruning.o MaxEntPruning.o RegWebFns.o Consolidator.o
 
 NullModel.o:
 
@@ -24,6 +24,8 @@ FDRPruning.o:
 MaxEntPruning.o:
 
 RegWebFns.o:
+
+Consolidator.o:
 
 .PHONY: all
 all: ARACNe3 

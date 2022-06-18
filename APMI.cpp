@@ -100,14 +100,14 @@ void APMI_split(const square &s) {
  * returns the APMI 
  */
 // [[Rcpp::export]]
-float APMI(vector<float> &vec_x, vector<float> &vec_y, 
+float APMI(const vector<float>& vec_x, const vector<float>& vec_y, 
 		const float q_thresh,
 		const uint16_t size_thresh) {
 	// Set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	::vec_x = &vec_x;
-	::vec_y = &vec_y;
+	::vec_x = const_cast<std::vector<float>*>(&vec_x);
+	::vec_y = const_cast<std::vector<float>*>(&vec_y);
 	::tot_num_pts = (*::vec_x).size();
 
 

@@ -16,12 +16,12 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 The C++20 standard is used when compiling `ARACNe3` into an executable.  Build the executable by cloning the repository and typing `make` in the command line, while in the repository base directory.  You could also manually build the executable by compiling all C++ files and linking `ARACNe3` with object file dependencies in the manner below.  Make sure to utilize all available runtime optimization compiler options.  
 ### Compiling:
 ```
-g++ -std=c++20 -O3 -c NullModel.cpp; g++ -std=c++20 -O3 -c MatrixReglistIO.cpp; g++ -std=c++20 -O3 -c APMI.cpp; g++ -std=c++20 -O3 -c AlphaPruning.cpp; g++ -std=c++20 -O3 -c MaxEntPruning.cpp; g++ -std=c++20 -O3 -c RegWebFns.cpp 
+g++ -std=c++20 -O3 -c NullModel.cpp; g++ -std=c++20 -O3 -c MatrixReglistIO.cpp; g++ -std=c++20 -O3 -c APMI.cpp; g++ -std=c++20 -O3 -c AlphaPruning.cpp; g++ -std=c++20 -O3 -c MaxEntPruning.cpp; g++ -std=c++20 -O3 -c RegWebFns.cpp; g++ -std=c++20 -O3 -c Consolidator.cpp
 
 ```
 ### Linking:
 ```
-g++ -std=c++20 -O3 ARACNe3.cpp NullModel.o MatrixReglistIO.o APMI.o AlphaPruning.o MaxEntPruning.o RegWebFns.o -o ARACNe3
+g++ -std=c++20 -O3 ARACNe3.cpp NullModel.o MatrixReglistIO.o APMI.o AlphaPruning.o MaxEntPruning.o RegWebFns.o Consolidator.o -o ARACNe3
 ``` 
 ### Troubleshooting Build Issues
 If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the GNU `-O3` compiler optimization option, or repace it with `-O2`. 
@@ -108,6 +108,8 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 ## Currently Under Development:
  - Separating subnetwork generation and consolidation
  - Using the binomial distribution to estimate the significance of an edge, based on how many times it appears in the subnetworks
+ - Change entire reg\_reb data structure to use map\_map
+ - Use bitwise AND to determine shared edges for MaxEnt pruning step
 
 ## Tracking Progress
 
