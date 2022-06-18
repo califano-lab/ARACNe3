@@ -41,11 +41,11 @@ static void sinceLast(std::ostream &ostream) {
 /*
  This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
  */
-void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
+reg_web ARACNe3_subnet(genemap *matrix_ptr, uint16_t subnet_idx) {
 	// set the individual subnet log file
 	std::ofstream log_output(log_dir + "log_subnet" + std::to_string(subnet_idx) + ".txt");
 	
-	genemap matrix = *matrix_ptr;
+	genemap& matrix = *matrix_ptr;
 	
 	/*
 	 Log file header
@@ -128,6 +128,8 @@ void ARACNe3(genemap *matrix_ptr, uint16_t subnet_idx) {
 	//-------time module-------
 	sinceLast(log_output);
 	//-------------------------
+	
+	return network;
 }
 
 
@@ -242,7 +244,10 @@ int main(int argc, char *argv[]) {
 	}
 	
 	readRegList(reg_file);
-	std::vector<genemap> matrices = readExpMatrix(exp_file);
+	/*
+	 matrices.first contains the genemap for the full sample size.  matrices.second contains a vector of genemaps for each 'fold', or subset of samples for each subnetwork.
+	 */
+	std::pair<genemap, std::vector<genemap>> matrices = readExpMatrix(exp_file);
 	
 	if (verbose) {
 		//-------time module-------
@@ -268,9 +273,8 @@ int main(int argc, char *argv[]) {
 		//-------------------------
 	}
 	
-	for (uint16_t i = 0; i < num_subnets; ++i) {
-		ARACNe3(&matrices[i], i);
-	}
+	for (uint16_t i = 0; i < num_subnets; ++i)
+		ARACNe3_subnet(&matrices.second[i], i);
 	
 	if (verbose) {
 		using namespace std::string_literals;
