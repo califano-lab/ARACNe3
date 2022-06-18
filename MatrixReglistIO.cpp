@@ -66,13 +66,11 @@ void readRegList(string filename) {
 	return;
 }
 
-/*
- * Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and 
- * outputs an unordered hash table corresponding to the {gene, expression} 
- * values
+/* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the genemap for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
  */
-std::vector<genemap> readExpMatrix(std::string filename) {
+std::pair<genemap, std::vector<genemap>> readExpMatrix(std::string filename) {
 	fstream f {filename};
+	genemap gm;
 	std::vector<genemap> gm_folds(num_subnets);
 	if (!f.is_open()) {
         	cerr << "error: file open failed " << filename << ".\n";
@@ -156,12 +154,14 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 		 */
 		if (compression_map[gene] == 0) {
 			// the last index of decompression_vec is the new uint16_t
+			gm[decompression_map.size()] = expr_vec;
 			for (uint16_t i = 0; i < num_subnets; ++i)
 				gm_folds[i][decompression_map.size()] = expr_vec_folds[i];
 			// we must have a target
 			decompression_map.push_back(gene);
 		} else {
 			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
+			gm[decompression_map.size()] = expr_vec;
 			for (uint16_t i = 0; i < num_subnets; ++i)
 				gm_folds[i][compression_map[gene]-1] = expr_vec_folds[i];
 		}
@@ -176,7 +176,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 	// update tot_num_samps because of **NOTE** above
 	tot_num_samps_pre_subsample = tot_num_samps;
 	tot_num_samps = subsample_quant;
-	return gm_folds;
+	return std::make_pair(gm, gm_folds);
 }
 
 /*
