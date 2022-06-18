@@ -26,8 +26,8 @@ float consolidate_scc(const std::vector<float>& vec_x, const std::vector<float>&
 /*
  We can do factorial on at most an 8-bit integer.
  */
-uint32_t factorial(const uint8_t& n) {
-	return n == 1U ? n : n * factorial(n - 1);
+uint32_t factorial(const uint8_t n) {
+	return n == 0 ? 1 : n * factorial(n - 1);
 }
 
 uint32_t n_choose_r(uint8_t n, uint8_t r) {
@@ -36,8 +36,8 @@ uint32_t n_choose_r(uint8_t n, uint8_t r) {
 
 double right_tail_binomial_p(const uint16_t& num_occurrences) {
 	float theta = 1.5E-4f;
-	double p = 0.0f;
-	for (uint16_t i = num_subnets; i >= num_occurrences; --i) 
+	double p = 0.0;
+	for (uint16_t i = num_subnets; i >= num_occurrences; --i)
 		p += n_choose_r(num_subnets, i) * std::pow(theta, i) * std::pow(1-theta,num_subnets-i);
 	return p;
 }

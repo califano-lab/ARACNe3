@@ -43,7 +43,7 @@ static void sinceLast(decltype(std::chrono::high_resolution_clock::now()) &last,
  This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
  */
 reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
-	auto last = std::chrono::high_resolution_clock::now(), cur = std::chrono::high_resolution_clock::now();
+	auto last = std::chrono::high_resolution_clock::now();
 	
 	// set the individual subnet log file
 	std::ofstream log_output(log_dir + "log_subnet" + std::to_string(subnet_idx) + ".txt");
@@ -165,7 +165,7 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
  ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noAlpha -a 0.05 --alpha 0.05 --noMaxEnt --subsample 0.6321 --noverbose --seed 1 --mithresh 0.2 --numnulls 1000000
  */
 int main(int argc, char *argv[]) {
-	auto last = std::chrono::high_resolution_clock::now(), cur = std::chrono::high_resolution_clock::now();
+	auto last = std::chrono::high_resolution_clock::now();
 	
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
 		cout << "usage: " + ((string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05" << endl;
