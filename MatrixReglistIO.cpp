@@ -11,9 +11,11 @@ static vector<string> decompression_map;
 /*
  Global variables are passed from ARACNe3.cpp, which are the user-defined parameters.
  */
-extern uint16_t tot_num_samps_pre_subsample;
-extern uint16_t tot_num_samps;
-extern uint16_t tot_num_regulators;
+uint16_t tot_num_samps_pre_subsample = 0;
+uint16_t tot_num_samps = 0;
+uint16_t tot_num_regulators = 0;
+genemap global_gm;
+
 extern bool verbose;
 extern uint32_t global_seed;
 extern uint16_t num_subnets;
@@ -68,7 +70,7 @@ void readRegList(string filename) {
 
 /* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the genemap for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
  */
-std::pair<genemap, std::vector<genemap>> readExpMatrix(std::string filename) {
+std::vector<genemap> readExpMatrix(std::string filename) {
 	fstream f {filename};
 	genemap gm;
 	std::vector<genemap> gm_folds(num_subnets);
@@ -176,7 +178,8 @@ std::pair<genemap, std::vector<genemap>> readExpMatrix(std::string filename) {
 	// update tot_num_samps because of **NOTE** above
 	tot_num_samps_pre_subsample = tot_num_samps;
 	tot_num_samps = subsample_quant;
-	return std::make_pair(gm, gm_folds);
+	global_gm = gm;
+	return gm_folds;
 }
 
 /*

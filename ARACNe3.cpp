@@ -3,11 +3,12 @@
 using namespace std;
 
 /*
- These variables are inferred while reading text files.
+ These variables represent the original data and do not change after matrix files are read.
  */
-uint16_t tot_num_samps_pre_subsample = 0;
-uint16_t tot_num_samps = 0;
-uint16_t tot_num_regulators = 0;
+extern uint16_t tot_num_samps_pre_subsample;
+extern uint16_t tot_num_samps;
+extern uint16_t tot_num_regulators;
+extern genemap global_gm;
 
 
 /*
@@ -41,11 +42,9 @@ static void sinceLast(std::ostream &ostream) {
 /*
  This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
  */
-reg_web ARACNe3_subnet(genemap *matrix_ptr, uint16_t subnet_idx) {
+reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
 	// set the individual subnet log file
 	std::ofstream log_output(log_dir + "log_subnet" + std::to_string(subnet_idx) + ".txt");
-	
-	genemap& matrix = *matrix_ptr;
 	
 	/*
 	 Log file header
@@ -54,10 +53,10 @@ reg_web ARACNe3_subnet(genemap *matrix_ptr, uint16_t subnet_idx) {
 	log_output << "\n-----------" << std::put_time(std::localtime(&t), "%c %Z") << "-----------\n" << std::endl;
 	log_output << "Subnetwork #: " + std::to_string(subnet_idx) << std::endl;
 	log_output << "Total # regulators: " + std::to_string(tot_num_regulators) << std::endl;
-	log_output << "Total # targets: " + std::to_string(matrix.size()) << std::endl;
+	log_output << "Total # targets: " + std::to_string(subnet_matrix.size()) << std::endl;
 	log_output << "Total # samples: " + std::to_string(tot_num_samps_pre_subsample) << std::endl;
 	log_output << "Subsampled quantity: " + std::to_string(tot_num_samps) << std::endl;
-	log_output << "Total possible edges: " + std::to_string(tot_num_regulators*matrix.size()-tot_num_regulators) << std::endl;
+	log_output << "Total possible edges: " + std::to_string(tot_num_regulators*subnet_matrix.size()-tot_num_regulators) << std::endl;
 	log_output << "Method of first pruning step: " + method << std::endl;
 	log_output << "Alpha: " + std::to_string(alpha) << std::endl;
 	log_output << "\n-----------Begin Network Generation-----------\n" << std::endl;
@@ -74,7 +73,7 @@ reg_web ARACNe3_subnet(genemap *matrix_ptr, uint16_t subnet_idx) {
 	reg_web network;
 	network.reserve(tot_num_regulators);
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
-		network[reg] = genemapAPMI(matrix, reg, 7.815, 4);
+		network[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
 		size_of_network += network[reg].size();
 	}
 	
@@ -132,6 +131,9 @@ reg_web ARACNe3_subnet(genemap *matrix_ptr, uint16_t subnet_idx) {
 	return network;
 }
 
+
+/* This is the consolidation step.  Takes the subnetworks generated, 
+ */
 
 
 //--------------------cmd line parser------------------------
@@ -247,7 +249,7 @@ int main(int argc, char *argv[]) {
 	/*
 	 matrices.first contains the genemap for the full sample size.  matrices.second contains a vector of genemaps for each 'fold', or subset of samples for each subnetwork.
 	 */
-	std::pair<genemap, std::vector<genemap>> matrices = readExpMatrix(exp_file);
+	std::vector<genemap> matrices = readExpMatrix(exp_file);
 	
 	if (verbose) {
 		//-------time module-------
@@ -273,8 +275,12 @@ int main(int argc, char *argv[]) {
 		//-------------------------
 	}
 	
+	std::vector<reg_web> subnets(num_subnets);
+	
 	for (uint16_t i = 0; i < num_subnets; ++i)
-		ARACNe3_subnet(&matrices.second[i], i);
+		subnets[i] = ARACNe3_subnet(matrices[i], i);
+	
+	
 	
 	if (verbose) {
 		using namespace std::string_literals;
