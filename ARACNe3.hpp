@@ -66,11 +66,11 @@ typedef struct edge_tar{
 typedef struct consolidated_df {
 	gene_id_t regulator;
 	gene_id_t target;
-	uint16_t num_subnets_incident;
 	float final_mi;
 	float final_scc;
+	uint16_t num_subnets_incident;
 	float final_p;
-	consolidated_df(const gene_id_t& r, const gene_id_t& t, const uint16_t& n, const float& mi, const float& scc, const float& p) : regulator(r), target(t), num_subnets_incident(n), final_mi(mi), final_scc(scc), final_p(p) {};
+	consolidated_df(const gene_id_t& r, const gene_id_t& t, const float& mi, const float& scc, const uint16_t& n, const float& p) : regulator(r), target(t), num_subnets_incident(n), final_mi(mi), final_scc(scc), final_p(p) {};
 } consolidated_df;
 
 /*
@@ -85,6 +85,7 @@ typedef std::unordered_map<gene_id_t, std::unordered_map<gene_id_t, float>> map_
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
 void makeDir(const std::string &dir_name);
+std::vector<uint16_t> rank_vals(const std::vector<float>& vec);
 
 /*
  * Maps gene identifiers to gene expression matrices
@@ -102,6 +103,8 @@ void readRegList(std::string filename = "regulators.txt");
 std::vector<genemap> readExpMatrix(std::string filename = "exp_mat.txt");
 
 void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir = "output", const std::string &output_suffix = "0");
+
+void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, const std::string& output_dir);
 
 
 //--------------------- APMI.cpp	 		-----------------------

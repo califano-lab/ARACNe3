@@ -14,6 +14,7 @@ bool verbose = true;
 std::string cached_dir;
 std::string output_dir;
 std::string log_dir;
+std::string subnets_dir;
 uint32_t global_seed = 0;
 std::string method = "FDR";
 float DEVELOPER_mi_cutoff = 0;
@@ -122,7 +123,7 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
 	//-------------------------
 	
 	// writes the individual subnet output
-	writeNetworkRegTarMI(network, output_dir, "subnet" + std::to_string(subnet_idx));
+	writeNetworkRegTarMI(network, subnets_dir, "subnet" + std::to_string(subnet_idx));
 	
 	//-------time module-------
 	sinceLast(log_output);
@@ -238,6 +239,9 @@ int main(int argc, char *argv[]) {
 	log_dir = output_dir + "log/";
 	makeDir(log_dir);
 	
+	subnets_dir = output_dir + "subnets/";
+	makeDir(subnets_dir);
+	
 	if (verbose) {
 	// we don't print "... TIME:" here because we have prints in the function below
 		//-------time module-------
@@ -280,7 +284,9 @@ int main(int argc, char *argv[]) {
 	for (uint16_t i = 0; i < num_subnets; ++i)
 		subnets[i] = ARACNe3_subnet(matrices[i], i);
 	
+	std::vector<consolidated_df> final_df = consolidate(subnets);
 	
+	writeConsolidatedNetwork(final_df, output_dir);
 	
 	if (verbose) {
 		using namespace std::string_literals;

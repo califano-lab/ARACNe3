@@ -36,6 +36,19 @@ void makeDir(const std::string &dir_name) {
 	return;
 }
 
+/*
+ A ranking is formed in the following way.  Indices index = [0,subsample_quant) are sorted based on the ranking of expr_vec_sampled[index], so that we get some new sorted set of indexes (5, 2, 9, ... ) that is the rank of each element in expr_vec_sampled
+ 
+ For a lambda function, brackets indicate the scope of the function.
+ */
+std::vector<uint16_t> rank_vals(const std::vector<float>& vec) {
+
+	std::vector<uint16_t> rank_vec(vec.size());
+	std::iota(rank_vec.begin(), rank_vec.end(), 0U); /* 0, 1, ..., size-1 */
+	std::sort(rank_vec.begin(), rank_vec.end(), [vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1] < vec[num2];}); /* sort ascending */
+	return rank_vec;
+}
+
 
 /*
  Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
@@ -134,14 +147,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			for (uint16_t i = 0U; i < subsample_quant; ++i)
 				expr_vec_sampled.emplace_back(expr_vec[folds[subnet_idx][i]]);
 			
-			/*
-			 A ranking is formed in the following way.  Indices index = [0,subsample_quant) are sorted based on the ranking of expr_vec_sampled[index], so that we get some new sorted set of indexes (5, 2, 9, ... ) that is the rank of each element in expr_vec_sampled
-			 
-			 For a lambda function, brackets indicate the scope of the function.
-			 */
-			std::vector<uint16_t> rank_vec(subsample_quant);
-			std::iota(rank_vec.begin(), rank_vec.end(), 0U); /* 0, 1, ..., size-1 */
-			std::sort(rank_vec.begin(), rank_vec.end(), [&expr_vec_sampled](const uint16_t &num1, const uint16_t &num2) -> bool { return expr_vec_sampled[num1] < expr_vec_sampled[num2];}); /* sort ascending */
+			std::vector<uint16_t> rank_vec = rank_vals(expr_vec_sampled);
 			
 			/*
 			 This function copula transforms the expr_vec values.  It's a brain teaser to think about, but rank_vec spits out the index of the rank r'th element.  So rank_vec[0] is the index of expr_vec for the least value, and we set that accordingly, in the manner below.
@@ -190,7 +196,7 @@ void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir,
 	ofstream ofs{filename};
 	if (!ofs) {
 		cerr << "error: could not write to file: " << filename << ".\n";
-		cerr << "Try a subdirectory of the working directory. Example \"-o ./output\"." << endl;
+		cerr << "Try making the output directory subdirectory of the working directory. Example \"-o ./runs\"." << endl;
 		std::exit(2);
 	}
 	auto cout_buff = cout.rdbuf();
@@ -204,4 +210,23 @@ void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir,
 	}
 	
 	cout.rdbuf(cout_buff);
+}
+
+void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, const std::string& output_dir) {
+	const std::string filename = output_dir + "finalNet.txt";
+	ofstream ofs{filename};
+	if (!ofs) {
+		std::cerr << "error: could not write to file: " << filename << ".\n";
+		std::cerr << "Try making the output directory subdirectory of the working directory. Example \"-o ./runs\"." << std::endl;
+		std::exit(2);
+	}
+	ofs << "REGULATOR\tTARGET\tMI\tSCC\t# SUBNETS INCIDENT\tP-VALUE (# SUBNETS INCIDENT)" << std::endl;
+	for (const auto& edge : final_df)
+		ofs << 
+		decompression_map[edge.regulator] << '\t' <<
+		decompression_map[edge.target] << '\t' <<
+		edge.final_mi << '\t' <<
+		edge.final_scc << '\t' <<
+		edge.num_subnets_incident << '\t' <<
+		edge.final_p << '\t' << std::endl;
 }
