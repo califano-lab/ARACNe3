@@ -37,15 +37,15 @@ void makeDir(const std::string &dir_name) {
 }
 
 /*
- A ranking is formed in the following way.  Indices index = [0,subsample_quant) are sorted based on the ranking of expr_vec_sampled[index], so that we get some new sorted set of indexes (5, 2, 9, ... ) that is the rank of each element in expr_vec_sampled
+ A ranking is formed in the following way.  Indices index = [1,size) are sorted based on the ranking of expr_vec_sampled[index-1], so that we get some new sorted set of indexes (5, 2, 9, ... ) that is the rank of each element in expr_vec_sampled.  Rank is 1 for smallest, size for largest.
  
  For a lambda function, brackets indicate the scope of the function.
  */
 std::vector<uint16_t> rank_vals(const std::vector<float>& vec) {
 
 	std::vector<uint16_t> rank_vec(vec.size());
-	std::iota(rank_vec.begin(), rank_vec.end(), 0U); /* 0, 1, ..., size-1 */
-	std::sort(rank_vec.begin(), rank_vec.end(), [vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1] < vec[num2];}); /* sort ascending */
+	std::iota(rank_vec.begin(), rank_vec.end(), 1U); /* 1, 2, ..., size */
+	std::sort(rank_vec.begin(), rank_vec.end(), [vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1-1] < vec[num2-1];}); /* sort ascending */
 	return rank_vec;
 }
 
@@ -150,12 +150,17 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			std::vector<uint16_t> rank_vec = rank_vals(expr_vec_sampled);
 			
 			/*
-			 This function copula transforms the expr_vec values.  It's a brain teaser to think about, but rank_vec spits out the index of the rank r'th element.  So rank_vec[0] is the index of expr_vec for the least value, and we set that accordingly, in the manner below.
+			 This function copula transforms the expr_vec_sampled values.  It's a brain teaser to think about, but rank_vec spits out the index of the rank r'th element.  So rank_vec[0] is the index of expr_vec_sampled for the least value, and we set that accordingly, in the manner below.
 			 */
 			for (uint16_t r = 0; r < subsample_quant; ++r)
-				expr_vec_sampled[rank_vec[r]] = (r + 1)/((float)subsample_quant + 1);
+				expr_vec_sampled[rank_vec[r]] = (r)/((float)subsample_quant + 1);
 			expr_vec_folds.push_back(expr_vec_sampled);
 		}
+		
+		// copula-transform expr_vec values
+		std::vector<uint16_t> rank_vec = rank_vals(expr_vec);
+		for (uint16_t r = 0; r < tot_num_samps; ++r)
+			expr_vec[rank_vec[r]] = (r)/((float)tot_num_samps + 1);
 		
 		/*
 		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if there exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.
@@ -169,7 +174,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			decompression_map.push_back(gene);
 		} else {
 			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
-			gm[decompression_map.size()] = expr_vec;
+			gm[compression_map[gene]-1] = expr_vec;
 			for (uint16_t i = 0; i < num_subnets; ++i)
 				gm_folds[i][compression_map[gene]-1] = expr_vec_folds[i];
 		}
