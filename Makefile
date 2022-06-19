@@ -1,8 +1,8 @@
 CC = g++
 CXX = g++
 
-CFLAGS = -std=c++20 -O3 $(INCLUDES)
-CXXFLAGS = -std=c++20 -O3 $(INCLUDES)
+CFLAGS = -std=c++20 -O3 -fopenmp $(INCLUDES)
+CXXFLAGS = -std=c++20 -O3 -fopenmp $(INCLUDES)
 
 INCLUDES =
 LDFLAGS =
