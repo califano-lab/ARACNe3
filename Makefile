@@ -1,12 +1,12 @@
-CC = g++
-CXX = g++
+CC = clang++
+CXX = clang++
 
-CFLAGS = -std=c++20 -O3 -fopenmp $(INCLUDES)
-CXXFLAGS = -std=c++20 -O3 -fopenmp $(INCLUDES)
+CFLAGS = -std=c++20 -Xpreprocessor -fopenmp -fopenmp $(INCLUDES)
+CXXFLAGS = -std=c++20 -Xpreprocessor -fopenmp $(INCLUDES)
 
-INCLUDES =
-LDFLAGS =
-LDLIBS = 
+INCLUDES = 
+LDFLAGS = -L/opt/homebrew/opt/llvm/lib
+LDLIBS = -lomp
 
 .PHONY: release
 release: ARACNe3 clean
