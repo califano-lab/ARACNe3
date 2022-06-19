@@ -11,8 +11,12 @@ using namespace std;
  * each time the APMI is calculated, discarding all products.
  */
 static float q_thresh;
+/*
+ CANNOT BE PARALLELIZED
+ */
 static vector<float> *vec_x, *vec_y;
 static vector<float> mis;
+#pragma omp threadprivate(vec_x, vec_y, mis)
 static uint16_t tot_num_pts, size_thresh;
 
 extern float DEVELOPER_mi_cutoff;

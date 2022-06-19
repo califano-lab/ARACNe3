@@ -5,9 +5,6 @@ extern bool prune_MaxEnt;
 extern float alpha;
 extern std::string method; 
 
-// for MaxEnt pruning, copied from ARACNe-AP!
-extern map_map tftfNetwork;
-
 /*
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if method = FDR, or FWER if method = FWER..
  */
