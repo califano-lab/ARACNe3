@@ -253,6 +253,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	readRegList(reg_file);
+	
 	/*
 	 matrices.first contains the genemap for the full sample size.  matrices.second contains a vector of genemaps for each 'fold', or subset of samples for each subnetwork.
 	 */

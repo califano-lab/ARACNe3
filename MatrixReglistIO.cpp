@@ -53,20 +53,22 @@ std::vector<uint16_t> rank_vals(const std::vector<float>& vec) {
 /*
  Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
  */
-void readRegList(string filename) {
-	fstream f {filename};
-	vector<string> regs;
+void readRegList(std::string filename) {
+	std::fstream f {filename};
+	std::vector<std::string> regs;
+	
 	if (!f.is_open()) {
-        	cerr << "error: file open failed " << filename << ".\n";
+        	std::cerr << "error: file open failed " << filename << ".\n";
 		std::exit(2);
 	}
-	string reg;
+	
+	std::string reg;
+	
 	while (std::getline(f, reg, '\n')) {
 		if (reg.back() == '\r') /* Alert! We have a Windows dweeb! */
 			reg.pop_back();
 		regs.push_back(reg);
 	}
-	
 	
 	compression_map.reserve(regs.size());
 	/* NOTE** This map starts from values i+1 because we are only using it to make the compression step below faster.  The compression map is redundant for every uint16_t greater than the number of regulators (i.e., contents are emptied after readExpMatrix
@@ -84,7 +86,7 @@ void readRegList(string filename) {
 /* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the genemap for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
  */
 std::vector<genemap> readExpMatrix(std::string filename) {
-	fstream f {filename};
+	fstream f{filename};
 	genemap gm;
 	std::vector<genemap> gm_folds(num_subnets);
 	if (!f.is_open()) {
@@ -121,15 +123,14 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 	}
 	
 	// now, we can more efficiently load
-	string gene;
-	while(getline(f, line, '\n')) {
+	while(std::getline(f, line, '\n')) {
 		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 			line.pop_back();
-		vector<float> expr_vec;
+		std::vector<float> expr_vec;
 		expr_vec.reserve(tot_num_samps);
 		
-		size_t prev = 0U, pos = line.find_first_of("\t, ", prev);
-		gene = line.substr(prev, pos-prev);
+		std::size_t prev = 0U, pos = line.find_first_of("\t, ", prev);
+		std::string gene = line.substr(prev, pos-prev);
 		prev = pos + 1;
 		while ((pos = line.find_first_of("\t, ", prev)) != string::npos) {
 			if (pos > prev) {
@@ -140,7 +141,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 		expr_vec.emplace_back(stof(line.substr(prev, string::npos)));
 		
 		// subsample. create expr_vec subsamples for each "fold" (subnetwork) requested.
-		std::vector<std::vector<float>> expr_vec_folds;
+		std::vector<std::vector<float>> expr_vec_folds(num_subnets, std::vector<float>(subsample_quant));
 		for (uint16_t subnet_idx = 0; subnet_idx < num_subnets; ++subnet_idx) {
 			vector <float> expr_vec_sampled;
 			expr_vec_sampled.reserve(subsample_quant);
@@ -153,14 +154,17 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			 This function copula transforms the expr_vec_sampled values.  It's a brain teaser to think about, but rank_vec spits out the index of the rank r'th element.  So rank_vec[0] is the index of expr_vec_sampled for the least value, and we set that accordingly, in the manner below.
 			 */
 			for (uint16_t r = 0; r < subsample_quant; ++r)
-				expr_vec_sampled[rank_vec[r]] = (r)/((float)subsample_quant + 1);
-			expr_vec_folds.push_back(expr_vec_sampled);
+				expr_vec_sampled[rank_vec[r]-1] = (r)/((float)subsample_quant + 1); // must sub 1 because rank_vec is idx+1
+			std::cerr << "BEFORE" << std::endl;
+			expr_vec_folds[subnet_idx] = expr_vec_sampled; //MALLOC ERROR AFTER HERE
+			std::cerr << "AFTER" << std::endl;
 		}
+		std::cerr << "AFTER 2" << std::endl;
 		
 		// copula-transform expr_vec values
 		std::vector<uint16_t> rank_vec = rank_vals(expr_vec);
 		for (uint16_t r = 0; r < tot_num_samps; ++r)
-			expr_vec[rank_vec[r]] = (r)/((float)tot_num_samps + 1);
+			expr_vec[rank_vec[r]-1] = (r)/((float)tot_num_samps + 1);
 		
 		/*
 		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if there exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.
