@@ -52,7 +52,7 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
 	 Log file header
 	 */
 	std::time_t t = std::time(nullptr);
-	log_output << "\n-----------" << std::put_time(std::localtime(&t), "%c %Z") << "-----------\n" << std::endl;
+	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------\n" << std::endl;
 	log_output << "Subnetwork #: " + std::to_string(subnet_idx) << std::endl;
 	log_output << "Total # regulators: " + std::to_string(tot_num_regulators) << std::endl;
 	log_output << "Total # targets: " + std::to_string(subnet_matrix.size()) << std::endl;
