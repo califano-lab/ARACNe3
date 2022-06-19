@@ -205,17 +205,13 @@ void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir,
 		cerr << "Try making the output directory subdirectory of the working directory. Example \"-o ./runs\"." << endl;
 		std::exit(2);
 	}
-	auto cout_buff = cout.rdbuf();
-	cout.rdbuf(ofs.rdbuf());
 	
-	cout << "REGULATOR\tTARGET\tMI\t" << endl;
+	ofs << "REGULATOR\tTARGET\tMI\t" << std::endl;
 	for (auto it = network.begin(); it != network.end(); ++it) {
 		for (auto &edge_tar : it->second) {
-				cout << decompression_map[it->first] << '\t' << decompression_map[edge_tar.target] << '\t' << edge_tar.mi << '\t' << endl;
+				ofs << decompression_map[it->first] << '\t' << decompression_map[edge_tar.target] << '\t' << edge_tar.mi << '\t' << std::endl;
 		}
 	}
-	
-	cout.rdbuf(cout_buff);
 }
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, const std::string& output_dir) {
