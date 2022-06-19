@@ -13,7 +13,7 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 `git clone https://github.com/califano-lab/ARACNe3-CPP # Clone the repo`
 
 ## Building ARACNe3
-The C++20 standard is used when compiling `ARACNe3` into an executable.  `ARACNe3` utilizes multiple threads with OpenMP directives, so you must have libraries that support them installed.  Here is _one_ example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) already installed.
+The C++20 standard is used when compiling `ARACNe3` into an executable.  `ARACNe3` utilizes multiple threads with OpenMP directives, so you must have libraries that support them installed.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) already installed.
 
 `brew install llvm libomp`
 
