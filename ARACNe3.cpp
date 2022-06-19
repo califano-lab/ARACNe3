@@ -15,10 +15,11 @@ std::string cached_dir;
 std::string output_dir;
 std::string log_dir;
 std::string subnets_dir;
-uint32_t global_seed = 0;
 std::string method = "FDR";
 float DEVELOPER_mi_cutoff = 0;
 uint16_t num_subnets = 1;
+
+uint32_t global_seed = 0;
 
 /*
  These variables represent the original data and do not change after matrix files are read.
@@ -285,7 +286,7 @@ int main(int argc, char *argv[]) {
 	
 	std::vector<reg_web> subnets(num_subnets);
 	
-#pragma omp parallel shared(subnets, matrices)//multithreading for each subnet
+#pragma omp parallel shared(subnets, matrices, global_seed)//multithreading for each subnet.  
 	{
 #pragma omp for
 	for (uint16_t i = 0; i < num_subnets; ++i) {
