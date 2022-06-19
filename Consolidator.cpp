@@ -66,7 +66,6 @@ std::vector<consolidated_df> consolidate(std::vector<reg_web> &subnets) {
 					const float final_mi = APMI(global_gm[reg], global_gm[tar]);
 					const float final_scc = consolidate_scc(global_gm[reg], global_gm[tar]);
 					const double final_p = right_tail_binomial_p(num_occurrences);
-					
 					final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences, final_p);
 				}
 		}

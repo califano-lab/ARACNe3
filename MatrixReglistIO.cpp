@@ -5,8 +5,8 @@ using namespace std;
 /*
  Compression (gene (string) to uint16_t) and decompression (uint16_t back to gene (string)) mapping.  When doing the matrix/regulator list IO, this application automatically compresses all gene identifiers into unsigned short (2B) 0-65535, as this substantially can decrease the memory load of data structures which must copy the initial values (strings, for the gene identifiers these are anywhere from 5B-25B), or refer to them through pointers (8B).  Reading less memory also can speed up computation.
  */
-static unordered_map<string, uint16_t> compression_map;
-static vector<string> decompression_map;
+static std::unordered_map<std::string, uint16_t> compression_map;
+static std::vector<std::string> decompression_map;
 
 /*
  Global variables are passed from ARACNe3.cpp, which are the user-defined parameters.
@@ -141,7 +141,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 		expr_vec.emplace_back(stof(line.substr(prev, string::npos)));
 		
 		// subsample. create expr_vec subsamples for each "fold" (subnetwork) requested.
-		std::vector<std::vector<float>> expr_vec_folds(num_subnets);
+		std::vector<std::vector<float>> expr_vec_folds;
 		for (uint16_t subnet_idx = 0; subnet_idx < num_subnets; ++subnet_idx) {
 			vector <float> expr_vec_sampled;
 			expr_vec_sampled.reserve(subsample_quant);
@@ -154,25 +154,25 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			 This function copula transforms the expr_vec_sampled values.  It's a brain teaser to think about, but rank_vec spits out the index of the rank r'th element.  So rank_vec[0] is the index of expr_vec_sampled for the least value, and we set that accordingly, in the manner below.
 			 */
 			for (uint16_t r = 0; r < subsample_quant; ++r)
-				expr_vec_sampled[rank_vec[r]-1] = (r)/((float)subsample_quant + 1); // must sub 1 because rank_vec is idx+1
-			expr_vec_folds[subnet_idx] = expr_vec_sampled; //MALLOC ERROR AFTER HERE
+				expr_vec_sampled[rank_vec[r]-1 /*sub 1 b/c rank starts from 1*/] = (r + 1 /*add 1 bc r starts from 0*/)/((float)subsample_quant + 1); // must sub 1 because rank_vec is idx+1
+			expr_vec_folds.push_back(expr_vec_sampled);
 		}
 		
 		// copula-transform expr_vec values
 		std::vector<uint16_t> rank_vec = rank_vals(expr_vec);
 		for (uint16_t r = 0; r < tot_num_samps; ++r)
-			expr_vec[rank_vec[r]-1] = (r)/((float)tot_num_samps + 1);
+			expr_vec[rank_vec[r]-1] = (r + 1)/((float)tot_num_samps + 1);
 		
 		/*
 		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if there exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.
 		 */
 		if (compression_map[gene] == 0) {
-			// the last index of decompression_vec is the new uint16_t
-			gm[decompression_map.size()] = expr_vec;
-			for (uint16_t i = 0; i < num_subnets; ++i)
-				gm_folds[i][decompression_map.size()] = expr_vec_folds[i];
 			// we must have a target
 			decompression_map.push_back(gene);
+			// the last index of decompression_vec is the new uint16_t
+			gm[decompression_map.size()-1] = expr_vec;
+			for (uint16_t i = 0; i < num_subnets; ++i)
+				gm_folds[i][decompression_map.size()-1] = expr_vec_folds[i];
 		} else {
 			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
 			gm[compression_map[gene]-1] = expr_vec;
