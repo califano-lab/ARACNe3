@@ -141,7 +141,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 		expr_vec.emplace_back(stof(line.substr(prev, string::npos)));
 		
 		// subsample. create expr_vec subsamples for each "fold" (subnetwork) requested.
-		std::vector<std::vector<float>> expr_vec_folds(num_subnets, std::vector<float>(subsample_quant));
+		std::vector<std::vector<float>> expr_vec_folds(num_subnets);
 		for (uint16_t subnet_idx = 0; subnet_idx < num_subnets; ++subnet_idx) {
 			vector <float> expr_vec_sampled;
 			expr_vec_sampled.reserve(subsample_quant);
@@ -155,11 +155,8 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			 */
 			for (uint16_t r = 0; r < subsample_quant; ++r)
 				expr_vec_sampled[rank_vec[r]-1] = (r)/((float)subsample_quant + 1); // must sub 1 because rank_vec is idx+1
-			std::cerr << "BEFORE" << std::endl;
 			expr_vec_folds[subnet_idx] = expr_vec_sampled; //MALLOC ERROR AFTER HERE
-			std::cerr << "AFTER" << std::endl;
 		}
-		std::cerr << "AFTER 2" << std::endl;
 		
 		// copula-transform expr_vec values
 		std::vector<uint16_t> rank_vec = rank_vals(expr_vec);
