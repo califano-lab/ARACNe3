@@ -21,7 +21,7 @@ Build the executable by cloning the repository and typing `make` in the command 
 ### Compiling:
 ```
 clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o NullModel.o NullModel.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o MatrixReglistIO.o MatrixReglistIO.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o APMI.o APMI.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o AlphaPruning.o AlphaPruning.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o MaxEntPruning.o MaxEntPruning.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o RegWebFns.o RegWebFns.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o Consolidator.o Consolidator.cpp
-
+ 
 ```
 ### Linking:
 ```

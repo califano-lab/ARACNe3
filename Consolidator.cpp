@@ -37,6 +37,8 @@ uint32_t n_choose_r(uint8_t n, uint8_t r) {
 double right_tail_binomial_p(const uint16_t& num_occurrences) {
 	float theta = 1.5E-4f;
 	double p = 0.0;
+	if (num_subnets == 1)
+		return std::numeric_limits<double>::quiet_NaN(); // cannot have a p-value for 1 subnet (1 network)
 	for (uint16_t i = num_subnets; i >= num_occurrences; --i)
 		p += n_choose_r(num_subnets, i) * std::pow(theta, i) * std::pow(1-theta,num_subnets-i);
 	return p;
