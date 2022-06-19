@@ -20,15 +20,15 @@ The C++20 standard is used when compiling `ARACNe3` into an executable.  `ARACNe
 Build the executable by cloning the repository and typing `make` in the command line, while in the repository base directory.  You could also manually build the executable by compiling all C++ files and linking `ARACNe3` with object file dependencies in the manner below.  Make sure to utilize all available runtime optimization compiler options.  
 ### Compiling:
 ```
-g++ -std=c++20 -O3 -c NullModel.cpp; g++ -std=c++20 -O3 -c MatrixReglistIO.cpp; g++ -std=c++20 -O3 -c APMI.cpp; g++ -std=c++20 -O3 -c AlphaPruning.cpp; g++ -std=c++20 -O3 -c MaxEntPruning.cpp; g++ -std=c++20 -O3 -c RegWebFns.cpp; g++ -std=c++20 -O3 -c Consolidator.cpp
+clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o NullModel.o NullModel.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o MatrixReglistIO.o MatrixReglistIO.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o APMI.o APMI.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o AlphaPruning.o AlphaPruning.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o MaxEntPruning.o MaxEntPruning.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o RegWebFns.o RegWebFns.cpp; clang++ -std=c++20 -Xpreprocessor -fopenmp -c -o Consolidator.o Consolidator.cpp
 
 ```
 ### Linking:
 ```
-g++ -std=c++20 -O3 ARACNe3.cpp NullModel.o MatrixReglistIO.o APMI.o AlphaPruning.o MaxEntPruning.o RegWebFns.o Consolidator.o -o ARACNe3
+clang++ -std=c++20 -Xpreprocessor -fopenmp  ARACNe3.cpp NullModel.o MatrixReglistIO.o APMI.o AlphaPruning.o MaxEntPruning.o RegWebFns.o Consolidator.o -o ARACNe3
 ``` 
 ### Troubleshooting Build Issues
-If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the GNU `-O3` compiler optimization option, or repace it with `-O2`. 
+If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the clang `-Ofast` compiler optimization option, or repace it with `-O2`. 
 
 ## Using ARACNe3
 ### Input files needed to run ARACNe3
