@@ -14,7 +14,7 @@ static float q_thresh;
 /*
  CANNOT BE PARALLELIZED
  */
-static vector<float> *vec_x, *vec_y;
+static vector<float> vec_x, vec_y;
 static vector<float> mis;
 #pragma omp threadprivate(vec_x, vec_y, mis)
 static uint16_t tot_num_pts, size_thresh;
@@ -60,8 +60,8 @@ void APMI_split(const square &s) {
 	for (uint16_t i = 0; i < num_pts; ++i) {
 		// we must pull the actual point index from the pts array
 		const uint16_t p = pts[i];
-		const bool top = (*vec_y)[p] >= y_thresh,
-		      right = (*vec_x)[p] >= x_thresh;
+		const bool top = vec_y[p] >= y_thresh,
+		      right = vec_x[p] >= x_thresh;
 		if (top && right) { tr_pts[tr_num_pts++] = p; } 
 		else if (right) { br_pts[br_num_pts++] = p; } 
 		else if (top) { tl_pts[tl_num_pts++] = p; } 
@@ -110,13 +110,13 @@ float APMI(const vector<float>& vec_x, const vector<float>& vec_y,
 	// Set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	::vec_x = const_cast<std::vector<float>*>(&vec_x);
-	::vec_y = const_cast<std::vector<float>*>(&vec_y);
-	::tot_num_pts = (*::vec_x).size();
+	::vec_x = vec_x;
+	::vec_y = vec_y;
+	::tot_num_pts = (::vec_x).size();
 
 
 	// Make an array of all indices, to be partitioned later
-	uint16_t all_pts[(*::vec_x).size()];
+	uint16_t all_pts[(::vec_x).size()];
 	for (uint16_t i = 0; i < tot_num_pts; i++) { all_pts[i] = i; }
 	
 	// Initialize plane and calc all MIs
@@ -148,8 +148,8 @@ vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	::vec_x = &matrix[reg];
-	::tot_num_pts = (*vec_x).size();
+	vec_x = matrix[reg];
+	::tot_num_pts = vec_x.size();
 	uint16_t all_pts[tot_num_pts];
 	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }	
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
@@ -157,7 +157,7 @@ vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
 	vector<edge_tar> edges;
 	edges.reserve(matrix.size() - 2); // minus 1 because size, minus 1 because reg->reg not an edge
 	for (auto it = matrix.begin(); it != matrix.end(); ++it) {
-		::vec_y = &(it->second);
+		vec_y = it->second;
 		if (it->first != reg) {
 			APMI_split(init);
 			const float mi = std::accumulate(mis.begin(), mis.end(),
@@ -189,7 +189,7 @@ const vector<float> permuteAPMI(vector<float> &ref,
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	::vec_x = &ref;
+	vec_x = ref;
 	::tot_num_pts = ref.size();
 
 	vector<float> mi_vec;
@@ -200,7 +200,7 @@ const vector<float> permuteAPMI(vector<float> &ref,
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
 
 	for (unsigned int i = 0; i < targets.size(); ++i) {
-		::vec_y = &(targets[i]);
+		vec_y = targets[i];
 		APMI_split(init);
 		mi_vec.emplace_back(std::accumulate(mis.begin(), mis.end(), static_cast<float>(0.0)));
 		mis.clear();

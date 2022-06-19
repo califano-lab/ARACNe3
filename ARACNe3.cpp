@@ -286,9 +286,9 @@ int main(int argc, char *argv[]) {
 	
 	std::vector<reg_web> subnets(num_subnets);
 	
-#pragma omp parallel shared(subnets, matrices, global_seed)//multithreading for each subnet.  
+#pragma omp parallel shared(subnets, matrices, global_seed) //multithreading for each subnet.  
 	{
-#pragma omp for
+#pragma omp for ordered
 	for (uint16_t i = 0; i < num_subnets; ++i) {
 		subnets[i] = ARACNe3_subnet(matrices[i], i);
 	}
