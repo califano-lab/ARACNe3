@@ -37,15 +37,15 @@ void makeDir(const std::string &dir_name) {
 }
 
 /*
- A ranking is formed in the following way.  Indices index = [1,size) are sorted based on the ranking of expr_vec_sampled[index-1], so that we get some new sorted set of indexes (5, 2, 9, ... ) that is the rank of each element in expr_vec_sampled.  Rank is 1 for smallest, size for largest.
+ A ranking is formed in the following way.  Indices index = [1,size) are sorted based on the ranking of vec[index-1], so that we get some new sorted set of indexes (5, 2, 9, ... ) that is the rank of each element in vec.  Rank is 1 for smallest, size for largest.
  
  For a lambda function, brackets indicate the scope of the function.
  */
 std::vector<uint16_t> rank_vals(const std::vector<float>& vec) {
-
+	static std::mt19937 rd{global_seed++};
 	std::vector<uint16_t> rank_vec(vec.size());
 	std::iota(rank_vec.begin(), rank_vec.end(), 1U); /* 1, 2, ..., size */
-	std::sort(rank_vec.begin(), rank_vec.end(), [vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1-1] < vec[num2-1];}); /* sort ascending */
+	std::sort(rank_vec.begin(), rank_vec.end(), [&vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1-1] != vec[num2-1] ? vec[num1-1] < vec[num2-1] : rd() % 2;}); /* sort ascending */
 	return rank_vec;
 }
 
