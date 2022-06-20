@@ -31,7 +31,11 @@ uint32_t factorial(const uint8_t n) {
 }
 
 uint32_t n_choose_r(uint8_t n, uint8_t r) {
-	return factorial(n) / (factorial(n - r) * factorial(r));
+	/* Must optimize this because factorial becomes extremely infeasible eventually */
+	for (auto i = n; i > r; --i)
+		n *= i-1;
+	
+	return n / factorial(r);
 }
 
 double right_tail_binomial_p(const uint16_t& num_occurrences) {

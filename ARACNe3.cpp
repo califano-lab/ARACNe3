@@ -262,7 +262,7 @@ int main(int argc, char *argv[]) {
 	
 	if (verbose) {
 		//-------time module-------
-		std::cout << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
+		std::cout << "\nMATRIX & REGULATORS READ & SUBSAMPLING TIME:" << std::endl;
 		sinceLast(last, std::cout);
 		//-------------------------
 		
