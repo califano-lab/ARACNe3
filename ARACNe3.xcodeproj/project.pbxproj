@@ -301,6 +301,7 @@
 				OTHER_CPLUSPLUSFLAGS = (
 					"-Xpreprocessor",
 					"-fopenmp",
+					"-O3",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -314,6 +315,7 @@
 				OTHER_CPLUSPLUSFLAGS = (
 					"-Xpreprocessor",
 					"-fopenmp",
+					"-O3",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

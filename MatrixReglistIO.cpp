@@ -48,10 +48,10 @@ std::vector<uint16_t> rank_indexes(const std::vector<float>& vec) {
 	std::sort(idx_ranks.begin(), idx_ranks.end(), [&vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1] < vec[num2];}); /* sort ascending */
 	for (uint16_t r = 0U; r < idx_ranks.size();) {
 		uint16_t same_range = 1U;
-		while (vec[idx_ranks[r]] == vec[idx_ranks[r+same_range++]])
+		while (r + same_range < idx_ranks.size() && vec[idx_ranks[r]] == vec[idx_ranks[r+same_range++]])
 			; // same_range is off-end index
 		if (same_range > 1U) {
-			std::shuffle(idx_ranks.begin()+r, idx_ranks.end()+same_range, rd);
+			std::shuffle(idx_ranks.begin()+r, idx_ranks.begin()+r+same_range, rd);
 			r = r + same_range;
 		} else {
 			++r;
