@@ -54,7 +54,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o /Users/andrew/Desktop/a3/outputFinal --subsample 0.63 --seed 23 --numnulls 500001 --alpha 0.05 --FDR -x 5"
+            argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o /Users/andrew/Desktop/a3/output --subsample 0.63 --seed 23 --numnulls 500001 --alpha 0.05 --FDR -x 5"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

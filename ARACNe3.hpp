@@ -120,14 +120,14 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, cons
 typedef struct {const float &x_bound1, &y_bound1, &width; 
 	uint16_t *pts, &num_pts;} square;
 
-float APMI(const std::vector<float>& vec_x, const std::vector<float>& vec_y, const float q_thresh = 7.815, 
-		const uint16_t size_thresh = 4);
+float APMI(const std::vector<float>& vec_x, const std::vector<float>& vec_y, const float& q_thresh = 7.815, 
+		const uint16_t& size_thresh = 4);
 
 std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& identifier, const float& q_thresh = 7.815, const uint16_t& size_thresh = 4);
 
-const std::vector<float> permuteAPMI(std::vector<float> &ref_vec,
-		std::vector<std::vector<float>> &target_vec, const float q_thresh = 7.815,
-		const uint16_t size_thresh = 4);
+const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec,
+		const std::vector<std::vector<float>> &target_vec, const float &q_thresh = 7.815,
+		const uint16_t &size_thresh = 4);
 
 
 //--------------------- NullModel.cpp	 		-----------------------

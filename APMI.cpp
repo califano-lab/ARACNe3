@@ -13,11 +13,10 @@ extern float DEVELOPER_mi_cutoff;
  * variables here, and so calculating the APMI should invoke this file uniquely,
  * each time the APMI is calculated, discarding all products.
  */
-static std::vector<float> vec_x, vec_y;
-static float mis = 0.0f;
-#pragma omp threadprivate(vec_x, vec_y, mis)
 static float q_thresh;
 static uint16_t tot_num_pts, size_thresh;
+static std::vector<uint16_t> all_pts;
+#pragma omp threadprivate(tot_num_pts, all_pts)
 
 /*
  * Calculate the MI for a square struct
@@ -35,13 +34,13 @@ float calcMI(const square &s) {
  *
  * returns nothing; values computed from pointers to original
  */
-void APMI_split(const square &s) {
+const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>& vec_y, const square &s) {
 	// extract values; memory disadvantage but runtime advantage
 	const float x_bound1=s.x_bound1, y_bound1=s.y_bound1, width=s.width;
 	const uint16_t *pts=s.pts, num_pts=s.num_pts;
 
 	// if we have less points in the square than size_thresh, calc MI
-	if (num_pts < size_thresh) {mis += calcMI(s); return;}
+	if (num_pts < size_thresh) { return calcMI(s);}
 
 	// thresholds for potential partition of XY plane
 	const float x_thresh = x_bound1 + width*0.5,
@@ -78,16 +77,11 @@ void APMI_split(const square &s) {
 		       bl{x_bound1, y_bound1, width*0.5, bl_pts, bl_num_pts},
 		       tl{x_bound1, y_thresh, width*0.5, tl_pts, tl_num_pts};
 
-		APMI_split(tr);
-		APMI_split(br);
-		APMI_split(bl);
-		APMI_split(tl);
+		return APMI_split(vec_x, vec_y, tr) + APMI_split(vec_x, vec_y, br) + APMI_split(vec_x, vec_y, bl) + APMI_split(vec_x, vec_y, tl);
 	} else {
 		// if we don't partition, then we calc MI
-		mis += calcMI(s);
+		return calcMI(s);
 	}
-
-	return;
 }
 
 /* Takes in two expression vectors (regulator-target) and computes APMI for 
@@ -102,28 +96,25 @@ void APMI_split(const square &s) {
  */
 // [[Rcpp::export]]
 float APMI(const vector<float>& vec_x, const vector<float>& vec_y, 
-		const float q_thresh,
-		const uint16_t size_thresh) {
+		const float& q_thresh,
+		const uint16_t& size_thresh) {
 	// Set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	::vec_x = vec_x;
-	::vec_y = vec_y;
-	::tot_num_pts = (::vec_x).size();
+	if (tot_num_pts != vec_x.size()) {
+		::tot_num_pts = vec_x.size();
+		// Make an array of all indices, to be partitioned later
+		std::vector<uint16_t> all_pts(tot_num_pts);
+		for (uint16_t i = 0; i < tot_num_pts; i++) { all_pts[i] = i; }
+		::all_pts = all_pts;
+	}
 
 
-	// Make an array of all indices, to be partitioned later
-	uint16_t all_pts[(::vec_x).size()];
-	for (uint16_t i = 0; i < tot_num_pts; i++) { all_pts[i] = i; }
 	
 	// Initialize plane and calc all MIs
-	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};	
-	APMI_split(init);
+	const square init{0.0, 0.0, 1.0, &all_pts[0], tot_num_pts};	
 	
-	float mi = mis;
-	mis = 0.0f;
-	
-	return mi;
+	return APMI_split(vec_x, vec_y, init);
 }
 
 
@@ -145,21 +136,24 @@ std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	vec_x = matrix[reg];
-	::tot_num_pts = vec_x.size();
-	uint16_t all_pts[tot_num_pts];
-	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }	
-	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
+	const std::vector<float>& vec_x = matrix[reg];
+	if (tot_num_pts != vec_x.size()) {
+		::tot_num_pts = vec_x.size();
+		std::vector<uint16_t> all_pts(tot_num_pts);
+		for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }
+		::all_pts = all_pts;
+	}
+	const square init{0.0, 0.0, 1.0, &all_pts[0], tot_num_pts};
+	
+
 	
 	std::vector<edge_tar> edges;
 	edges.reserve(matrix.size() - 2); // minus 1 because size, minus 1 because reg->reg not an edge
 	for (const auto &[tar, vec_y] : matrix) {
-		::vec_y = vec_y;
 		if (tar != reg) {
-			APMI_split(init);
-			if (mis >= DEVELOPER_mi_cutoff)
-				edges.emplace_back(tar, mis);
-			mis = 0.0f;
+			const float mi = APMI_split(vec_x, vec_y, init);
+			if (mi >= DEVELOPER_mi_cutoff)
+				edges.emplace_back(tar, mi);
 		}
 	}
 
@@ -179,27 +173,25 @@ std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
  * returns a float vector of targets.size() MI values, in the order of 'targets'
  */
 
-const vector<float> permuteAPMI(vector<float> &ref,
-		vector<vector<float>> &targets, const float q_thresh, const uint16_t size_thresh) {
+const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec_x,
+		const std::vector<vector<float>> &targets, const float &q_thresh, const uint16_t &size_thresh) {
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
-	vec_x = ref;
-	::tot_num_pts = ref.size();
+	if (tot_num_pts != ref_vec_x.size()) {
+		::tot_num_pts = ref_vec_x.size();
+		std::vector<uint16_t> all_pts(tot_num_pts);
+		for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }
+		::all_pts = all_pts;
+	}
 
-	vector<float> mi_vec;
+	std::vector<float> mi_vec;
 	mi_vec.reserve(targets.size());
 
-	uint16_t all_pts[tot_num_pts];
-	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }
-	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
+	const square init{0.0, 0.0, 1.0, &all_pts[0], tot_num_pts};
 
-	for (unsigned int i = 0; i < targets.size(); ++i) {
-		vec_y = targets[i];
-		APMI_split(init);
-		mi_vec.emplace_back(mis);
-		mis = 0.0f;
-	}
+	for (uint32_t i = 0; i < targets.size(); ++i)
+		mi_vec.emplace_back(APMI_split(ref_vec_x, targets[i], init));
 
 	return mi_vec;
 }
