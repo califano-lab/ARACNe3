@@ -23,7 +23,7 @@ static uint16_t tot_num_pts, size_thresh;
  * Calculate the MI for a square struct
  */
 float calcMI(const square &s) {
-	const float pxy = s.num_pts/(float)tot_num_pts, &marginal = s.width, mi = pxy*std::log(pxy/marginal/marginal);
+	const float pxy = s.num_pts/(float)tot_num_pts, &marginal = s.width, mi = pxy*std::log(pxy/(marginal*marginal));
 	return std::isfinite(mi) ? mi : 0.0;
 }
 
