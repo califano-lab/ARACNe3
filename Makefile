@@ -1,8 +1,8 @@
 CC = clang++
 CXX = clang++
 
-CFLAGS = -std=c++20 -Xpreprocessor -fopenmp -O3 $(INCLUDES)
-CXXFLAGS = -std=c++20 -Xpreprocessor -fopenmp -O3 $(INCLUDES)
+CFLAGS = -std=c++20 -O1 -Xpreprocessor -fopenmp $(INCLUDES)
+CXXFLAGS = -std=c++20 -O1 -Xpreprocessor -fopenmp $(INCLUDES)
 
 INCLUDES = 
 LDFLAGS = -L/opt/homebrew/opt/llvm/lib
