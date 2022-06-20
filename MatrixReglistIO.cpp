@@ -41,12 +41,23 @@ void makeDir(const std::string &dir_name) {
  
  For a lambda function, brackets indicate the scope of the function.
  */
-std::vector<uint16_t> rank_vals(const std::vector<float>& vec) {
+std::vector<uint16_t> rank_indexes(const std::vector<float>& vec) {
 	static std::mt19937 rd{global_seed++};
-	std::vector<uint16_t> rank_vec(vec.size());
-	std::iota(rank_vec.begin(), rank_vec.end(), 1U); /* 1, 2, ..., size */
-	std::sort(rank_vec.begin(), rank_vec.end(), [&vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1-1] != vec[num2-1] ? vec[num1-1] < vec[num2-1] : rd() % 2;}); /* sort ascending */
-	return rank_vec;
+	std::vector<uint16_t> idx_ranks(vec.size());
+	std::iota(idx_ranks.begin(), idx_ranks.end(), 0U); /* 0, 1, ..., size-1 */
+	std::sort(idx_ranks.begin(), idx_ranks.end(), [&vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1] < vec[num2];}); /* sort ascending */
+	for (uint16_t r = 0U; r < idx_ranks.size();) {
+		uint16_t same_range = 1U;
+		while (vec[idx_ranks[r]] == vec[idx_ranks[r+same_range++]])
+			; // same_range is off-end index
+		if (same_range > 1U) {
+			std::shuffle(idx_ranks.begin()+r, idx_ranks.end()+same_range, rd);
+			r = r + same_range;
+		} else {
+			++r;
+		}
+	}
+	return idx_ranks;
 }
 
 
@@ -148,20 +159,20 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			for (uint16_t i = 0U; i < subsample_quant; ++i)
 				expr_vec_sampled.emplace_back(expr_vec[folds[subnet_idx][i]]);
 			
-			std::vector<uint16_t> rank_vec = rank_vals(expr_vec_sampled);
+			std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec_sampled);
 			
 			/*
-			 This function copula transforms the expr_vec_sampled values.  It's a brain teaser to think about, but rank_vec spits out the index of the rank r'th element.  So rank_vec[0] is the index of expr_vec_sampled for the least value, and we set that accordingly, in the manner below.
+			 This function copula transforms the expr_vec_sampled values.  It's a brain teaser to think about, but idx_ranks spits out the index of the rank r'th element.  So idx_ranks[0] is the index of expr_vec_sampled for the least value, and we set that accordingly, in the manner below.
 			 */
 			for (uint16_t r = 0; r < subsample_quant; ++r)
-				expr_vec_sampled[rank_vec[r]-1 /*sub 1 b/c rank starts from 1*/] = (r + 1 /*add 1 bc r starts from 0*/)/((float)subsample_quant + 1); // must sub 1 because rank_vec is idx+1
+				expr_vec_sampled[idx_ranks[r]] = (r + 1 /*rank starts from 0*/)/((float)subsample_quant + 1); 
 			expr_vec_folds.push_back(expr_vec_sampled);
 		}
 		
 		// copula-transform expr_vec values
-		std::vector<uint16_t> rank_vec = rank_vals(expr_vec);
+		std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec);
 		for (uint16_t r = 0; r < tot_num_samps; ++r)
-			expr_vec[rank_vec[r]-1] = (r + 1)/((float)tot_num_samps + 1);
+			expr_vec[idx_ranks[r]] = (r + 1)/((float)tot_num_samps + 1);
 		
 		/*
 		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if there exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.

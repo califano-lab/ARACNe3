@@ -85,7 +85,7 @@ typedef std::unordered_map<gene_id_t, std::unordered_map<gene_id_t, float>> map_
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
 void makeDir(const std::string &dir_name);
-std::vector<uint16_t> rank_vals(const std::vector<float>& vec);
+std::vector<uint16_t> rank_indexes(const std::vector<float>& vec);
 
 /*
  * Maps gene identifiers to gene expression matrices

@@ -11,7 +11,12 @@ extern genemap global_gm;
 extern uint16_t num_subnets;
 
 float consolidate_scc(const std::vector<float>& vec_x, const std::vector<float>& vec_y) {
-	std::vector<uint16_t> x_ranked = rank_vals(vec_x), y_ranked = rank_vals(vec_y);
+	std::vector<uint16_t> x_idx_ranked = rank_indexes(vec_x), y_idx_ranked = rank_indexes(vec_y);
+	std::vector<uint16_t> x_ranked(vec_x.size()), y_ranked(vec_x.size());
+	for (uint16_t r = 0; r < x_idx_ranked.size(); ++r) {
+		x_ranked[x_idx_ranked[r]] = r + 1;
+		y_ranked[y_idx_ranked[r]] = r + 1;
+	}
 	float sigma = 0, sigmaxy = 0, sigmasq = 0;
 	for (uint16_t i = 0; i < vec_x.size(); ++i) {
 		sigma += x_ranked[i]; // same for x and y

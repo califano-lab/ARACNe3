@@ -94,11 +94,9 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_samps) {
 		// vector of vectors, 1mil rows
 		std::vector<std::vector<float>> target_vec(num_null_marginals, ref_vec);
 
-		auto rng = std::default_random_engine{global_seed++};
-		for (unsigned int i = 0; i < num_null_marginals; ++i) {
-			std::shuffle(std::begin(target_vec[i]), std::end(target_vec[i]),
-					rng);
-		}
+		static std::mt19937 rd{global_seed++};
+		for (unsigned int i = 0; i < num_null_marginals; ++i)
+			std::shuffle(target_vec[i].begin(), target_vec[i].end(), rd);
 
 		// get the 1 million MI values
 		std::vector<float> mi_vec = permuteAPMI(ref_vec, target_vec, 7.815, 4);
