@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
 	
 #pragma omp parallel shared(subnets, matrices, global_seed) //multithreading for each subnet.  
 	{
-#pragma omp for ordered
+#pragma omp for
 	for (uint16_t i = 0; i < num_subnets; ++i) {
 		subnets[i] = ARACNe3_subnet(matrices[i], i);
 	}

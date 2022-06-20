@@ -5,29 +5,26 @@
 
 using namespace std;
 
+
+extern float DEVELOPER_mi_cutoff;
+
 /*
  * File static  variables will be modified.  There are many file static
  * variables here, and so calculating the APMI should invoke this file uniquely,
  * each time the APMI is calculated, discarding all products.
  */
-static float q_thresh;
-/*
- CANNOT BE PARALLELIZED
- */
-static vector<float> vec_x, vec_y;
-static vector<float> mis;
+static std::vector<float> vec_x, vec_y;
+static float mis = 0.0f;
 #pragma omp threadprivate(vec_x, vec_y, mis)
+static float q_thresh;
 static uint16_t tot_num_pts, size_thresh;
-
-extern float DEVELOPER_mi_cutoff;
 
 /*
  * Calculate the MI for a square struct
  */
 float calcMI(const square &s) {
-	const float pxy = s.num_pts/(float)tot_num_pts, marginal = s.width;
-	float mi;
-	return isfinite(mi = pxy*log(pxy/marginal/marginal)) ? mi : 0.0;
+	const float pxy = s.num_pts/(float)tot_num_pts, &marginal = s.width, mi = pxy*std::log(pxy/marginal/marginal);
+	return std::isfinite(mi) ? mi : 0.0;
 }
 
 /*
@@ -44,7 +41,7 @@ void APMI_split(const square &s) {
 	const uint16_t *pts=s.pts, num_pts=s.num_pts;
 
 	// if we have less points in the square than size_thresh, calc MI
-	if (num_pts < size_thresh) {mis.push_back(calcMI(s)); return;}
+	if (num_pts < size_thresh) {mis += calcMI(s); return;}
 
 	// thresholds for potential partition of XY plane
 	const float x_thresh = x_bound1 + width*0.5,
@@ -87,7 +84,7 @@ void APMI_split(const square &s) {
 		APMI_split(tl);
 	} else {
 		// if we don't partition, then we calc MI
-		mis.push_back(calcMI(s));
+		mis += calcMI(s);
 	}
 
 	return;
@@ -123,8 +120,8 @@ float APMI(const vector<float>& vec_x, const vector<float>& vec_y,
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};	
 	APMI_split(init);
 	
-	float mi = std::accumulate(mis.begin(), mis.end(), static_cast<float>(0.0));
-	mis.clear();
+	float mi = mis;
+	mis = 0.0f;
 	
 	return mi;
 }
@@ -142,7 +139,7 @@ float APMI(const vector<float>& vec_x, const vector<float>& vec_y,
  * Returns a vector of 'edge' structs
  * corresponding to each edge and their MI.
  */
-vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
+std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
 		    const float& q_thresh,
 		    const uint16_t& size_thresh) {
 	// set file static variables
@@ -154,20 +151,18 @@ vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
 	for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }	
 	const square init{0.0, 0.0, 1.0,  all_pts, tot_num_pts};
 	
-	vector<edge_tar> edges;
+	std::vector<edge_tar> edges;
 	edges.reserve(matrix.size() - 2); // minus 1 because size, minus 1 because reg->reg not an edge
-	for (auto it = matrix.begin(); it != matrix.end(); ++it) {
-		vec_y = it->second;
-		if (it->first != reg) {
+	for (const auto &[tar, vec_y] : matrix) {
+		::vec_y = vec_y;
+		if (tar != reg) {
 			APMI_split(init);
-			const float mi = std::accumulate(mis.begin(), mis.end(),
-					static_cast<float>(0.0));
-			if (mi >= DEVELOPER_mi_cutoff) {
-				edges.emplace_back(it->first, mi);
-			}
-			mis.clear();
+			if (mis >= DEVELOPER_mi_cutoff)
+				edges.emplace_back(tar, mis);
+			mis = 0.0f;
 		}
 	}
+
 	return edges;
 }
 	
@@ -202,8 +197,8 @@ const vector<float> permuteAPMI(vector<float> &ref,
 	for (unsigned int i = 0; i < targets.size(); ++i) {
 		vec_y = targets[i];
 		APMI_split(init);
-		mi_vec.emplace_back(std::accumulate(mis.begin(), mis.end(), static_cast<float>(0.0)));
-		mis.clear();
+		mi_vec.emplace_back(mis);
+		mis = 0.0f;
 	}
 
 	return mi_vec;
