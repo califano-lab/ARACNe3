@@ -26,14 +26,15 @@ float consolidate_scc(const std::vector<float>& vec_x, const std::vector<float>&
 /*
  We can do factorial on at most an 8-bit integer.
  */
-uint32_t factorial(const uint8_t n) {
+uint32_t factorial(const uint16_t n) {
 	return n == 0 ? 1 : n * factorial(n - 1);
 }
 
-uint32_t n_choose_r(uint8_t n, uint8_t r) {
+uint32_t n_choose_r(uint16_t n, uint16_t r) {
 	/* Must optimize this because factorial becomes extremely infeasible eventually */
-	for (auto i = n; i > r; --i)
-		n *= i-1;
+	const uint16_t n_copy = n;
+	for (auto i = n_copy-1; i > n_copy-r; --i)
+		n *= i;
 	
 	return n / factorial(r);
 }
