@@ -15,7 +15,7 @@ uint16_t tot_num_samps_pre_subsample = 0;
 uint16_t tot_num_samps = 0;
 uint16_t tot_num_regulators = 0;
 genemap global_gm;
-genemap_r global_gm_r_idx;
+genemap_r global_gm_r;
 
 extern bool verbose;
 extern uint32_t global_seed;
@@ -100,7 +100,7 @@ void readRegList(std::string filename) {
 std::vector<genemap> readExpMatrix(std::string filename) {
 	fstream f{filename};
 	genemap gm;
-	genemap_r gm_r_idx; //to store rank-transformed INDICES of gexp values
+	genemap_r gm_r; //to store rank-transformed INDICES of gexp values
 	std::vector<genemap> gm_folds(num_subnets);
 	if (!f.is_open()) {
 		std::cerr << "error: file open failed " << filename << ".\n";
@@ -173,8 +173,13 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 		
 		// copula-transform expr_vec values
 		std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec);
-		for (uint16_t r = 0; r < tot_num_samps; ++r)
-			expr_vec[idx_ranks[r]] = (r + 1)/((float)tot_num_samps + 1);
+		
+		std::vector<uint16_t> expr_vec_ranked(tot_num_samps);
+		for (uint16_t r = 0; r < tot_num_samps; ++r) {
+			expr_vec_ranked[idx_ranks[r]] = r + 1; // ranks the values of expr_vec
+			expr_vec[idx_ranks[r]] = (r + 1)/((float)tot_num_samps + 1); // switches out expr_vec with copula-transformed values
+		}
+			
 		
 		/*
 		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if there exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.
@@ -184,13 +189,13 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			decompression_map.push_back(gene);
 			// the last index of decompression_vec is the new uint16_t
 			gm[decompression_map.size()-1] = expr_vec;
-			gm_r_idx[decompression_map.size()-1] = idx_ranks; //store ranks of idx's for SCC later
+			gm_r[decompression_map.size()-1] = expr_vec_ranked; //store ranks of idx's for SCC later
 			for (uint16_t i = 0; i < num_subnets; ++i)
 				gm_folds[i][decompression_map.size()-1] = expr_vec_folds[i];
 		} else {
 			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
 			gm[compression_map[gene]-1] = expr_vec;
-			gm_r_idx[compression_map[gene]-1] = idx_ranks; //store ranks of idx's for SCC later
+			gm_r[compression_map[gene]-1] = expr_vec_ranked; //store ranks of idx's for SCC later
 			for (uint16_t i = 0; i < num_subnets; ++i)
 				gm_folds[i][compression_map[gene]-1] = expr_vec_folds[i];
 		}
@@ -206,7 +211,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 	tot_num_samps_pre_subsample = tot_num_samps;
 	tot_num_samps = subsample_quant;
 	global_gm = gm;
-	global_gm_r_idx = gm_r_idx;
+	global_gm_r = gm_r;
 	return gm_folds;
 }
 

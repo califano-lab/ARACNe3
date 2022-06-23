@@ -8,24 +8,18 @@ extern uint16_t tot_num_samps_pre_subsample;
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_regulators;
 extern genemap global_gm;
-extern genemap_r global_gm_r_idx;
+extern genemap_r global_gm_r;
 extern uint16_t num_subnets;
 
-float consolidate_scc(const std::vector<float>& vec_x, const std::vector<float>& vec_y) {
-	std::vector<uint16_t> x_idx_ranked = rank_indexes(vec_x), y_idx_ranked = rank_indexes(vec_y);
-	std::vector<uint16_t> x_ranked(vec_x.size()), y_ranked(vec_x.size());
-	for (uint16_t r = 0; r < x_idx_ranked.size(); ++r) {
-		x_ranked[x_idx_ranked[r]] = r + 1;
-		y_ranked[y_idx_ranked[r]] = r + 1;
-	}
+float consolidate_scc(const std::vector<uint16_t>& x_ranked, const std::vector<uint16_t>& y_ranked) {
 	float sigma = 0, sigmaxy = 0, sigmasq = 0;
-	for (uint16_t i = 0; i < vec_x.size(); ++i) {
+	for (uint16_t i = 0; i < x_ranked.size(); ++i) {
 		sigma += x_ranked[i]; // same for x and y
 		sigmaxy += x_ranked[i]*y_ranked[i];
 		sigmasq += x_ranked[i]*x_ranked[i]; // same for x and y
 	}
-	return (vec_x.size() * sigmaxy - sigma*sigma)/
-			(float) (vec_x.size() * sigmasq - sigma*sigma);
+	return (x_ranked.size() * sigmaxy - sigma*sigma)/
+			(float) (x_ranked.size() * sigmasq - sigma*sigma);
 }
 
 double lchoose(const uint16_t &n, const uint16_t &k) {
@@ -62,7 +56,7 @@ std::vector<consolidated_df> consolidate(std::vector<reg_web> &subnets) {
 				}
 				if (num_occurrences > 0) {
 					const float final_mi = APMI(global_gm[reg], global_gm[tar]);
-					const float final_scc = consolidate_scc(global_gm[reg], global_gm[tar]);
+					const float final_scc = consolidate_scc(global_gm_r[reg], global_gm_r[tar]);
 					const double final_p = right_tail_binomial_p(num_occurrences);
 					final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences, final_p);
 				}
