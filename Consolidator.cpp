@@ -12,14 +12,11 @@ extern genemap_r global_gm_r;
 extern uint16_t num_subnets;
 
 float consolidate_scc(const std::vector<uint16_t>& x_ranked, const std::vector<uint16_t>& y_ranked) {
-	float sigma = 0, sigmaxy = 0, sigmasq = 0;
-	for (uint16_t i = 0; i < x_ranked.size(); ++i) {
-		sigma += x_ranked[i]; // same for x and y
-		sigmaxy += x_ranked[i]*y_ranked[i];
-		sigmasq += x_ranked[i]*x_ranked[i]; // same for x and y
-	}
-	return (x_ranked.size() * sigmaxy - sigma*sigma)/
-			(float) (x_ranked.size() * sigmasq - sigma*sigma);
+	const auto &n = x_ranked.size();
+	int sigma_dxy = 0;
+	for (uint16_t i = 0; i < n; ++i)
+		sigma_dxy += (x_ranked[i] - y_ranked[i]) * (x_ranked[i] - y_ranked[i]);
+	return 1 - 6.0f * sigma_dxy / n / (n * n - 1);
 }
 
 double lchoose(const uint16_t &n, const uint16_t &k) {
