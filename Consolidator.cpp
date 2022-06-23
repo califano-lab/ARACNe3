@@ -34,12 +34,12 @@ double lchoose(const uint16_t &n, const uint16_t &k) {
 
 double right_tail_binomial_p(const uint16_t& num_occurrences) {
 	float theta = 1.5E-4f;
-	double lp = 0.0;
+	double p = 0.0;
 	if (num_subnets == 1)
 		return std::numeric_limits<double>::quiet_NaN(); // cannot have a p-value for 1 subnet (1 network)
 	for (uint16_t i = num_subnets; i >= num_occurrences; --i)
-		lp += lchoose(num_subnets, num_occurrences) + num_occurrences * std::log(theta) + (num_subnets - num_occurrences) * std::log(1-theta);
-	return std::exp(lp);
+		p += std::exp(lchoose(num_subnets, num_occurrences) + num_occurrences * std::log(theta) + (num_subnets - num_occurrences) * std::log(1-theta));
+	return p;
 }
 
 std::vector<consolidated_df> consolidate(std::vector<reg_web> &subnets) {
