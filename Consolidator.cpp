@@ -8,6 +8,7 @@ extern uint16_t tot_num_samps_pre_subsample;
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_regulators;
 extern genemap global_gm;
+extern genemap_r global_gm_r;
 extern uint16_t num_subnets;
 
 float consolidate_scc(const std::vector<float>& vec_x, const std::vector<float>& vec_y) {
@@ -27,37 +28,18 @@ float consolidate_scc(const std::vector<float>& vec_x, const std::vector<float>&
 			(float) (vec_x.size() * sigmasq - sigma*sigma);
 }
 
-
-/*
- We can do factorial on at most an 8-bit integer.
- */
-uint64_t factorial(const uint16_t n) {
-	return n == 0 ? 1 : n * factorial(n - 1);
-}
-
-uint64_t n_choose_r(const uint16_t& n, const uint16_t& r) {
-	/* Must optimize this because factorial becomes extremely infeasible eventually */
-	uint64_t n_copy = n;
-	uint16_t mults = 0;
-	for (auto i = n-1; i > n-r; --i, ++mults)
-		n_copy *= i;
-	if (mults > 256U | r > 256U) {
-		std::cout << "WARNING! EDGE P-VALUE INVOLVES FACTORIAL TOO LARGE TO COMPUTE (" + std::to_string(n) + " nCr " + std::to_string(r) + ")" << std::endl;
-		std::cout << "WARNING! EDGE P-VALUE INVOLVES FACTORIAL TOO LARGE TO COMPUTE (" + std::to_string(n) + " nCr " + std::to_string(r) + ")" << std::endl;
-		std::cout << "WARNING! EDGE P-VALUE INVOLVES FACTORIAL TOO LARGE TO COMPUTE (" + std::to_string(n) + " nCr " + std::to_string(r) + ")" << std::endl;
-	}
-	
-	return n / factorial(r);
+double lchoose(const uint16_t &n, const uint16_t &k) {
+	return std::lgamma(n + 1) - std::lgamma(k + 1) - std::lgamma(n - k + 1);
 }
 
 double right_tail_binomial_p(const uint16_t& num_occurrences) {
 	float theta = 1.5E-4f;
-	double p = 0.0;
+	double lp = 0.0;
 	if (num_subnets == 1)
 		return std::numeric_limits<double>::quiet_NaN(); // cannot have a p-value for 1 subnet (1 network)
 	for (uint16_t i = num_subnets; i >= num_occurrences; --i)
-		p += n_choose_r(num_subnets, i) * std::pow(theta, i) * std::pow(1-theta,num_subnets-i);
-	return p;
+		lp += lchoose(num_subnets, num_occurrences) + num_occurrences * std::log(theta) + (num_subnets - num_occurrences) * std::log(1-theta);
+	return std::exp(lp);
 }
 
 std::vector<consolidated_df> consolidate(std::vector<reg_web> &subnets) {
