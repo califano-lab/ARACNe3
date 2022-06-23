@@ -8,7 +8,7 @@ extern uint16_t tot_num_samps_pre_subsample;
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_regulators;
 extern genemap global_gm;
-extern genemap_r global_gm_r;
+extern genemap_r global_gm_r_idx;
 extern uint16_t num_subnets;
 
 float consolidate_scc(const std::vector<float>& vec_x, const std::vector<float>& vec_y) {

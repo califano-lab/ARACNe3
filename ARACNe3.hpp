@@ -93,6 +93,11 @@ std::vector<uint16_t> rank_indexes(const std::vector<float>& vec);
 typedef std::unordered_map<gene_id_t, std::vector<float>> genemap;
 
 /*
+ Same as genemap, except mapped to ranked vectors
+ */
+typedef std::unordered_map<gene_id_t, std::vector<uint16_t>> genemap_r;
+
+/*
  Does not return a list of regulators as a string vector, as we are using compression
  */
 void readRegList(std::string filename = "regulators.txt");

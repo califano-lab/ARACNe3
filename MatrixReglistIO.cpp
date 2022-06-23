@@ -15,6 +15,7 @@ uint16_t tot_num_samps_pre_subsample = 0;
 uint16_t tot_num_samps = 0;
 uint16_t tot_num_regulators = 0;
 genemap global_gm;
+genemap_r global_gm_r_idx;
 
 extern bool verbose;
 extern uint32_t global_seed;
@@ -69,7 +70,7 @@ void readRegList(std::string filename) {
 	std::vector<std::string> regs;
 	
 	if (!f.is_open()) {
-        	std::cerr << "error: file open failed " << filename << ".\n";
+		std::cerr << "error: file open failed " << filename << ".\n";
 		std::exit(2);
 	}
 	
@@ -99,9 +100,10 @@ void readRegList(std::string filename) {
 std::vector<genemap> readExpMatrix(std::string filename) {
 	fstream f{filename};
 	genemap gm;
+	genemap_r gm_r_idx; //to store rank-transformed INDICES of gexp values
 	std::vector<genemap> gm_folds(num_subnets);
 	if (!f.is_open()) {
-        	cerr << "error: file open failed " << filename << ".\n";
+		std::cerr << "error: file open failed " << filename << ".\n";
 		std::exit(2);
 	}
 
@@ -182,11 +184,13 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			decompression_map.push_back(gene);
 			// the last index of decompression_vec is the new uint16_t
 			gm[decompression_map.size()-1] = expr_vec;
+			gm_r_idx[decompression_map.size()-1] = idx_ranks; //store ranks of idx's for SCC later
 			for (uint16_t i = 0; i < num_subnets; ++i)
 				gm_folds[i][decompression_map.size()-1] = expr_vec_folds[i];
 		} else {
 			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
 			gm[compression_map[gene]-1] = expr_vec;
+			gm_r_idx[compression_map[gene]-1] = idx_ranks; //store ranks of idx's for SCC later
 			for (uint16_t i = 0; i < num_subnets; ++i)
 				gm_folds[i][compression_map[gene]-1] = expr_vec_folds[i];
 		}
@@ -202,6 +206,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 	tot_num_samps_pre_subsample = tot_num_samps;
 	tot_num_samps = subsample_quant;
 	global_gm = gm;
+	global_gm_r_idx = gm_r_idx;
 	return gm_folds;
 }
 
