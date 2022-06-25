@@ -260,68 +260,40 @@ int main(int argc, char *argv[]) {
 	
 	readExpMatrix(exp_file);
 	
+	if (verbose) {
+		//-------time module-------
+		std::cout << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
+		sinceLast(last, std::cout);
+		//-------------------------
+		
+		//-------time module-------
+		std::cout << "\nNULL MI MODEL TIME:" << endl;
+		last = chrono::high_resolution_clock::now();
+		//-------------------------
+	}
+	
+	initNullMIs(tot_num_subsample);
+	
+	if(verbose) {
+		//-------time module-------
+		sinceLast(last, std::cout);
+		//-------------------------
+		
+		//-------time module-------
+		std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
+		//-------------------------
+	}
+	
 	
 	std::vector<reg_web> subnets;
 	if (adaptive) {
-		if (verbose) {
-			//-------time module-------
-			std::cout << "\nMATRIX & REGULATORS TIME:" << std::endl;
-			sinceLast(last, std::cout);
-			//-------------------------
-			
-			//-------time module-------
-			std::cout << "\nNULL MI MODEL TIME:" << endl;
-			last = chrono::high_resolution_clock::now();
-			//-------------------------
-		}
-		
-		initNullMIs(tot_num_subsample);
-		
-		if(verbose) {
-			//-------time module-------
-			sinceLast(last, std::cout);
-			//-------------------------
-			
-			//-------time module-------
-			std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
-			//-------------------------
-		}
-		
 		subnets = std::vector<reg_web>(num_subnets);
-		
 		for (uint16_t i = 0; i < num_subnets; ++i) {
-			subnets[i] = ARACNe3_subnet(global_gm, i);
+			genemap subnet_matrix = sampleFromGlobalGenemap();
+			subnets.push_back(ARACNe3_subnet(subnet_matrix, i));
 		}
 	} else {
-		/*
-		 matrices.first contains the genemap for the full sample size.  matrices.second contains a vector of genemaps for each 'fold', or subset of samples for each subnetwork.
-		 */
-		if (verbose) {
-			//-------time module-------
-			std::cout << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
-			sinceLast(last, std::cout);
-			//-------------------------
-			
-			//-------time module-------
-			std::cout << "\nNULL MI MODEL TIME:" << endl;
-			last = chrono::high_resolution_clock::now();
-			//-------------------------
-		}
-		
-		initNullMIs(tot_num_subsample);
-		
-		if(verbose) {
-			//-------time module-------
-			sinceLast(last, std::cout);
-			//-------------------------
-			
-			//-------time module-------
-			std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
-			//-------------------------
-		}
-		
 		subnets = std::vector<reg_web>(num_subnets);
-		
 		for (uint16_t i = 0; i < num_subnets; ++i) {
 			genemap subnet_matrix = sampleFromGlobalGenemap(); 
 			subnets[i] = ARACNe3_subnet(subnet_matrix, i);
