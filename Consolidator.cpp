@@ -6,8 +6,8 @@
 
 float FPR_estimate = 1.5E-4f;
 
-extern uint16_t tot_num_samps_pre_subsample;
 extern uint16_t tot_num_samps;
+extern uint16_t tot_num_subsample;
 extern uint16_t tot_num_regulators;
 extern genemap global_gm;
 extern genemap_r global_gm_r; 

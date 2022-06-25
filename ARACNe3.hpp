@@ -105,7 +105,9 @@ void readRegList(std::string filename = "regulators.txt");
 /*
  Returns a map of gene identifier -> gene expression.
  */
-std::vector<genemap> readExpMatrix(std::string filename = "exp_mat.txt");
+void readExpMatrix(std::string filename = "exp_mat.txt");
+
+genemap sampleFromGlobalGenemap();
 
 void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir = "output", const std::string &output_suffix = "0");
 
@@ -137,7 +139,7 @@ const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec,
 
 //--------------------- NullModel.cpp	 		-----------------------
 // sets a file static variable of an ordered null distribution
-const std::vector<float> initNullMIs(const uint16_t& tot_num_samps);
+const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample);
 
 // the function below requires that initNullMIs has been called
 const float getMIPVal(const float& mi, const float& p_precise = 0.001f);

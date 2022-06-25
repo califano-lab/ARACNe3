@@ -5,7 +5,7 @@
 #include "ARACNe3.hpp"
 
 extern uint16_t tot_num_regulators;
-extern uint16_t tot_num_samps;
+extern uint16_t tot_num_subsample;
 
 /*
  Simply returns a vector of the same regID duplicated for every edge it has associated
@@ -45,7 +45,7 @@ std::vector<float> get_MIs(gene_id_t regID, reg_web &regweb) {
  Returns a vector of the p-values in the regweb, must be computed as this is not reg_web_p
  */
 std::vector<float> get_p_vals(gene_id_t regID, reg_web &regweb) {
-	initNullMIs(tot_num_samps);
+	initNullMIs(tot_num_subsample);
 	const std::vector<float> mis = get_MIs(regID, regweb);
 	return getMIPVals(mis);
 }

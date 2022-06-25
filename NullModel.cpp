@@ -62,8 +62,8 @@ std::pair<float, float> linreg(uint32_t N, const std::vector<float>& x, const st
 /*
  Computes 1 million null mutual information values for the sample size.  Checks whether there already exists a null_mi vector (nulls_filename) in the cached directory.
  */
-const std::vector<float> initNullMIs(const uint16_t& tot_num_samps) {
-	std::string nulls_filename = cached_dir + "numnulls-" + std::to_string(num_null_marginals) + "_numsamps-" + std::to_string(tot_num_samps);
+const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
+	std::string nulls_filename = cached_dir + "numnulls-" + std::to_string(num_null_marginals) + "_numsamps-" + std::to_string(tot_num_subsample);
 	/*
 	 If there already is a null model for this number of samples cached in the cached_dir, then we just pull values from that.  Also pull parameters from regression.
 	 */
@@ -86,9 +86,9 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_samps) {
 	} else {
 		// make the permute vector, the ref vector, send to permuteAPMI
 		std::vector<float> ref_vec;
-		ref_vec.reserve(tot_num_samps);
-		for (uint16_t i = 1; i <= tot_num_samps; ++i) {
-			ref_vec.push_back(((float) i)/(tot_num_samps+1));
+		ref_vec.reserve(tot_num_subsample);
+		for (uint16_t i = 1; i <= tot_num_subsample; ++i) {
+			ref_vec.push_back(((float) i)/(tot_num_subsample+1));
 		}
 
 		// vector of vectors, 1mil rows

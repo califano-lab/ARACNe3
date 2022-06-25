@@ -7,6 +7,7 @@ using namespace std;
  These variables are tuned according to user preferences.  Some of these the user doesn't choose, such as the cached_dir, which is always the working directory of the ARACNe3 script.
  */
 bool prune_alpha = true;
+bool adaptive = false;
 float alpha = 0.05f;
 double subsampling_percent = 1 - std::exp(-1);
 bool prune_MaxEnt = true;
@@ -24,8 +25,8 @@ uint32_t global_seed = 0;
 /*
  These variables represent the original data and do not change after matrix files are read.
  */
-extern uint16_t tot_num_samps_pre_subsample;
 extern uint16_t tot_num_samps;
+extern uint16_t tot_num_subsample;
 extern uint16_t tot_num_regulators;
 extern genemap global_gm;
 
@@ -57,8 +58,8 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
 	log_output << "Subnetwork #: " + std::to_string(subnet_idx) << std::endl;
 	log_output << "Total # regulators: " + std::to_string(tot_num_regulators) << std::endl;
 	log_output << "Total # targets: " + std::to_string(subnet_matrix.size()) << std::endl;
-	log_output << "Total # samples: " + std::to_string(tot_num_samps_pre_subsample) << std::endl;
-	log_output << "Subsampled quantity: " + std::to_string(tot_num_samps) << std::endl;
+	log_output << "Total # samples: " + std::to_string(tot_num_samps) << std::endl;
+	log_output << "Subsampled quantity: " + std::to_string(tot_num_subsample) << std::endl;
 	log_output << "Total possible edges: " + std::to_string(tot_num_regulators*subnet_matrix.size()-tot_num_regulators) << std::endl;
 	log_output << "Method of first pruning step: " + method << std::endl;
 	log_output << "Alpha: " + std::to_string(alpha) << std::endl;
@@ -218,6 +219,8 @@ int main(int argc, char *argv[]) {
 		method = "FDR";
 	if (cmdOptionExists(argv, argv+argc, "--FWER"))
 		method = "FWER";
+	if (cmdOptionExists(argv, argv+argc, "--adaptive"))
+		adaptive = true;
 
 	//----------------------DEVELOPER--------------------------
 	
@@ -255,39 +258,74 @@ int main(int argc, char *argv[]) {
 	
 	readRegList(reg_file);
 	
-	/*
-	 matrices.first contains the genemap for the full sample size.  matrices.second contains a vector of genemaps for each 'fold', or subset of samples for each subnetwork.
-	 */
-	std::vector<genemap> matrices = readExpMatrix(exp_file);
+	readExpMatrix(exp_file);
 	
-	if (verbose) {
-		//-------time module-------
-		std::cout << "\nMATRIX & REGULATORS READ & SUBSAMPLING TIME:" << std::endl;
-		sinceLast(last, std::cout);
-		//-------------------------
+	
+	std::vector<reg_web> subnets;
+	if (adaptive) {
+		if (verbose) {
+			//-------time module-------
+			std::cout << "\nMATRIX & REGULATORS TIME:" << std::endl;
+			sinceLast(last, std::cout);
+			//-------------------------
+			
+			//-------time module-------
+			std::cout << "\nNULL MI MODEL TIME:" << endl;
+			last = chrono::high_resolution_clock::now();
+			//-------------------------
+		}
 		
-		//-------time module-------
-		std::cout << "\nNULL MI MODEL TIME:" << endl;
-		last = chrono::high_resolution_clock::now();
-		//-------------------------
-	}
-	
-	initNullMIs(tot_num_samps);
-	
-	if(verbose) {
-		//-------time module-------
-		sinceLast(last, std::cout);
-		//-------------------------
+		initNullMIs(tot_num_subsample);
 		
-		//-------time module-------
-		std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
-		//-------------------------
-	}
-	
-	std::vector<reg_web> subnets(num_subnets);
-	
-	for (uint16_t i = 0; i < num_subnets; ++i) {
-		subnets[i] = ARACNe3_subnet(matrices[i], i);
+		if(verbose) {
+			//-------time module-------
+			sinceLast(last, std::cout);
+			//-------------------------
+			
+			//-------time module-------
+			std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
+			//-------------------------
+		}
+		
+		subnets = std::vector<reg_web>(num_subnets);
+		
+		for (uint16_t i = 0; i < num_subnets; ++i) {
+			subnets[i] = ARACNe3_subnet(global_gm, i);
+		}
+	} else {
+		/*
+		 matrices.first contains the genemap for the full sample size.  matrices.second contains a vector of genemaps for each 'fold', or subset of samples for each subnetwork.
+		 */
+		if (verbose) {
+			//-------time module-------
+			std::cout << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
+			sinceLast(last, std::cout);
+			//-------------------------
+			
+			//-------time module-------
+			std::cout << "\nNULL MI MODEL TIME:" << endl;
+			last = chrono::high_resolution_clock::now();
+			//-------------------------
+		}
+		
+		initNullMIs(tot_num_subsample);
+		
+		if(verbose) {
+			//-------time module-------
+			sinceLast(last, std::cout);
+			//-------------------------
+			
+			//-------time module-------
+			std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
+			//-------------------------
+		}
+		
+		subnets = std::vector<reg_web>(num_subnets);
+		
+		for (uint16_t i = 0; i < num_subnets; ++i) {
+			genemap subnet_matrix = sampleFromGlobalGenemap(); 
+			subnets[i] = ARACNe3_subnet(subnet_matrix, i);
+		}
 	}
 	
 	if(verbose) {

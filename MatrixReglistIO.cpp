@@ -11,8 +11,8 @@ static std::vector<std::string> decompression_map;
 /*
  Global variables are passed from ARACNe3.cpp, which are the user-defined parameters.
  */
-uint16_t tot_num_samps_pre_subsample = 0;
 uint16_t tot_num_samps = 0;
+uint16_t tot_num_subsample = 0;
 uint16_t tot_num_regulators = 0;
 genemap global_gm;
 genemap_r global_gm_r;
@@ -95,13 +95,29 @@ void readRegList(std::string filename) {
 	return;
 }
 
+/*
+ Create a subsampled genemap.  Requires that global_gm and tot_num_subsample are set by readExpMat(), which must occur on program launch anyway
+ */
+genemap sampleFromGlobalGenemap() {
+	static std::mt19937 rand{global_seed++};
+	genemap subsample_gm;
+	for (auto &[gene, expr_vec] : global_gm) {
+		subsample_gm[gene] = std::vector<float>(tot_num_subsample);
+		std::sample(expr_vec.begin(), expr_vec.end(), subsample_gm[gene].begin(), tot_num_subsample, rand);
+		std::vector<uint16_t> idx_ranks = rank_indexes(subsample_gm[gene]);
+		for (uint16_t r = 0; r < tot_num_subsample; ++r)
+			subsample_gm[gene][idx_ranks[r]] = (r + 1)/((float)tot_num_subsample + 1); 
+	}	
+	
+	return subsample_gm;
+}
+
 /* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the genemap for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
  */
-std::vector<genemap> readExpMatrix(std::string filename) {
+void readExpMatrix(std::string filename) {
 	fstream f{filename};
 	genemap gm;
-	genemap_r gm_r; //to store rank-transformed INDICES of gexp values
-	std::vector<genemap> gm_folds(num_subnets);
+	genemap_r gm_r; //to store ranks of gexp values
 	if (!f.is_open()) {
 		std::cerr << "error: file open failed " << filename << ".\n";
 		std::exit(2);
@@ -119,21 +135,10 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 	for (size_t pos = 0; (pos = line.find_first_of("\t, ", pos)) != string::npos; ++pos)
 		++tot_num_samps;
 	
-	// find subsample number **NOTE** must update tot_num_samps after subsampling
-	uint16_t subsample_quant = std::ceil(subsampling_percent * tot_num_samps);
-	if (subsample_quant >= tot_num_samps || subsample_quant < 0)
-		subsample_quant = tot_num_samps;
-	std::vector<uint16_t> samps_idx(tot_num_samps);
-	
-	std::iota(samps_idx.begin(), samps_idx.end(), 0U); /* 0, 1, ..., size-1 */
-	// now, fold is a vector with subsample_quant indices sampled from [0,tot_num_samps).
-	/* verify that seeding is done properly.  Replaced std::random_device{}() w/ global_seed*/
-	
-	// This is a vector of folds for every subnet requested
-	std::vector<std::vector<uint16_t>> folds(num_subnets, std::vector<uint16_t>(subsample_quant));
-	for (uint16_t i = 0; i < num_subnets; ++i) {
-		std::sample(samps_idx.begin(), samps_idx.end(), folds[i].begin(), subsample_quant, std::mt19937{global_seed++});
-	}
+	// find subsample number
+	tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
+	if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0)
+		tot_num_subsample = tot_num_samps;
 	
 	// now, we can more efficiently load
 	while(std::getline(f, line, '\n')) {
@@ -152,25 +157,7 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			prev = pos + 1;
 		}
 		expr_vec.emplace_back(stof(line.substr(prev, string::npos)));
-		
-		// subsample. create expr_vec subsamples for each "fold" (subnetwork) requested.
-		std::vector<std::vector<float>> expr_vec_folds;
-		for (uint16_t subnet_idx = 0; subnet_idx < num_subnets; ++subnet_idx) {
-			vector <float> expr_vec_sampled;
-			expr_vec_sampled.reserve(subsample_quant);
-			for (uint16_t i = 0U; i < subsample_quant; ++i)
-				expr_vec_sampled.emplace_back(expr_vec[folds[subnet_idx][i]]);
-			
-			std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec_sampled);
-			
-			/*
-			 This function copula transforms the expr_vec_sampled values.  It's a brain teaser to think about, but idx_ranks spits out the index of the rank r'th element.  So idx_ranks[0] is the index of expr_vec_sampled for the least value, and we set that accordingly, in the manner below.
-			 */
-			for (uint16_t r = 0; r < subsample_quant; ++r)
-				expr_vec_sampled[idx_ranks[r]] = (r + 1 /*rank starts from 0*/)/((float)subsample_quant + 1); 
-			expr_vec_folds.push_back(expr_vec_sampled);
-		}
-		
+				
 		// copula-transform expr_vec values
 		std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec);
 		
@@ -190,29 +177,22 @@ std::vector<genemap> readExpMatrix(std::string filename) {
 			// the last index of decompression_vec is the new uint16_t
 			gm[decompression_map.size()-1] = expr_vec;
 			gm_r[decompression_map.size()-1] = expr_vec_ranked; //store ranks of idx's for SCC later
-			for (uint16_t i = 0; i < num_subnets; ++i)
-				gm_folds[i][decompression_map.size()-1] = expr_vec_folds[i];
 		} else {
 			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
 			gm[compression_map[gene]-1] = expr_vec;
 			gm_r[compression_map[gene]-1] = expr_vec_ranked; //store ranks of idx's for SCC later
-			for (uint16_t i = 0; i < num_subnets; ++i)
-				gm_folds[i][compression_map[gene]-1] = expr_vec_folds[i];
 		}
 
 	}
 	
 	if (verbose) {
 		std::cout << "\nInitial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
-		std::cout << "Sampled Num Samples: " + std::to_string(subsample_quant) << std::endl;
+		std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) << std::endl;
 	}
 	
-	// update tot_num_samps because of **NOTE** above
-	tot_num_samps_pre_subsample = tot_num_samps;
-	tot_num_samps = subsample_quant;
 	global_gm = gm;
 	global_gm_r = gm_r;
-	return gm_folds;
+	return;
 }
 
 /*
