@@ -11,7 +11,6 @@ bool adaptive = false;
 float alpha = 0.05f;
 double subsampling_percent = 1 - std::exp(-1);
 bool prune_MaxEnt = true;
-bool verbose = true;
 std::string cached_dir;
 std::string output_dir;
 std::string log_dir;
@@ -164,22 +163,22 @@ bool cmdOptionExists(char **begin, char **end, const std::string& option)
  Main function is the command line executable; this primes the global variables and parses the command line.  It will also return usage notes if the user incorrectly calls ./ARACNe3.
  
  Example:
- ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noAlpha -a 0.05 --alpha 0.05 --noMaxEnt --subsample 0.6321 --noverbose --seed 1 --mithresh 0.2 --numnulls 1000000
+ ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noAlpha -a 0.05 --alpha 0.05 --noMaxEnt --subsample 0.6321 --seed 1 --mithresh 0.2 --numnulls 1000000
  */
 int main(int argc, char *argv[]) {
 	auto last = std::chrono::high_resolution_clock::now();
 	
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
-		cout << "usage: " + ((string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05" << endl;
+		std::cout << "usage: " + ((std::string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05" << std:endl;
 		return 1;
 	}
 	
 	//--------------------cmd line parsing------------------------
 	
-	string exp_file = (string) getCmdOption(argv, argv+argc, "-e");
-	string reg_file = (string) getCmdOption(argv, argv+argc, "-r");
+	std::string exp_file = (std::string) getCmdOption(argv, argv+argc, "-e");
+	std::string reg_file = (std::string) getCmdOption(argv, argv+argc, "-r");
 	
-	output_dir = (string) getCmdOption(argv, argv+argc, "-o");
+	output_dir = (std::string) getCmdOption(argv, argv+argc, "-o");
 	
 	// make sure output_dir has a trailing slash
 	if (output_dir.back() != '/')
@@ -213,8 +212,6 @@ int main(int argc, char *argv[]) {
 	    	prune_alpha = false;
 	if (cmdOptionExists(argv, argv+argc, "--noMaxEnt"))
 	    	prune_MaxEnt = false;
-	if (cmdOptionExists(argv, argv+argc, "--noverbose"))
-	    	verbose = false;
 	if (cmdOptionExists(argv, argv+argc, "--FDR"))
 		method = "FDR";
 	if (cmdOptionExists(argv, argv+argc, "--FWER"))
@@ -249,41 +246,33 @@ int main(int argc, char *argv[]) {
 	subnets_dir = output_dir + "subnets/";
 	makeDir(subnets_dir);
 	
-	if (verbose) {
-	// we don't print "... TIME:" here because we have prints in the function below
-		//-------time module-------
-		last = chrono::high_resolution_clock::now();
-		//-------------------------
-	}
+	//-------time module-------
+	last = chrono::high_resolution_clock::now();
+	//-------------------------
 	
 	readRegList(reg_file);
 	
 	readExpMatrix(exp_file);
 	
-	if (verbose) {
-		//-------time module-------
-		std::cout << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
-		sinceLast(last, std::cout);
-		//-------------------------
-		
-		//-------time module-------
-		std::cout << "\nNULL MI MODEL TIME:" << endl;
-		last = chrono::high_resolution_clock::now();
-		//-------------------------
-	}
+	//-------time module-------
+	std::cout << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
+	sinceLast(last, std::cout);
+	//-------------------------
+	
+	//-------time module-------
+	std::cout << "\nNULL MI MODEL TIME:" << endl;
+	last = chrono::high_resolution_clock::now();
+	//-------------------------
 	
 	initNullMIs(tot_num_subsample);
 	
-	if(verbose) {
-		//-------time module-------
-		sinceLast(last, std::cout);
-		//-------------------------
-		
-		//-------time module-------
-		std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
-		//-------------------------
-	}
+	//-------time module-------
+	sinceLast(last, std::cout);
+	//-------------------------
 	
+	//-------time module-------
+	std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
+	//-------------------------
 	
 	std::vector<reg_web> subnets;
 	if (adaptive) {
@@ -300,29 +289,26 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	
-	if(verbose) {
-		//-------time module-------
-		sinceLast(last, std::cout);
-		//-------------------------
-		
-		//-------time module-------
-		std::cout << "\nCONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
-		//-------------------------
-	}
+	//-------time module-------
+	sinceLast(last, std::cout);
+	//-------------------------
+	
+	//-------time module-------
+	std::cout << "\nCONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
+	//-------------------------
+	
 	std::vector<consolidated_df> final_df = consolidate(subnets);
 	
-	if(verbose) {
-		//-------time module-------
-		sinceLast(last, std::cout);
-		//-------------------------
-		
-		//-------time module-------
-		std::cout << "\nWRITING FINAL NETWORK..." << std::endl;
-		//-------------------------
-	}
+	//-------time module-------
+	sinceLast(last, std::cout);
+	//-------------------------
+	
+	//-------time module-------
+	std::cout << "\nWRITING FINAL NETWORK..." << std::endl;
+	//-------------------------
+	
 	writeConsolidatedNetwork(final_df, output_dir);
 	
-	if (verbose) {
 		using namespace std::string_literals;
 		const char* success_A3 =
 R"(
@@ -342,7 +328,6 @@ R"(
 SUCCESS!
 )";
 		std::cout << success_A3 << std::endl;
-	}
 	
 	return 0;
 }

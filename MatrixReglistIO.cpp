@@ -17,7 +17,6 @@ uint16_t tot_num_regulators = 0;
 genemap global_gm;
 genemap_r global_gm_r;
 
-extern bool verbose;
 extern uint32_t global_seed;
 extern uint16_t num_subnets;
 extern double subsampling_percent;
@@ -28,7 +27,7 @@ extern double subsampling_percent;
 void makeDir(const std::string &dir_name) {
 	if (!std::filesystem::exists(dir_name)) {
 		if (std::filesystem::create_directory(dir_name)) {
-			if (verbose) std::cout << "Directory Created: " + dir_name << std::endl;
+			std::cout << "Directory Created: " + dir_name << std::endl;
 		} else {
 			std::cerr << "failed to create directory: " + dir_name << std::endl;
 			std::exit(2);
@@ -124,7 +123,7 @@ void readExpMatrix(std::string filename) {
 	}
 
 	// for the first line, we simply want to count the number of samples
-	string line;
+	std::string line;
 	getline(f, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
@@ -132,7 +131,7 @@ void readExpMatrix(std::string filename) {
 	/*
 	 Count number of samples from the number of columns in the first line
 	 */ 
-	for (size_t pos = 0; (pos = line.find_first_of("\t, ", pos)) != string::npos; ++pos)
+	for (size_t pos = 0; (pos = line.find_first_of("\t, ", pos)) != std::string::npos; ++pos)
 		++tot_num_samps;
 	
 	// find subsample number
@@ -150,13 +149,13 @@ void readExpMatrix(std::string filename) {
 		std::size_t prev = 0U, pos = line.find_first_of("\t, ", prev);
 		std::string gene = line.substr(prev, pos-prev);
 		prev = pos + 1;
-		while ((pos = line.find_first_of("\t, ", prev)) != string::npos) {
+		while ((pos = line.find_first_of("\t, ", prev)) != std::string::npos) {
 			if (pos > prev) {
 				expr_vec.emplace_back(stof(line.substr(prev, pos-prev)));
 			}
 			prev = pos + 1;
 		}
-		expr_vec.emplace_back(stof(line.substr(prev, string::npos)));
+		expr_vec.emplace_back(stof(line.substr(prev, std::string::npos)));
 				
 		// copula-transform expr_vec values
 		std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec);
@@ -178,17 +177,15 @@ void readExpMatrix(std::string filename) {
 			gm[decompression_map.size()-1] = expr_vec;
 			gm_r[decompression_map.size()-1] = expr_vec_ranked; //store ranks of idx's for SCC later
 		} else {
-			/* we already mapped this regulator, so we must use the string map to find its compression value.  We do -1 because of NOTE** above */
+			/* we already mapped this regulator, so we must use the std::string map to find its compression value.  We do -1 because of NOTE** above */
 			gm[compression_map[gene]-1] = expr_vec;
 			gm_r[compression_map[gene]-1] = expr_vec_ranked; //store ranks of idx's for SCC later
 		}
 
 	}
 	
-	if (verbose) {
-		std::cout << "\nInitial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
-		std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) << std::endl;
-	}
+	std::cout << "\nInitial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
+	std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) << std::endl;
 	
 	global_gm = gm;
 	global_gm_r = gm_r;

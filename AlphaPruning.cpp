@@ -3,7 +3,8 @@
 extern uint16_t tot_num_regulators;
 extern bool prune_MaxEnt;
 extern float alpha;
-extern std::string method; 
+extern std::string method;
+
 
 /*
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if method = FDR, or FWER if method = FWER..

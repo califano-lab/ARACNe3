@@ -94,8 +94,6 @@ g_10011_	0.055	0.73	4.64
 
 ``--seed`` sets the seed for pseudorandom behavior for null model marginals and subsampling (default: `--seed 0`)
 
-``--noverbose`` removes console messages from ARACNe3 stating elapsed time and resulting edges
-
 ## Examples
 Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators). 
 
