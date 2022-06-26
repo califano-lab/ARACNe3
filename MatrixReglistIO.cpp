@@ -1,7 +1,5 @@
 #include "ARACNe3.hpp"
 
-using namespace std;
-
 /*
  Compression (gene (string) to uint16_t) and decompression (uint16_t back to gene (string)) mapping.  When doing the matrix/regulator list IO, this application automatically compresses all gene identifiers into unsigned short (2B) 0-65535, as this substantially can decrease the memory load of data structures which must copy the initial values (strings, for the gene identifiers these are anywhere from 5B-25B), or refer to them through pointers (8B).  Reading less memory also can speed up computation.
  */
@@ -114,7 +112,7 @@ genemap sampleFromGlobalGenemap() {
 /* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the genemap for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
  */
 void readExpMatrix(std::string filename) {
-	fstream f{filename};
+	std::fstream f{filename};
 	genemap gm;
 	genemap_r gm_r; //to store ranks of gexp values
 	if (!f.is_open()) {
@@ -196,11 +194,11 @@ void readExpMatrix(std::string filename) {
  Function that prints the Regulator, Target, and MI to the output_dir given the output_suffix.  Does not print to the console.  The data structure input is a reg_web, which is defined in "ARACNe3.hpp".
  */
 void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir, const std::string &output_suffix) {
-	const string filename = output_dir + "output_" + output_suffix + ".txt";
-	ofstream ofs{filename};
+	const std::string filename = output_dir + "output_" + output_suffix + ".txt";
+	std::ofstream ofs{filename};
 	if (!ofs) {
-		cerr << "error: could not write to file: " << filename << ".\n";
-		cerr << "Try making the output directory subdirectory of the working directory. Example \"-o ./runs\"." << endl;
+		std::cerr << "error: could not write to file: " << filename << ".\n";
+		std::cerr << "Try making the output directory subdirectory of the working directory. Example \"-o ./runs\"." << std::endl;
 		std::exit(2);
 	}
 	
@@ -214,7 +212,7 @@ void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir,
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, const std::string& output_dir) {
 	const std::string filename = output_dir + "finalNet.txt";
-	ofstream ofs{filename};
+	std::ofstream ofs{filename};
 	if (!ofs) {
 		std::cerr << "error: could not write to file: " << filename << ".\n";
 		std::cerr << "Try making the output directory subdirectory of the working directory. Example \"-o ./runs\"." << std::endl;

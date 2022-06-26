@@ -1,8 +1,5 @@
 #include "ARACNe3.hpp"
 
-using namespace std;
-
-
 /*
  These variables are tuned according to user preferences.  Some of these the user doesn't choose, such as the cached_dir, which is always the working directory of the ARACNe3 script.
  */
@@ -122,7 +119,7 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix, uint16_t subnet_idx) {
 	
 	//-------time module-------
 	log_output << "\nPRINTING NETWORK IN DIRECTORY \"" + output_dir + "\"....." << std::endl;
-	last = chrono::high_resolution_clock::now();
+	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
 	// writes the individual subnet output
@@ -186,17 +183,17 @@ int main(int argc, char *argv[]) {
 	    output_dir += '/';
 	
 	if (cmdOptionExists(argv, argv+argc, "--alpha"))
-		alpha = stof(getCmdOption(argv, argv+argc, "--alpha"));
+		alpha = std::stof(getCmdOption(argv, argv+argc, "--alpha"));
 	if (alpha >= 1.00f || alpha <= 0) {
 		std::cout << "alpha not on range [0,1], setting to 1.00" << std::endl;
 		alpha = 1.01f;
 	}
 	
 	if (cmdOptionExists(argv, argv+argc, "--seed"))
-		global_seed = stoi(getCmdOption(argv, argv+argc, "--seed"));
+		global_seed = std::stoi(getCmdOption(argv, argv+argc, "--seed"));
 	
 	if (cmdOptionExists(argv, argv+argc, "--subsample"))
-		subsampling_percent = stod(getCmdOption(argv, argv+argc, "--subsample"));
+		subsampling_percent = std::stod(getCmdOption(argv, argv+argc, "--subsample"));
 	
 	if (subsampling_percent > 1.0000001 || subsampling_percent <= 0) {
 			std::cout << "Subsampling percent not on range (0,1]; setting to 1.00." << std::endl;
@@ -204,10 +201,10 @@ int main(int argc, char *argv[]) {
 	}
 	
 	if (cmdOptionExists(argv, argv+argc, "-x")) 
-		num_subnets = targets_per_regulator = stoi(getCmdOption(argv, argv+argc, "-x"));
+		num_subnets = targets_per_regulator = std::stoi(getCmdOption(argv, argv+argc, "-x"));
 
 	if (cmdOptionExists(argv, argv+argc, "--numNetworks"))
-		num_subnets = stoi(getCmdOption(argv, argv+argc, "--numNetworks"));
+		num_subnets = std::stoi(getCmdOption(argv, argv+argc, "--numNetworks"));
 
 	if (cmdOptionExists(argv, argv+argc, "--noAlpha"))
 	    	prune_alpha = false;
@@ -223,12 +220,12 @@ int main(int argc, char *argv[]) {
 	//----------------------DEVELOPER--------------------------
 	
 	if (cmdOptionExists(argv, argv+argc, "--mithresh"))
-		DEVELOPER_mi_cutoff = stof(getCmdOption(argv, argv+argc, "--mithresh"));
+		DEVELOPER_mi_cutoff = std::stof(getCmdOption(argv, argv+argc, "--mithresh"));
 	if (DEVELOPER_mi_cutoff < 0)
 		DEVELOPER_mi_cutoff = 0.0f;
 	
 	if (cmdOptionExists(argv, argv+argc, "--numnulls"))
-		num_null_marginals = stoi(getCmdOption(argv, argv+argc, "--numnulls"));
+		num_null_marginals = std::stoi(getCmdOption(argv, argv+argc, "--numnulls"));
 	if (num_null_marginals < 0) {
 		std::cout << "Number of null marginals not on range (0,inf); setting to 1000000." << std::endl;
 		num_null_marginals = 1000000;
@@ -248,7 +245,7 @@ int main(int argc, char *argv[]) {
 	makeDir(subnets_dir);
 	
 	//-------time module-------
-	last = chrono::high_resolution_clock::now();
+	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 
 	std::ofstream log_output(output_dir + "finalLog.txt");
@@ -267,8 +264,8 @@ int main(int argc, char *argv[]) {
 	//-------------------------
 	
 	//-------time module-------
-	log_output << "\nNULL MI MODEL TIME:" << endl;
-	last = chrono::high_resolution_clock::now();
+	log_output << "\nNULL MI MODEL TIME:" << std::endl;
+	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
 	initNullMIs(tot_num_subsample);

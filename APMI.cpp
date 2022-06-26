@@ -3,9 +3,6 @@
 //#include <Rcpp.h>
 #include "ARACNe3.hpp"
 
-using namespace std;
-
-
 extern float DEVELOPER_mi_cutoff;
 
 /*
@@ -95,7 +92,7 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
  * returns the APMI 
  */
 // [[Rcpp::export]]
-float APMI(const vector<float>& vec_x, const vector<float>& vec_y, 
+float APMI(const std::vector<float>& vec_x, const std::vector<float>& vec_y, 
 		const float& q_thresh,
 		const uint16_t& size_thresh) {
 	// Set file static variables
@@ -174,7 +171,7 @@ std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
  */
 
 const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec_x,
-		const std::vector<vector<float>> &targets, const float &q_thresh, const uint16_t &size_thresh) {
+		const std::vector<std::vector<float>> &targets, const float &q_thresh, const uint16_t &size_thresh) {
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
