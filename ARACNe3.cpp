@@ -309,6 +309,7 @@ int main(int argc, char *argv[]) {
 			
 			++i;
 		}
+		num_subnets = i;
 	} else {
 		subnets = std::vector<reg_web>(num_subnets);
 		for (uint16_t i = 0; i < num_subnets; ++i) {
@@ -320,6 +321,8 @@ int main(int argc, char *argv[]) {
 	//-------time module-------
 	sinceLast(last, log_output);
 	//-------------------------
+	
+	log_output << "TOTAL SUBNETS GENERATED: " + std::to_string(num_subnets) << std::endl;
 	
 	//-------time module-------
 	log_output << "\nCONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
