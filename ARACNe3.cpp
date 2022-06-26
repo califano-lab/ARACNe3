@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
 	auto last = std::chrono::high_resolution_clock::now();
 	
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
-		std::cout << "usage: " + ((std::string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05" << std:endl;
+		std::cout << "usage: " + ((std::string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05" << std::endl;
 		return 1;
 	}
 	
@@ -249,29 +249,35 @@ int main(int argc, char *argv[]) {
 	//-------time module-------
 	last = chrono::high_resolution_clock::now();
 	//-------------------------
+
+	std::ofstream log_output(output_dir + "finalLog.txt");
+	std::time_t t = std::time(nullptr);
+	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------\n" << std::endl;
+	std::cout << "\nBeginning ARACNe3 network generation.  See logs and progress reports in \"" + output_dir + "finalLog.txt\"" << std::endl;
+	log_output << "\nBeginning ARACNe3 network generation..." << std::endl;
 	
 	readRegList(reg_file);
 	
 	readExpMatrix(exp_file);
 	
 	//-------time module-------
-	std::cout << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
-	sinceLast(last, std::cout);
+	log_output << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
+	sinceLast(last, log_output);
 	//-------------------------
 	
 	//-------time module-------
-	std::cout << "\nNULL MI MODEL TIME:" << endl;
+	log_output << "\nNULL MI MODEL TIME:" << endl;
 	last = chrono::high_resolution_clock::now();
 	//-------------------------
 	
 	initNullMIs(tot_num_subsample);
 	
 	//-------time module-------
-	sinceLast(last, std::cout);
+	sinceLast(last, log_output);
 	//-------------------------
 	
 	//-------time module-------
-	std::cout << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
+	log_output << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
 	//-------------------------
 	
 	std::vector<reg_web> subnets;
@@ -290,21 +296,21 @@ int main(int argc, char *argv[]) {
 	}
 	
 	//-------time module-------
-	sinceLast(last, std::cout);
+	sinceLast(last, log_output);
 	//-------------------------
 	
 	//-------time module-------
-	std::cout << "\nCONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
+	log_output << "\nCONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
 	//-------------------------
 	
 	std::vector<consolidated_df> final_df = consolidate(subnets);
 	
 	//-------time module-------
-	sinceLast(last, std::cout);
+	sinceLast(last, log_output);
 	//-------------------------
 	
 	//-------time module-------
-	std::cout << "\nWRITING FINAL NETWORK..." << std::endl;
+	log_output << "\nWRITING FINAL NETWORK..." << std::endl;
 	//-------------------------
 	
 	writeConsolidatedNetwork(final_df, output_dir);
@@ -328,6 +334,7 @@ R"(
 SUCCESS!
 )";
 		std::cout << success_A3 << std::endl;
+		log_output << success_A3 << std::endl;
 	
 	return 0;
 }
