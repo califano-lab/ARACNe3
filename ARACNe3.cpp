@@ -17,7 +17,8 @@ std::string log_dir;
 std::string subnets_dir;
 std::string method = "FDR";
 float DEVELOPER_mi_cutoff = 0;
-uint16_t num_subnets = 1;
+uint16_t num_subnets = 10;
+uint16_t targets_per_regulator = 30;
 
 uint32_t global_seed = 0;
 
@@ -202,8 +203,8 @@ int main(int argc, char *argv[]) {
 			subsampling_percent = 1.00;
 	}
 	
-	if (cmdOptionExists(argv, argv+argc, "-x"))
-		num_subnets = stoi(getCmdOption(argv, argv+argc, "-x"));
+	if (cmdOptionExists(argv, argv+argc, "-x")) 
+		num_subnets = targets_per_regulator = stoi(getCmdOption(argv, argv+argc, "-x"));
 
 	if (cmdOptionExists(argv, argv+argc, "--numNetworks"))
 		num_subnets = stoi(getCmdOption(argv, argv+argc, "--numNetworks"));
@@ -252,9 +253,9 @@ int main(int argc, char *argv[]) {
 
 	std::ofstream log_output(output_dir + "finalLog.txt");
 	std::time_t t = std::time(nullptr);
-	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------\n" << std::endl;
-	std::cout << "\nBeginning ARACNe3 network generation.  See logs and progress reports in \"" + output_dir + "finalLog.txt\"" << std::endl;
-	log_output << "\nBeginning ARACNe3 network generation..." << std::endl;
+	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl;
+	std::cout << "Beginning ARACNe3 network generation.  See logs and progress reports in \"" + output_dir + "finalLog.txt\"." << std::endl;
+	log_output << "Beginning ARACNe3 network generation..." << std::endl;
 	
 	readRegList(reg_file);
 	
@@ -283,9 +284,30 @@ int main(int argc, char *argv[]) {
 	std::vector<reg_web> subnets;
 	if (adaptive) {
 		subnets = std::vector<reg_web>(num_subnets);
-		for (uint16_t i = 0; i < num_subnets; ++i) {
+		bool stoppingCriteriaMet = false;
+		std::unordered_map<gene_id_t, std::unordered_set<gene_id_t>> regulon_set;
+		for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) regulon_set[reg];
+		uint16_t i = 0U;
+		while (!stoppingCriteriaMet) {
 			genemap subnet_matrix = sampleFromGlobalGenemap();
 			subnets.push_back(ARACNe3_subnet(subnet_matrix, i));
+			
+			// add any new edges to the regulon_set
+			for (const auto &[reg, edge_tars] : subnets[i]) {
+				for (const auto &edge : edge_tars) {
+					regulon_set[reg].insert(edge.target);
+				}
+			}
+			
+			// check stoping criteria
+			uint16_t min = 65535U;
+			for (const auto &[reg, regulon] : regulon_set)
+				if (regulon.size() < min) 
+					min = regulon.size();
+			if (min >= targets_per_regulator) 
+				stoppingCriteriaMet = true;
+			
+			++i;
 		}
 	} else {
 		subnets = std::vector<reg_web>(num_subnets);
