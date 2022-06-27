@@ -10,7 +10,7 @@ extern uint16_t nthreads;
  */
 reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_network) {
 	// primed will store the edges that are weakest.  we use a set to eliminate redundancy if the same edge is identified twice; same as hash set?
-	std::unordered_map<gene_id_t, std::set<gene_id_t>> removedEdges;
+	std::vector<std::set<gene_id_t>> removedEdges(tot_num_regulators);
 	
 	/*
 	 Inefficient conversion operation here.  Makes searching whether a target is contained an O(1) operation due to the hash map of hash maps, as opposed to a hash map of edge_tar vectors, which would make checking for a particular edge_tar.target an O(n) operation.
@@ -19,7 +19,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 	map_map finalNet = regweb_to_mapmap(network);
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
-#pragma omp parallel for num_threads(nthreads)
+#pragma omp parallel for num_threads(nthreads) private(tftfNetwork, finalNet)
 	for (gene_id_t reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.contains(reg1)) {
 			auto &fin1 = finalNet[reg1];
@@ -33,6 +33,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 					for(const auto &[target, v2] : fin2) {
 						if (fin1.contains(target)) {
 							const float v1 = fin1[target];
+#pragma omp critical
 							if (v1 < tftfMI && v1 < v2)
 								rem1.insert(target);
 							else if (v2 < tftfMI && v2 < v1)
@@ -48,8 +49,9 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 			}
 		}
 	}
-	for (const auto &[target, value] : removedEdges) {
-		 size_of_network -= value.size();
+	
+	for (const auto &removedSet : removedEdges) {
+		 size_of_network -= removedSet.size();
 	}
 	
 	reg_web pruned_net;
