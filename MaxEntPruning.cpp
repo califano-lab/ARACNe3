@@ -33,7 +33,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 					for(const auto &[target, v2] : fin2) {
 						if (fin1.contains(target)) {
 							const float v1 = fin1[target];
-#pragma omp critical
+#pragma omp critical //
 							if (v1 < tftfMI && v1 < v2)
 								rem1.insert(target);
 							else if (v2 < tftfMI && v2 < v1)
@@ -50,9 +50,8 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 		}
 	}
 	
-	for (const auto &removedSet : removedEdges) {
+	for (const auto &removedSet : removedEdges) 
 		 size_of_network -= removedSet.size();
-	}
 	
 	reg_web pruned_net;
 	pruned_net.reserve(tot_num_regulators);
