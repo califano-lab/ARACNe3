@@ -104,6 +104,10 @@ genemap sampleFromGlobalGenemap() {
 	for (unsigned long gene = 0; gene < subsampled_vecs.size(); ++gene) {
 		const std::vector<float> &expr_vec = global_gm[gene];
 		subsampled_vecs[gene] = std::vector<float>(tot_num_subsample);
+		/*
+		 NOTE: MUST CHECK!
+		 Threads share the rand object, but since some of them may use rand without updating it before the next thread uses the same rand object, it is possible that some subsampled vectors will not be random
+		 */
 		std::sample(expr_vec.begin(), expr_vec.end(), subsampled_vecs[gene].begin(), tot_num_subsample, rand);
 		std::vector<uint16_t> idx_ranks = rank_indexes(subsampled_vecs[gene]);
 		for (uint16_t r = 0; r < tot_num_subsample; ++r)

@@ -185,7 +185,8 @@ const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec_x,
 	mi_vec.reserve(targets.size());
 
 	const square init{0.0, 0.0, 1.0, &all_pts[0], tot_num_pts};
-
+	
+#pragma omp parallel for
 	for (uint32_t i = 0; i < targets.size(); ++i)
 		mi_vec.emplace_back(APMI_split(ref_vec_x, targets[i], init));
 

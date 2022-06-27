@@ -94,6 +94,7 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		std::vector<std::vector<float>> target_vec(num_null_marginals, ref_vec);
 
 		static std::mt19937 rd{global_seed++};
+#pragma omp parallel for
 		for (unsigned int i = 0; i < num_null_marginals; ++i)
 			std::shuffle(target_vec[i].begin(), target_vec[i].end(), rd);
 
@@ -109,7 +110,8 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 
 		// we will be doing a linear regression of the log(mi_ps)
 		std::vector<float> mis(mi_vec.begin(), mi_vec.begin() + p_99th_percentile_idx), mi_ps(p_99th_percentile_idx);
-		
+
+#pragma omp parallel for
 		for (uint32_t i = 0; i < p_99th_percentile_idx; ++i)
 			mi_ps[i] = ((i+1)/(float)num_null_marginals);
 		
