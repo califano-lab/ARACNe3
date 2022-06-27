@@ -45,7 +45,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 			auto k = it - reg_edge_tar.begin();
 			float p_k = getMIPVal(it->second.mi);
 			if (p_k <= alpha/m)
-				argmax_k = static_cast<uint32_t>(k);
+				argmax_k = static_cast<uint32_t>(k) + 1;
 		}
 	}
 	

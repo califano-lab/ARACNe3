@@ -87,9 +87,8 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		// make the permute vector, the ref vector, send to permuteAPMI
 		std::vector<float> ref_vec;
 		ref_vec.reserve(tot_num_subsample);
-		for (uint16_t i = 1; i <= tot_num_subsample; ++i) {
+		for (uint16_t i = 1; i <= tot_num_subsample; ++i)
 			ref_vec.push_back(((float) i)/(tot_num_subsample+1));
-		}
 
 		// vector of vectors, 1mil rows
 		std::vector<std::vector<float>> target_vec(num_null_marginals, ref_vec);

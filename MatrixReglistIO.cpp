@@ -40,16 +40,16 @@ void makeDir(const std::string &dir_name) {
  For a lambda function, brackets indicate the scope of the function.
  */
 std::vector<uint16_t> rank_indexes(const std::vector<float>& vec) {
-	static std::mt19937 rd{global_seed++};
+	static std::mt19937 rand{global_seed++};
 	std::vector<uint16_t> idx_ranks(vec.size());
 	std::iota(idx_ranks.begin(), idx_ranks.end(), 0U); /* 0, 1, ..., size-1 */
 	std::sort(idx_ranks.begin(), idx_ranks.end(), [&vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1] < vec[num2];}); /* sort ascending */
 	for (uint16_t r = 0U; r < idx_ranks.size();) {
 		uint16_t same_range = 1U;
-		while (r + same_range < idx_ranks.size() && vec[idx_ranks[r]] == vec[idx_ranks[r+same_range++]])
-			; // same_range is off-end index
+		while (r + same_range < idx_ranks.size() && vec[idx_ranks[r]] == vec[idx_ranks[r+same_range]])
+			++same_range; // same_range is off-end index
 		if (same_range > 1U) {
-			std::shuffle(idx_ranks.begin()+r, idx_ranks.begin()+r+same_range, rd);
+			std::shuffle(idx_ranks.begin()+r, idx_ranks.begin()+r+same_range, rand);
 			r = r + same_range;
 		} else {
 			++r;
@@ -98,7 +98,7 @@ void readRegList(std::string filename) {
 genemap sampleFromGlobalGenemap() {
 	static std::mt19937 rand{global_seed++};
 	genemap subsample_gm;
-	for (auto &[gene, expr_vec] : global_gm) {
+	for (const auto &[gene, expr_vec] : global_gm) {
 		subsample_gm[gene] = std::vector<float>(tot_num_subsample);
 		std::sample(expr_vec.begin(), expr_vec.end(), subsample_gm[gene].begin(), tot_num_subsample, rand);
 		std::vector<uint16_t> idx_ranks = rank_indexes(subsample_gm[gene]);
