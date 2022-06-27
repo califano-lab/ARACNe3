@@ -18,6 +18,7 @@ genemap_r global_gm_r;
 extern uint32_t global_seed;
 extern uint16_t num_subnets;
 extern double subsampling_percent;
+extern uint16_t nthreads;
 
 /*
  Will automatically checked if there already is a directory.  Then creates the output directory.
@@ -104,7 +105,7 @@ genemap sampleFromGlobalGenemap() {
 	
 	std::vector<std::vector<float>> subsampled_vecs(global_gm.size());
 	// parallelized can modify a vector
-#pragma omp parallel for
+#pragma omp parallel for num_threads(nthreads)
 	for (unsigned long gene = 0; gene < subsampled_vecs.size(); ++gene) {
 		const std::vector<float> &expr_vec = global_gm[gene];
 		subsampled_vecs[gene] = std::vector<float>(tot_num_subsample);

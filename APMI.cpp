@@ -4,6 +4,7 @@
 #include "ARACNe3.hpp"
 
 extern float DEVELOPER_mi_cutoff;
+extern uint16_t nthreads;
 
 /*
  * File static  variables will be modified.  There are many file static
@@ -186,7 +187,7 @@ const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec_x,
 
 	const square init{0.0, 0.0, 1.0, &all_pts[0], tot_num_pts};
 	
-#pragma omp parallel for
+#pragma omp parallel for num_threads(nthreads)
 	for (uint64_t i = 0; i < targets.size(); ++i)
 		mi_vec.emplace_back(APMI_split(ref_vec_x, targets[i], init));
 

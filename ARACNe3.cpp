@@ -13,11 +13,12 @@ std::string output_dir;
 std::string log_dir;
 std::string subnets_dir;
 std::string method = "FDR";
-float DEVELOPER_mi_cutoff = 0;
-uint16_t num_subnets = 1;
-uint16_t targets_per_regulator = 30;
+float DEVELOPER_mi_cutoff = 0.0f;
+uint16_t num_subnets = 1U;
+uint16_t targets_per_regulator = 30U;
+uint16_t nthreads = 1U;
 
-uint32_t global_seed = 0;
+uint32_t global_seed = 0U;
 
 /*
  These variables represent the original data and do not change after matrix files are read.
@@ -70,9 +71,10 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_idx) {
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
+	
 	uint32_t size_of_network = 0;
 	std::vector<std::vector<edge_tar>> network_vec(tot_num_regulators); 
-#pragma omp parallel for firstprivate(subnet_matrix)
+#pragma omp parallel for firstprivate(subnet_matrix) num_threads(nthreads)
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
 		network_vec[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
 		size_of_network += network_vec[reg].size();
@@ -210,6 +212,8 @@ int main(int argc, char *argv[]) {
 
 	if (cmdOptionExists(argv, argv+argc, "--numNetworks"))
 		num_subnets = std::stoi(getCmdOption(argv, argv+argc, "--numNetworks"));
+	if (cmdOptionExists(argv, argv+argc, "--threads"))
+		nthreads = std::stoi(getCmdOption(argv, argv+argc, "--threads"));
 
 	if (cmdOptionExists(argv, argv+argc, "--noAlpha"))
 	    	prune_alpha = false;
