@@ -71,12 +71,17 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_idx) {
 	//-------------------------
 	
 	uint32_t size_of_network = 0;
+	std::vector<std::vector<edge_tar>> network_vec(tot_num_regulators); 
+#pragma omp parallel for firstprivate(subnet_matrix)
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
+		network_vec[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
+		size_of_network += network_vec[reg].size();
+	}
 	reg_web network;
 	network.reserve(tot_num_regulators);
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
-		network[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
-		size_of_network += network[reg].size();
-	}
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+		network[reg] = network_vec[reg];
+	std::vector<std::vector<edge_tar>>().swap(network_vec);
 	
 	//-------time module-------
 	sinceLast(last, log_output);
