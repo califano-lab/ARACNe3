@@ -4,6 +4,7 @@
 
 #include "ARACNe3.hpp"
 
+std::vector<float> FPR_estimates;
 float FPR_estimate = 1.5E-4f;
 
 extern uint16_t tot_num_samps;

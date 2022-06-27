@@ -30,6 +30,9 @@ extern genemap global_gm;
 
 extern uint32_t num_null_marginals;
 
+extern float FPR_estimate;
+extern std::vector<float> FPR_estimates;
+
 /*
  Convenient function for timing parts of ARACNe3.  It's only used to time from the pipeline function, so it's included in ARACNe3.cpp.
  */
@@ -109,6 +112,11 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_idx) {
 	log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
 	//-------------------------
 	
+	/*
+	 Save for binomial theta
+	 */
+	uint32_t num_edges_after_threshold_pruning = size_of_network; 
+	
 	if (prune_MaxEnt) {
 		//-------time module-------
 		log_output << "\nMaxEnt PRUNING TIME:" << std::endl;
@@ -122,6 +130,20 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_idx) {
 		sinceLast(last, log_output);
 		log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
 		//-------------------------
+		
+		uint32_t num_edges_after_MaxEnt_pruning = size_of_network;
+		if (method == "FDR") {
+			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		} else if (method == "FWER") {
+			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_MaxEnt_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		}
+		
+	} else {
+		if (method == "FDR") {
+			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		} else if (method == "FWER") {
+			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_threshold_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		}
 	}
 	
 	//-------time module-------
@@ -323,6 +345,9 @@ int main(int argc, char *argv[]) {
 			subnets[i] = ARACNe3_subnet(subnet_matrix, i);
 		}
 	}
+	
+	// set the FPR estimate
+	FPR_estimate = std::accumulate(FPR_estimates.begin(), FPR_estimates.end(), 0.0f) / FPR_estimates.size();
 	
 	//-------time module-------
 	sinceLast(last, log_output);
