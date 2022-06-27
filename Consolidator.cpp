@@ -27,8 +27,6 @@ double lchoose(const uint16_t &n, const uint16_t &k) {
 
 double right_tail_binomial_p(const uint16_t& num_occurrences) {
 	double p = 0.0;
-	if (num_subnets == 1)
-		return std::numeric_limits<double>::quiet_NaN(); // cannot have a p-value for 1 subnet (1 network)
 	for (uint16_t i = num_subnets; i >= num_occurrences; --i)
 		p += std::exp(lchoose(num_subnets, i) + i * std::log(FPR_estimate) + (num_subnets - i) * std::log(1-FPR_estimate));
 	return p;
