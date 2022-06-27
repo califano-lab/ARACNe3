@@ -35,7 +35,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 			auto k = it - reg_edge_tar.begin();
 			float p_k = getMIPVal(it->second.mi);
 			if (p_k <= k*alpha/m)
-				argmax_k = static_cast<uint32_t>(k);
+				argmax_k = static_cast<uint32_t>(k) + 1;
 		}
 	} else if (method == "FWER") {
 	/*
@@ -50,7 +50,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 	}
 	
 	// create the new vector that is a pruned version of original
-	std::vector<std::pair<gene_id_t, edge_tar>> pruned_vec(&reg_edge_tar[0], &reg_edge_tar[argmax_k+1]);
+	std::vector<std::pair<gene_id_t, edge_tar>> pruned_vec(&reg_edge_tar[0], &reg_edge_tar[argmax_k]);
 	
 	// submit new network size to global variable defined in ARACNe3.cpp
 	size_of_network = static_cast<uint32_t>(pruned_vec.size());
