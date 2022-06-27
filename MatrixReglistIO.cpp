@@ -97,14 +97,25 @@ void readRegList(std::string filename) {
  */
 genemap sampleFromGlobalGenemap() {
 	static std::mt19937 rand{global_seed++};
-	genemap subsample_gm;
-	for (const auto &[gene, expr_vec] : global_gm) {
-		subsample_gm[gene] = std::vector<float>(tot_num_subsample);
-		std::sample(expr_vec.begin(), expr_vec.end(), subsample_gm[gene].begin(), tot_num_subsample, rand);
-		std::vector<uint16_t> idx_ranks = rank_indexes(subsample_gm[gene]);
+	
+	std::vector<std::vector<float>> subsampled_vecs(global_gm.size());
+	// parallelized can modify a vector
+#pragma omp parallel for
+	for (unsigned long gene = 0; gene < subsampled_vecs.size(); ++gene) {
+		const std::vector<float> &expr_vec = global_gm[gene];
+		subsampled_vecs[gene] = std::vector<float>(tot_num_subsample);
+		std::sample(expr_vec.begin(), expr_vec.end(), subsampled_vecs[gene].begin(), tot_num_subsample, rand);
+		std::vector<uint16_t> idx_ranks = rank_indexes(subsampled_vecs[gene]);
 		for (uint16_t r = 0; r < tot_num_subsample; ++r)
-			subsample_gm[gene][idx_ranks[r]] = (r + 1)/((float)tot_num_subsample + 1); 
-	}	
+			subsampled_vecs[gene][idx_ranks[r]] = (r + 1)/((float)tot_num_subsample + 1); 
+	}
+	
+	genemap subsample_gm;
+	subsample_gm.reserve(global_gm.size());	
+	// non parallelized must set the genemap
+	for (unsigned long gene = 0; gene < subsampled_vecs.size(); ++gene) {
+		subsample_gm[gene] = subsampled_vecs[gene];
+	}
 	
 	return subsample_gm;
 }
