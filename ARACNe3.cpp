@@ -41,7 +41,7 @@ static void sinceLast(decltype(std::chrono::high_resolution_clock::now()) &last,
 /*
  This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
  */
-reg_web ARACNe3_subnet(const genemap& subnet_matrix,const uint16_t& subnet_idx) {
+reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_idx) {
 	auto last = std::chrono::high_resolution_clock::now();
 	
 	// set the individual subnet log file

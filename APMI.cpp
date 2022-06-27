@@ -13,7 +13,6 @@ extern float DEVELOPER_mi_cutoff;
 static float q_thresh;
 static uint16_t tot_num_pts, size_thresh;
 static std::vector<uint16_t> all_pts;
-#pragma omp threadprivate(tot_num_pts, all_pts)
 
 /*
  * Calculate the MI for a square struct
