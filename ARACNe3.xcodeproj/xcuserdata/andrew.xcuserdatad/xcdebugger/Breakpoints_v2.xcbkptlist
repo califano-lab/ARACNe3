@@ -30,8 +30,8 @@
             filePath = "MaxEntPruning.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "57"
-            endingLineNumber = "57"
+            startingLineNumber = "56"
+            endingLineNumber = "56"
             landmarkName = "pruneMaxEnt(network, tftfNetwork, size_of_network)"
             landmarkType = "9">
          </BreakpointContent>
