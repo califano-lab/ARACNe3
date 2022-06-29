@@ -200,7 +200,7 @@ void readExpMatrix(std::string filename) {
 	}
 	
 	std::cout << "\nInitial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
-	std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) << std::endl;
+	std::cout << "Sampled Num Samples: \n" + std::to_string(tot_num_subsample) << std::endl;
 	
 	global_gm = gm;
 	global_gm_r = gm_r;
