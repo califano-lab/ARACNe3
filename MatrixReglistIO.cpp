@@ -100,17 +100,16 @@ genemap sampleFromGlobalGenemap() {
 	static std::mt19937 rand{global_seed++};
 	std::vector<uint16_t> idxs(tot_num_samps);
 	std::iota(idxs.begin(), idxs.end(), 0U);
-	std::vector<uint16_t> idxs_sampled(tot_num_subsample);
-	std::sample(idxs.begin(), idxs.end(), idxs_sampled.begin(), tot_num_subsample, rand);
+	std::vector<uint16_t> fold(tot_num_subsample);
+	std::sample(idxs.begin(), idxs.end(), fold.begin(), tot_num_subsample, rand);
 	
-	std::vector<std::vector<float>> subsampled_vecs(global_gm.size());
+	std::vector<std::vector<float>> subsampled_vecs(global_gm.size(), std::vector<float>(tot_num_subsample));
 	// parallelized can modify a vector
 #pragma omp parallel for num_threads(nthreads)
 	for (unsigned long gene = 0; gene < subsampled_vecs.size(); ++gene) {
 		const std::vector<float> &expr_vec = global_gm[gene];
-		subsampled_vecs[gene] = std::vector<float>(tot_num_subsample);
-		for (uint16_t i = 0U; i < idxs_sampled.size(); ++i)
-			subsampled_vecs[gene][i] = expr_vec[idxs_sampled[i]];
+		for (uint16_t i = 0U; i < tot_num_subsample; ++i)
+			subsampled_vecs[gene][i] = expr_vec[fold[i]];
 		
 		std::vector<uint16_t> idx_ranks = rank_indexes(subsampled_vecs[gene]);
 		for (uint16_t r = 0; r < tot_num_subsample; ++r)
