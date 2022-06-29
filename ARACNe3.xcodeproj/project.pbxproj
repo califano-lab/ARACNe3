@@ -298,6 +298,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				GCC_NO_COMMON_BLOCKS = YES;
+				HEADER_SEARCH_PATHS = /opt/homebrew/Cellar/libomp/14.0.5/include;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-Xpreprocessor",
 					"-fopenmp",
@@ -312,6 +313,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				GCC_NO_COMMON_BLOCKS = YES;
+				HEADER_SEARCH_PATHS = /opt/homebrew/Cellar/libomp/14.0.5/include;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-Xpreprocessor",
 					"-fopenmp",
