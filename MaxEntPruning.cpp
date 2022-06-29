@@ -57,7 +57,6 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 				removedEdges[reg].insert(tar);
 		}
 	}
-		
 	
 	for (const auto &removedSet : removedEdges) 
 		 size_of_network -= removedSet.size();
