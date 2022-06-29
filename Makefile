@@ -4,7 +4,7 @@ CXX = clang++
 CFLAGS = -std=c++20 -O3 -Xpreprocessor -fopenmp $(INCLUDES)
 CXXFLAGS = -std=c++20 -O3 -Xpreprocessor -fopenmp $(INCLUDES)
 
-INCLUDES =
+INCLUDES = -I/opt/homebrew/cellar/libomp/14.0.5/include
 LDFLAGS = -L/opt/homebrew/opt/llvm/lib
 LDLIBS = -lomp
 

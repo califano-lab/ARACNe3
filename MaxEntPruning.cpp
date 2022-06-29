@@ -1,5 +1,5 @@
 #include "ARACNe3.hpp"
-#include "omp.h"
+#include <omp.h>
 
 // for MaxEnt pruning, regulator -> regulator -> mi
 extern uint16_t tot_num_regulators;
