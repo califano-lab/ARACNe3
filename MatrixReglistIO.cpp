@@ -171,6 +171,15 @@ void readExpMatrix(std::string filename) {
 			prev = pos + 1;
 		}
 		expr_vec.emplace_back(stof(line.substr(prev, std::string::npos)));
+		
+		/* This means that a user has inputted a matrix with unequal row 1 vs row 2 length
+		 */
+		if (expr_vec.size() > tot_num_samps) {
+			tot_num_samps = expr_vec.size();
+			tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
+			if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0)
+				tot_num_subsample = tot_num_samps;
+		}
 				
 		// copula-transform expr_vec values
 		std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec);
@@ -200,7 +209,7 @@ void readExpMatrix(std::string filename) {
 	}
 	
 	std::cout << "\nInitial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
-	std::cout << "Sampled Num Samples: \n" + std::to_string(tot_num_subsample) << std::endl;
+	std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) + "\n" << std::endl;
 	
 	global_gm = gm;
 	global_gm_r = gm_r;
