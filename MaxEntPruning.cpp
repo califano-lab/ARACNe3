@@ -17,7 +17,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 	 Inefficient conversion operation here.  Makes searching whether a target is contained an O(1) operation due to the hash map of hash maps, as opposed to a hash map of edge_tar vectors, which would make checking for a particular edge_tar.target an O(n) operation.
 	 */
 			
-	map_map finalNet = regweb_to_mapmap(network);
+	map_map finalNet = regweb_to_mapmap(network); 
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
 #pragma omp parallel for
