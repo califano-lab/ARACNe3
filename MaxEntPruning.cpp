@@ -19,6 +19,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 	map_map finalNet = regweb_to_mapmap(network);
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
+#pragma omp parallel for
 	for (gene_id_t reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.contains(reg1)) {
 			auto &fin1 = finalNet[reg1];
@@ -32,6 +33,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 					for(const auto &[target, v2] : fin2) {
 						if (fin1.contains(target)) {
 							const float v1 = fin1[target];
+#pragma omp critical
 							if (v1 < tftfMI && v1 < v2)
 								rem1.insert(target);
 							else if (v2 < tftfMI && v2 < v1)
