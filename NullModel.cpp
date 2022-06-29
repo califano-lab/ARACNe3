@@ -68,7 +68,7 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 	/*
 	 If there already is a null model for this number of samples cached in the cached_dir, then we just pull values from that.  Also pull parameters from regression.
 	 */
-	if (std::filesystem::exists(nulls_filename)) {
+	if ( /*never use cache for debugging;*/ std::filesystem::exists(nulls_filename)) {
 		std::ifstream cached(nulls_filename, std::ios::in | std::ios::binary);
 		
 		//read tab-delineated data
@@ -76,12 +76,12 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		mi_vec.reserve(num_null_marginals);
 		std::istream_iterator<float> cached_iterator(cached);
 		uint32_t i = 0;
-		for (; i < num_null_marginals; ++i) {
+		for (; i < num_null_marginals; ++i)
 			mi_vec.emplace_back(*cached_iterator++);
-		}
 		m = *cached_iterator++;
 		b = *cached_iterator;
 		
+		global_seed++; //global_seed is incremented when calculating null
 		null_mis = mi_vec;
 		return mi_vec;
 	} else {
@@ -95,7 +95,8 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		std::vector<std::vector<float>> target_vec(num_null_marginals, ref_vec);
 
 		static std::mt19937 rand{global_seed++};
-#pragma omp parallel for num_threads(nthreads)
+		
+		// Cannot be parallelized because access to random generator
 		for (unsigned int i = 0; i < num_null_marginals; ++i)
 			std::shuffle(target_vec[i].begin(), target_vec[i].end(), rand);
 
