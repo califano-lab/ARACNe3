@@ -172,7 +172,7 @@ std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
  */
 
 const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec_x,
-		const std::vector<std::vector<float>> &targets, const float &q_thresh, const uint16_t &size_thresh) {
+		const std::vector<std::vector<float>> &target_vecs, const float &q_thresh, const uint16_t &size_thresh) {
 	// set file static variables
 	::size_thresh = size_thresh;
 	::q_thresh = q_thresh;
@@ -183,14 +183,13 @@ const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec_x,
 		::all_pts = all_pts;
 	}
 
-	std::vector<float> mi_vec;
-	mi_vec.reserve(targets.size());
+	std::vector<float> mi_vec(target_vecs.size());
 
 	const square init{0.0, 0.0, 1.0, &all_pts[0], tot_num_pts};
 	
 #pragma omp parallel for num_threads(nthreads)
-	for (uint64_t i = 0; i < targets.size(); ++i)
-		mi_vec.emplace_back(APMI_split(ref_vec_x, targets[i], init));
+	for (uint64_t i = 0; i < target_vecs.size(); ++i)
+		mi_vec[i] = APMI_split(ref_vec_x, target_vecs[i], init);
 
 	return mi_vec;
 }
