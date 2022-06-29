@@ -64,7 +64,7 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_idx) {
 	log_output << "Total possible edges: " + std::to_string(tot_num_regulators*subnet_matrix.size()-tot_num_regulators) << std::endl;
 	log_output << "Method of first pruning step: " + method << std::endl;
 	log_output << "Alpha: " + std::to_string(alpha) << std::endl;
-	log_output << "\n-----------Begin Network Generation-----------\n" << std::endl;
+	log_output << "\n-----------Begin Network Generation-----------\n" ;
 	
 	/*
 	 Begin Network computation
