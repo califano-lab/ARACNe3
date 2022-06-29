@@ -94,10 +94,10 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		// vector of vectors, 1mil rows
 		std::vector<std::vector<float>> target_vec(num_null_marginals, ref_vec);
 
-		static std::mt19937 rd{global_seed++};
+		static std::mt19937 rand{global_seed++};
 #pragma omp parallel for num_threads(nthreads)
 		for (unsigned int i = 0; i < num_null_marginals; ++i)
-			std::shuffle(target_vec[i].begin(), target_vec[i].end(), rd);
+			std::shuffle(target_vec[i].begin(), target_vec[i].end(), rand);
 
 		// get the 1 million MI values
 		std::vector<float> mi_vec = permuteAPMI(ref_vec, target_vec, 7.815, 4);
