@@ -45,18 +45,18 @@ static void sinceLast(decltype(std::chrono::high_resolution_clock::now()) &last,
 /*
  This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
  */
-reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_idx) {
+reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_num) {
 	auto last = std::chrono::high_resolution_clock::now();
 	
 	// set the individual subnet log file
-	std::ofstream log_output(log_dir + "log_subnet" + std::to_string(subnet_idx) + ".txt");
+	std::ofstream log_output(log_dir + "log_subnet" + std::to_string(subnet_num) + ".txt");
 	
 	/*
 	 Log file header
 	 */
 	std::time_t t = std::time(nullptr);
 	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------\n" << std::endl;
-	log_output << "Subnetwork #: " + std::to_string(subnet_idx) << std::endl;
+	log_output << "Subnetwork #: " + std::to_string(subnet_num) << std::endl;
 	log_output << "Total # regulators: " + std::to_string(tot_num_regulators) << std::endl;
 	log_output << "Total # targets: " + std::to_string(subnet_matrix.size()) << std::endl;
 	log_output << "Total # samples: " + std::to_string(tot_num_samps) << std::endl;
@@ -152,11 +152,13 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_idx) {
 	//-------------------------
 	
 	// writes the individual subnet output
-	writeNetworkRegTarMI(network, subnets_dir, "subnet" + std::to_string(subnet_idx));
+	writeNetworkRegTarMI(network, subnets_dir, "subnet" + std::to_string(subnet_num));
 	
 	//-------time module-------
 	sinceLast(last, log_output);
 	//-------------------------
+	
+	std::cout << "... subnetwork " + std::to_string(subnet_num) + " completed = " + std::to_string(size_of_network) + " edges returned ..." << std::endl;
 	
 	return network;
 }
@@ -318,7 +320,7 @@ int main(int argc, char *argv[]) {
 		uint16_t i = 0U;
 		while (!stoppingCriteriaMet) {
 			genemap subnet_matrix = sampleFromGlobalGenemap();
-			subnets.push_back(ARACNe3_subnet(subnet_matrix, i));
+			subnets.push_back(ARACNe3_subnet(subnet_matrix, i+1));
 			
 			// add any new edges to the regulon_set
 			for (const auto &[reg, edge_tars] : subnets[i]) {
@@ -342,7 +344,7 @@ int main(int argc, char *argv[]) {
 		subnets = std::vector<reg_web>(num_subnets);
 		for (uint16_t i = 0; i < num_subnets; ++i) {
 			genemap subnet_matrix = sampleFromGlobalGenemap(); 
-			subnets[i] = ARACNe3_subnet(subnet_matrix, i);
+			subnets[i] = ARACNe3_subnet(subnet_matrix, i+1);
 		}
 	}
 	
