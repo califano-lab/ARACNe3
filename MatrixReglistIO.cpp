@@ -175,7 +175,7 @@ void readExpMatrix(std::string filename) {
 		/* This means that a user has inputted a matrix with unequal row 1 vs row 2 length
 		 */
 		if (expr_vec.size() > tot_num_samps) {
-			std::cerr << "WARNING: ROW 2 LENGTH DOES NOT EQUAL ROW 1 LENGTH.  MAKE SURE SIZE OF MATRIX IS G+1 x N+1" << std::endl;
+			std::cerr << "\nWARNING: ROW 2 LENGTH DOES NOT EQUAL ROW 1 LENGTH.  MAKE SURE SIZE OF MATRIX IS G+1 x N+1" << std::endl;
 			tot_num_samps = expr_vec.size();
 			tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
 			if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0)
