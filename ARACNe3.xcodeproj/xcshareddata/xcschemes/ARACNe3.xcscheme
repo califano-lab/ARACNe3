@@ -62,7 +62,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e /Users/andrew/Desktop/a3/test/exp_mat.txt -r test/regulators.txt -o /Users/andrew/Desktop/a3/output --threads 10"
+            argument = "-e /Users/andrew/Desktop/a3/test/exp_mat.txt -r test/regulators.txt -o /Users/andrew/Desktop/a3/output --threads 10 -x 1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
