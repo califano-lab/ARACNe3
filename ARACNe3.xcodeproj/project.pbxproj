@@ -41,7 +41,6 @@
 		49451D8F28450A1300158C6D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; tabWidth = 8; };
 		49451DA7284563D300158C6D /* ARACNe3_R.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3_R.cpp; sourceTree = "<group>"; };
 		497234F7285E50FA005E1BB8 /* Consolidator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Consolidator.cpp; sourceTree = "<group>"; };
-		497234FB285E5F5A005E1BB8 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		49A5A599286E2A2400D40564 /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		49F6F5982846988200C681BC /* RegWebFns.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RegWebFns.cpp; sourceTree = "<group>"; };
 		49F6F59C2846A73400C681BC /* AlphaPruning.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AlphaPruning.cpp; sourceTree = "<group>"; };
@@ -74,7 +73,6 @@
 				49451D8F28450A1300158C6D /* README.md */,
 				49451DA7284563D300158C6D /* ARACNe3_R.cpp */,
 				49A5A599286E2A2400D40564 /* CMakeLists.txt */,
-				497234FB285E5F5A005E1BB8 /* Makefile */,
 				49451D8A28450A1300158C6D /* test */,
 				49451D7F284509E500158C6D /* Products */,
 			);

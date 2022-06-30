@@ -60,20 +60,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e test/debug/ap_exp_mat.txt -r test/debug/ap_regulators.txt -o test/output --subsample 0.50"
+            argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug.txt -o /Users/andrew/Desktop/a3/output --subsample 0.99 --seed 23 --numnulls 10000 --alpha 0.05 --FDR -x 50 --threads 10 --adaptive"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e /Users/andrew/Desktop/a3/test/exp_mat.txt -r test/regulators.txt -o /Users/andrew/Desktop/a3/output --threads 10 -x 1"
             isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-e /Users/andrew/Desktop/a3/test/fun_mat.txt -r /Users/andrew/Desktop/a3/test/fun_reg.txt -o /Users/andrew/Desktop/a3/outputfun"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-e /Users/andrew/Desktop/a3/test/exp_mat.txt -r /Users/andrew/Desktop/a3/test/regulators.txt -o /Users/andrew/Desktop/a3/output"
-            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug3.txt -o /Users/andrew/Desktop/a3/output --subsample 0.63 --seed 23 --numnulls 500001 --alpha 0.05 --FDR"

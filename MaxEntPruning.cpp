@@ -12,6 +12,11 @@ extern uint16_t nthreads;
 reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_network) {
 	// primed will store the edges that are weakest.  we use a set to eliminate redundancy if the same edge is identified twice; same as hash set?
 	std::vector<std::vector<std::set<gene_id_t>>> removedEdgesForThread(nthreads, std::vector<std::set<gene_id_t>>(tot_num_regulators));
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
+		for (uint16_t th = 0; th < nthreads; ++th) {
+			removedEdgesForThread[th][reg]; // prevent re-hashing later?
+		}
+	}
 	
 	/*
 	 Inefficient conversion operation here.  Makes searching whether a target is contained an O(1) operation due to the hash map of hash maps, as opposed to a hash map of edge_tar vectors, which would make checking for a particular edge_tar.target an O(n) operation.
