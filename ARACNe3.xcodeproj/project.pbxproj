@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4927A79A286EB66F00C6523D /* ARACNe3 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 49451D7E284509E500158C6D /* ARACNe3 */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		49451D9028450A1300158C6D /* APMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8828450A1300158C6D /* APMI.cpp */; };
 		49451D9128450A1300158C6D /* ARACNe3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8928450A1300158C6D /* ARACNe3.cpp */; };
 		49451D9328450A1300158C6D /* MatrixReglistIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */; };
 		49451D9428450A1300158C6D /* NullModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8E28450A1300158C6D /* NullModel.cpp */; };
 		49451D9628453A0700158C6D /* ARACNe3.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 49451D8C28450A1300158C6D /* ARACNe3.hpp */; };
 		497234F8285E50FA005E1BB8 /* Consolidator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497234F7285E50FA005E1BB8 /* Consolidator.cpp */; };
-		49A5A59D286E837600D40564 /* ARACNe3 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 49451D7E284509E500158C6D /* ARACNe3 */; };
 		49F6F59A2846988200C681BC /* RegWebFns.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F5982846988200C681BC /* RegWebFns.cpp */; };
 		49F6F59D2846A73400C681BC /* AlphaPruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F59C2846A73400C681BC /* AlphaPruning.cpp */; };
 		49F6F5A02846A75100C681BC /* MaxEntPruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F59E2846A75100C681BC /* MaxEntPruning.cpp */; };
@@ -26,7 +26,7 @@
 			dstPath = "$(PROJECT_DIR)/products/macOS 12.3";
 			dstSubfolderSpec = 0;
 			files = (
-				49A5A59D286E837600D40564 /* ARACNe3 in CopyFiles */,
+				4927A79A286EB66F00C6523D /* ARACNe3 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
