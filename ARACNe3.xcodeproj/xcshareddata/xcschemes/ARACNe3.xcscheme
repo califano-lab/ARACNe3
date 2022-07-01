@@ -31,18 +31,18 @@
       </Testables>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      enableAddressSanitizer = "YES"
       enableASanStackUseAfterReturn = "YES"
-      enableUBSanitizer = "YES"
+      disableMainThreadChecker = "YES"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
       customWorkingDirectory = "/Users/andrew/Library/CloudStorage/OneDrive-Personal/Columbia/Califano Lab/Califano Git/ARACNe3-CPP"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
+      enableGPUValidationMode = "1"
       allowLocationSimulation = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
@@ -64,7 +64,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e /Users/andrew/Desktop/a3/test/exp_mat.txt -r test/regulators.txt -o /Users/andrew/Desktop/a3/output --threads 10 -x 1"
+            argument = "-e /Users/andrew/Desktop/a3/test/exp_mat.txt -r test/regulators.txt -o /Users/andrew/Desktop/a3/output --seed 1 -x 50 --threads 10 --adaptive"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -72,18 +72,6 @@
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
-      <AdditionalOptions>
-         <AdditionalOption
-            key = "NSZombieEnabled"
-            value = "YES"
-            isEnabled = "YES">
-         </AdditionalOption>
-         <AdditionalOption
-            key = "MallocScribble"
-            value = ""
-            isEnabled = "YES">
-         </AdditionalOption>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
