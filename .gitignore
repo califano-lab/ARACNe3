@@ -1,4 +1,5 @@
 .DS_Store
+*.jfm
 arh_APMI
 APMI
 arh_MatrixReglistIO
