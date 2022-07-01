@@ -16,9 +16,25 @@ static uint16_t tot_num_pts, size_thresh;
 static std::vector<uint16_t> all_pts;
 
 /*
+ * Square struct for APMI estimator.
+ * 'x_bound1' is the x-coordinate of the bottom left of square
+ * 'y_bound1' is the y-coordinate of the bottom left of square
+ * 'width' is the width of the square
+ * 'pts' is an array of indices
+ * 'num_pts' is the size of 'pts'
+ */
+// Can we somehow make uint16_t *pts into const uint16_t *&pts?
+typedef struct {const float &x_bound1, &y_bound1, &width; 
+	uint16_t *const pts, &num_pts;
+	const bool explicit_free;
+} square;
+
+/*
  * Calculate the MI for a square struct
  */
 float calcMI(const square &s) {
+	if (s.explicit_free)
+		std::free(s.pts);
 	const float pxy = s.num_pts/(float)tot_num_pts, &marginal = s.width, mi = pxy*std::log(pxy/(marginal*marginal));
 	return std::isfinite(mi) ? mi : 0.0;
 }
@@ -43,10 +59,24 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
 	const float x_thresh = x_bound1 + width*0.5,
 	      y_thresh = y_bound1 + width*0.5;
 
+	/* The usage of VLAs on the stack is an extreme runtime advantage for the APMI estimator.  Depending on the stack size, this can cause stack overflow at runtime.  VLAs are a C99 feature, but we can attempt to make this safe and take the runtime disadvantage when necessary. -Wpedantic will reveal this as a warning.  We assume there is at least 800Kb remaining on a 1Mb stack.
+	 */
 	// indices for quadrants, to test chi-square, with num_pts for each
-	uint16_t tr_pts[num_pts], br_pts[num_pts], bl_pts[num_pts], 
-	      tl_pts[num_pts], tr_num_pts=0, br_num_pts=0, bl_num_pts=0, 
-	      tl_num_pts=0;
+	uint16_t *tr_pts, *br_pts, *bl_pts, *tl_pts, tr_num_pts=0, br_num_pts=0, bl_num_pts=0, tl_num_pts=0;
+	bool explicit_free = false;
+	if (sizeof(uint16_t) * tot_num_pts < 800000U) {
+		tr_pts = (uint16_t*)alloca(num_pts);
+		br_pts = (uint16_t*)alloca(num_pts);
+		bl_pts = (uint16_t*)alloca(num_pts);
+		tl_pts = (uint16_t*)alloca(num_pts);
+	} else {
+		tr_pts = (uint16_t*)malloc(num_pts);
+		br_pts = (uint16_t*)malloc(num_pts);
+		bl_pts = (uint16_t*)malloc(num_pts);
+		tl_pts = (uint16_t*)malloc(num_pts);
+		explicit_free = true;
+	}
+		
 
 	// points that belong to each quadrant are discovered and sorted
 	// outer for loop will iterate through the pts array
@@ -69,10 +99,10 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
 
 	// partition if chi-square or if initial square
 	if (chisq > q_thresh || num_pts == tot_num_pts) {
-		const square tr{x_thresh, y_thresh, width*0.5, tr_pts, tr_num_pts},
-		       br{x_thresh, y_bound1, width*0.5, br_pts, br_num_pts},
-		       bl{x_bound1, y_bound1, width*0.5, bl_pts, bl_num_pts},
-		       tl{x_bound1, y_thresh, width*0.5, tl_pts, tl_num_pts};
+		const square tr{x_thresh, y_thresh, width*0.5f, tr_pts, tr_num_pts, explicit_free},
+		       br{x_thresh, y_bound1, width*0.5f, br_pts, br_num_pts, explicit_free},
+		       bl{x_bound1, y_bound1, width*0.5f, bl_pts, bl_num_pts, explicit_free},
+		       tl{x_bound1, y_thresh, width*0.5f, tl_pts, tl_num_pts, explicit_free};
 
 		return APMI_split(vec_x, vec_y, tr) + APMI_split(vec_x, vec_y, br) + APMI_split(vec_x, vec_y, bl) + APMI_split(vec_x, vec_y, tl);
 	} else {

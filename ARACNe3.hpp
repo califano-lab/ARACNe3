@@ -115,17 +115,6 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, cons
 
 
 //--------------------- APMI.cpp	 		-----------------------
-/*
- * Square struct for APMI estimator.
- * 'x_bound1' is the x-coordinate of the bottom left of square
- * 'y_bound1' is the y-coordinate of the bottom left of square
- * 'width' is the width of the square
- * 'pts' is an array of indices
- * 'num_pts' is the size of 'pts'
- */
-// Can we somehow make uint16_t *pts into const uint16_t *&pts?
-typedef struct {const float &x_bound1, &y_bound1, &width; 
-	uint16_t *pts, &num_pts;} square;
 
 float APMI(const std::vector<float>& vec_x, const std::vector<float>& vec_y, const float& q_thresh = 7.815, 
 		const uint16_t& size_thresh = 4);
