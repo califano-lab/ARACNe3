@@ -25,7 +25,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 	map_map finalNet = regweb_to_mapmap(network); 
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
-#pragma omp parallel for firstprivate(finalNet, tftfNetwork) num_threads(nthreads)
+#pragma omp parallel for firstprivate(finalNet, tftfNetwork) num_threads(nthreads)// schedule(dynamic) //dynamic schedule because inner loop is different size for each thread
 	for (gene_id_t reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.contains(reg1)) {
 			auto &fin1 = finalNet[reg1];
