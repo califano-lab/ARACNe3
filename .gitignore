@@ -9,6 +9,7 @@ output
 .ARACNe3_cached*
 .ARACNe3_cached/*
 output/*
+test/exp_mat.txt
 arh_APMI.o
 APMI.o
 arh_MatrixReglistIO.o

@@ -31,11 +31,12 @@
       </Testables>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      enableAddressSanitizer = "YES"
       enableASanStackUseAfterReturn = "YES"
-      disableMainThreadChecker = "YES"
+      enableUBSanitizer = "YES"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
       customWorkingDirectory = "/Users/andrew/Library/CloudStorage/OneDrive-Personal/Columbia/Califano Lab/Califano Git/ARACNe3-CPP"
@@ -60,18 +61,34 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-e test/exp_mat.txt -r test/regulators.txt -o test_output_1_ --seed 1 -x 50 --threads 4 --adaptive"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug.txt -o /Users/andrew/Desktop/a3/output --subsample 0.99 --seed 23 --numnulls 10000 --alpha 0.05 --FDR -x 50 --threads 10 --adaptive"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e /Users/andrew/Desktop/a3/test/exp_mat.txt -r test/regulators.txt -o /Users/andrew/Desktop/a3/output --seed 1 -x 50 --threads 10 --adaptive"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug3.txt -o /Users/andrew/Desktop/a3/output --subsample 0.63 --seed 23 --numnulls 500001 --alpha 0.05 --FDR"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
+      <AdditionalOptions>
+         <AdditionalOption
+            key = "NSZombieEnabled"
+            value = "YES"
+            isEnabled = "YES">
+         </AdditionalOption>
+         <AdditionalOption
+            key = "MallocScribble"
+            value = ""
+            isEnabled = "YES">
+         </AdditionalOption>
+      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
