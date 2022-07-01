@@ -13,6 +13,7 @@
 		49451D9428450A1300158C6D /* NullModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8E28450A1300158C6D /* NullModel.cpp */; };
 		49451D9628453A0700158C6D /* ARACNe3.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 49451D8C28450A1300158C6D /* ARACNe3.hpp */; };
 		497234F8285E50FA005E1BB8 /* Consolidator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497234F7285E50FA005E1BB8 /* Consolidator.cpp */; };
+		49A5A59D286E837600D40564 /* ARACNe3 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 49451D7E284509E500158C6D /* ARACNe3 */; };
 		49F6F59A2846988200C681BC /* RegWebFns.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F5982846988200C681BC /* RegWebFns.cpp */; };
 		49F6F59D2846A73400C681BC /* AlphaPruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F59C2846A73400C681BC /* AlphaPruning.cpp */; };
 		49F6F5A02846A75100C681BC /* MaxEntPruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F6F59E2846A75100C681BC /* MaxEntPruning.cpp */; };
@@ -21,10 +22,11 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		49451D7C284509E500158C6D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
+			buildActionMask = 8;
+			dstPath = "$(PROJECT_DIR)/products/macOS 12.3";
 			dstSubfolderSpec = 0;
 			files = (
+				49A5A59D286E837600D40564 /* ARACNe3 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
@@ -41,6 +43,7 @@
 		49451D8F28450A1300158C6D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; tabWidth = 8; };
 		49451DA7284563D300158C6D /* ARACNe3_R.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3_R.cpp; sourceTree = "<group>"; };
 		497234F7285E50FA005E1BB8 /* Consolidator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Consolidator.cpp; sourceTree = "<group>"; };
+		49A26A27286E84AF0014C94E /* products */ = {isa = PBXFileReference; lastKnownFileType = folder; path = products; sourceTree = "<group>"; };
 		49A5A599286E2A2400D40564 /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		49F6F5982846988200C681BC /* RegWebFns.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RegWebFns.cpp; sourceTree = "<group>"; };
 		49F6F59C2846A73400C681BC /* AlphaPruning.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AlphaPruning.cpp; sourceTree = "<group>"; };
@@ -73,6 +76,7 @@
 				49451D8F28450A1300158C6D /* README.md */,
 				49451DA7284563D300158C6D /* ARACNe3_R.cpp */,
 				49A5A599286E2A2400D40564 /* CMakeLists.txt */,
+				49A26A27286E84AF0014C94E /* products */,
 				49451D8A28450A1300158C6D /* test */,
 				49451D7F284509E500158C6D /* Products */,
 			);
@@ -306,6 +310,7 @@
 		49451D86284509E500158C6D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				GCC_NO_COMMON_BLOCKS = YES;
 				HEADER_SEARCH_PATHS = "";
@@ -322,6 +327,7 @@
 		49451D87284509E500158C6D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				GCC_NO_COMMON_BLOCKS = YES;
 				HEADER_SEARCH_PATHS = "";
