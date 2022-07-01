@@ -14,7 +14,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 	std::vector<std::vector<std::set<gene_id_t>>> removedEdgesForThread(nthreads, std::vector<std::set<gene_id_t>>(tot_num_regulators));
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
 		for (uint16_t th = 0; th < nthreads; ++th) {
-			removedEdgesForThread[th][reg]; // prevent re-hashing later?
+			removedEdgesForThread[th][reg] = std::set<gene_id_t>(); // prevent re-hashing later?
 		}
 	}
 	
@@ -25,7 +25,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 	map_map finalNet = regweb_to_mapmap(network); 
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
-#pragma omp parallel for
+#pragma omp parallel for firstprivate(finalNet, tftfNetwork)
 	for (gene_id_t reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.contains(reg1)) {
 			auto &fin1 = finalNet[reg1];
