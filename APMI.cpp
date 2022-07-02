@@ -35,7 +35,7 @@ typedef struct {const float &x_bound1, &y_bound1, &width;
 float calcMI(const square &s) {
 	if (s.explicit_free)
 		std::free(s.pts);
-	const float pxy = s.num_pts/(float)tot_num_pts, &marginal = s.width, mi = pxy*std::log(pxy/(marginal*marginal));
+	const float pxy = s.num_pts/(float)tot_num_pts, marginal = s.width, mi = pxy*std::log(pxy/(marginal*marginal));
 	return std::isfinite(mi) ? mi : 0.0;
 }
 
@@ -49,8 +49,8 @@ float calcMI(const square &s) {
  */
 const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>& vec_y, const square &s) {
 	// extract values; memory disadvantage but runtime advantage
-	const float x_bound1=s.x_bound1, y_bound1=s.y_bound1, width=s.width;
-	const uint16_t *pts=s.pts, num_pts=s.num_pts;
+	const float &x_bound1=s.x_bound1, &y_bound1=s.y_bound1, &width=s.width;
+	const uint16_t *const &pts=s.pts, &num_pts=s.num_pts;
 
 	// if we have less points in the square than size_thresh, calc MI
 	if (num_pts < size_thresh) { return calcMI(s);}
@@ -65,15 +65,15 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
 	uint16_t *tr_pts, *br_pts, *bl_pts, *tl_pts, tr_num_pts=0, br_num_pts=0, bl_num_pts=0, tl_num_pts=0;
 	bool explicit_free = false;
 	if (sizeof(uint16_t) * tot_num_pts < 800000U) {
-		tr_pts = (uint16_t*)alloca(num_pts);
-		br_pts = (uint16_t*)alloca(num_pts);
-		bl_pts = (uint16_t*)alloca(num_pts);
-		tl_pts = (uint16_t*)alloca(num_pts);
+		tr_pts = (uint16_t*)alloca(num_pts * sizeof(uint16_t));
+		br_pts = (uint16_t*)alloca(num_pts * sizeof(uint16_t));
+		bl_pts = (uint16_t*)alloca(num_pts * sizeof(uint16_t));
+		tl_pts = (uint16_t*)alloca(num_pts * sizeof(uint16_t));
 	} else {
-		tr_pts = (uint16_t*)std::malloc(num_pts);
-		br_pts = (uint16_t*)std::malloc(num_pts);
-		bl_pts = (uint16_t*)std::malloc(num_pts);
-		tl_pts = (uint16_t*)std::malloc(num_pts);
+		tr_pts = (uint16_t*)std::malloc(num_pts * sizeof(uint16_t));
+		br_pts = (uint16_t*)std::malloc(num_pts * sizeof(uint16_t));
+		bl_pts = (uint16_t*)std::malloc(num_pts * sizeof(uint16_t));
+		tl_pts = (uint16_t*)std::malloc(num_pts * sizeof(uint16_t));
 		explicit_free = true;
 	}
 
@@ -82,6 +82,9 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
 	for (uint16_t i = 0; i < num_pts; ++i) {
 		// we must pull the actual point index from the pts array
 		const uint16_t p = pts[i];
+		if (p > tot_num_pts) {
+			std::cout << p << std::endl;
+		}
 		const bool top = vec_y[p] >= y_thresh,
 		      right = vec_x[p] >= x_thresh;
 		if (top && right) { tr_pts[tr_num_pts++] = p; } 
