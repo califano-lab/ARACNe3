@@ -5,6 +5,8 @@ arh_MatrixReglistIO
 MatrixReglistIO
 output.txt
 output
+*ARACNe3_cached
+ARACNe3_cached
 .ARACNe3_cached/
 .ARACNe3_cached*
 .ARACNe3_cached/*
