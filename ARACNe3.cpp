@@ -45,7 +45,7 @@ static void sinceLast(decltype(std::chrono::high_resolution_clock::now()) &last,
 /*
  This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
  */
-reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_num) {
+reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	auto last = std::chrono::high_resolution_clock::now();
 	
 	// set the individual subnet log file
@@ -78,7 +78,7 @@ reg_web ARACNe3_subnet(genemap& subnet_matrix,const uint16_t& subnet_num) {
 	uint32_t size_of_network = 0;
 	std::vector<std::vector<edge_tar>> network_vec(tot_num_regulators); 
 #pragma omp parallel for firstprivate(subnet_matrix) num_threads(nthreads)
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
+	for (int reg = 0; reg < tot_num_regulators; ++reg) {
 		network_vec[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
 		size_of_network += network_vec[reg].size();
 	}

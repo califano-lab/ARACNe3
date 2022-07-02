@@ -9,7 +9,7 @@ extern uint16_t nthreads;
 /*
  Prune the network according to the MaxEnt weakest-edge reduction.
  */
-reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_network) {
+reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_network) {
 	// primed will store the edges that are weakest.  we use a set to eliminate redundancy if the same edge is identified twice; same as hash set?
 	std::vector<std::vector<std::set<gene_id_t>>> removedEdgesForThread(nthreads, std::vector<std::set<gene_id_t>>(tot_num_regulators));
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
@@ -26,7 +26,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map& tftfNetwork, uint32_t &size_of_ne
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
 #pragma omp parallel for firstprivate(finalNet, tftfNetwork) num_threads(nthreads) schedule(static,1) //block cyclic good for triangular matrices
-	for (gene_id_t reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
+	for (int reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.contains(reg1)) {
 			auto &fin1 = finalNet[reg1];
 			auto &tft1 = tftfNetwork[reg1]; 
