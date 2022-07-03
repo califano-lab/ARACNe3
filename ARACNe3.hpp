@@ -22,9 +22,9 @@
  */
 #if defined __linux__ || defined __APPLE__
 const std::string hiddenfpre = ".";
-const std::string directory_slash = "/";
+const char directory_slash = '/';
 #elif defined _WIN32 // in windows you must set a hidden file via properties
-const std::string directory_slash = "\\";
+const char directory_slash = '\\';
 const std::string hiddenfpre = "";
 #else
 const std::string hiddenfpre = "";
