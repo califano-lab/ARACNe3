@@ -86,7 +86,7 @@ typedef std::unordered_map<gene_id_t, std::unordered_map<gene_id_t, float>> map_
 
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
-void makeDir(const std::string &dir_name);
+void makeDir(std::string &dir_name);
 std::vector<uint16_t> rank_indexes(const std::vector<float>& vec);
 
 /*
@@ -111,9 +111,9 @@ void readExpMatrix(std::string filename = "exp_mat.txt");
 
 genemap sampleFromGlobalGenemap();
 
-void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir = "output", const std::string &output_suffix = "0");
+void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const std::string &output_suffix = "0");
 
-void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, const std::string& output_dir);
+void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string& output_dir);
 
 
 //--------------------- APMI.cpp	 		-----------------------

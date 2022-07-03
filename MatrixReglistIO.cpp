@@ -23,7 +23,8 @@ extern uint16_t nthreads;
 /*
  Will automatically checked if there already is a directory.  Then creates the output directory.
  */
-void makeDir(const std::string &dir_name) {
+void makeDir(std::string &dir_name) {
+	std::replace(dir_name.begin(), dir_name.end(), '/', directory_slash);
 	if (!std::filesystem::exists(dir_name)) {
 		if (std::filesystem::create_directory(dir_name)) {
 			std::cout << "Directory Created: " + dir_name << std::endl;
@@ -64,6 +65,7 @@ std::vector<uint16_t> rank_indexes(const std::vector<float>& vec) {
  Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
  */
 void readRegList(std::string filename) {
+	std::replace(filename.begin(), filename.end(), '/', directory_slash);
 	std::fstream f {filename};
 	std::vector<std::string> regs;
 	
@@ -129,6 +131,7 @@ genemap sampleFromGlobalGenemap() {
 /* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the genemap for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
  */
 void readExpMatrix(std::string filename) {
+	std::replace(filename.begin(), filename.end(), '/', directory_slash);
 	std::fstream f{filename};
 	genemap gm;
 	genemap_r gm_r; //to store ranks of gexp values
@@ -222,7 +225,8 @@ void readExpMatrix(std::string filename) {
 /*
  Function that prints the Regulator, Target, and MI to the output_dir given the output_suffix.  Does not print to the console.  The data structure input is a reg_web, which is defined in "ARACNe3.hpp".
  */
-void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir, const std::string &output_suffix) {
+void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const std::string &output_suffix) {
+	std::replace(output_dir.begin(), output_dir.end(), '/', directory_slash);
 	const std::string filename = output_dir + "output_" + output_suffix + ".txt";
 	std::ofstream ofs{filename};
 	if (!ofs) {
@@ -239,7 +243,7 @@ void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir,
 	}
 }
 
-void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, const std::string& output_dir) {
+void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string& output_dir) {
 	const std::string filename = output_dir + "finalNet.txt";
 	std::ofstream ofs{filename};
 	if (!ofs) {
