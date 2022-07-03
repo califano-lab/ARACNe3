@@ -55,7 +55,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	 Log file header
 	 */
 	std::time_t t = std::time(nullptr);
-	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------\n" << std::endl;
+	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl << std::endl;
 	log_output << "Subnetwork #: " + std::to_string(subnet_num) << std::endl;
 	log_output << "Total # regulators: " + std::to_string(tot_num_regulators) << std::endl;
 	log_output << "Total # targets: " + std::to_string(subnet_matrix.size()) << std::endl;
@@ -64,13 +64,13 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	log_output << "Total possible edges: " + std::to_string(tot_num_regulators*subnet_matrix.size()-tot_num_regulators) << std::endl;
 	log_output << "Method of first pruning step: " + method << std::endl;
 	log_output << "Alpha: " + std::to_string(alpha) << std::endl;
-	log_output << "\n-----------Begin Network Generation-----------\n" ;
+	log_output << std::endl << "-----------Begin Network Generation-----------" << std::endl;
 	
 	/*
 	 Begin Network computation
 	 */
 	//-------time module-------
-	log_output << "\nRAW NETWORK COMPUTATION TIME:" << std::endl;
+	log_output << std::endl << "RAW NETWORK COMPUTATION TIME:" << std::endl;
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -96,7 +96,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	if (!prune_alpha) alpha = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
 	
 	//-------time module-------
-	log_output << "\nALPHA PRUNING TIME (" + method + "): " << std::endl;
+	log_output << std::endl << "ALPHA PRUNING TIME (" + method + "): " << std::endl;
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -119,7 +119,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	
 	if (prune_MaxEnt) {
 		//-------time module-------
-		log_output << "\nMaxEnt PRUNING TIME:" << std::endl;
+		log_output << std::endl << "MaxEnt PRUNING TIME:" << std::endl;
 		last = std::chrono::high_resolution_clock::now();
 		//-------------------------
 
@@ -147,7 +147,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	}
 	
 	//-------time module-------
-	log_output << "\nPRINTING NETWORK IN DIRECTORY \"" + output_dir + "\"....." << std::endl;
+	log_output << std::endl << "PRINTING NETWORK IN DIRECTORY \"" + output_dir + "\"....." << std::endl;
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -292,12 +292,12 @@ int main(int argc, char *argv[]) {
 	readExpMatrix(exp_file);
 	
 	//-------time module-------
-	log_output << "\nMATRIX & REGULATORS READ TIME:" << std::endl;
+	log_output << std::endl << "MATRIX & REGULATORS READ TIME:" << std::endl;
 	sinceLast(last, log_output);
 	//-------------------------
 	
 	//-------time module-------
-	log_output << "\nNULL MI MODEL TIME:" << std::endl;
+	log_output << std::endl << "NULL MI MODEL TIME:" << std::endl;
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -308,7 +308,7 @@ int main(int argc, char *argv[]) {
 	//-------------------------
 	
 	//-------time module-------
-	log_output << "\nCREATING SUB-NETWORK(s) TIME: " << std::endl;
+	log_output << std::endl << "CREATING SUB-NETWORK(s) TIME: " << std::endl;
 	//-------------------------
 	
 	std::vector<reg_web> subnets;
@@ -358,7 +358,7 @@ int main(int argc, char *argv[]) {
 	log_output << "TOTAL SUBNETS GENERATED: " + std::to_string(num_subnets) << std::endl;
 	
 	//-------time module-------
-	log_output << "\nCONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
+	log_output << std::endl << "CONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
 	//-------------------------
 	
 	std::vector<consolidated_df> final_df = consolidate(subnets);
@@ -368,7 +368,7 @@ int main(int argc, char *argv[]) {
 	//-------------------------
 	
 	//-------time module-------
-	log_output << "\nWRITING FINAL NETWORK..." << std::endl;
+	log_output << std::endl << "WRITING FINAL NETWORK..." << std::endl;
 	//-------------------------
 	
 	writeConsolidatedNetwork(final_df, output_dir);

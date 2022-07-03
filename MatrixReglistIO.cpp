@@ -68,7 +68,7 @@ void readRegList(std::string filename) {
 	std::vector<std::string> regs;
 	
 	if (!f.is_open()) {
-		std::cerr << "error: file open failed " << filename << ".\n";
+		std::cerr << "error: file open failed " << filename << "." << std::endl;
 		std::exit(2);
 	}
 	
@@ -106,7 +106,7 @@ genemap sampleFromGlobalGenemap() {
 	std::vector<std::vector<float>> subsampled_vecs(global_gm.size(), std::vector<float>(tot_num_subsample));
 	// parallelized can modify a vector
 #pragma omp parallel for num_threads(nthreads)
-	for (int gene = 0; gene < subsampled_vecs.size(); ++gene) {
+	for (int gene = 0; gene < static_cast<int>(subsampled_vecs.size()); ++gene) {
 		const std::vector<float> &expr_vec = global_gm[gene];
 		for (uint16_t i = 0U; i < tot_num_subsample; ++i)
 			subsampled_vecs[gene][i] = expr_vec[fold[i]];
@@ -133,7 +133,7 @@ void readExpMatrix(std::string filename) {
 	genemap gm;
 	genemap_r gm_r; //to store ranks of gexp values
 	if (!f.is_open()) {
-		std::cerr << "error: file open failed " << filename << ".\n";
+		std::cerr << "error: file open failed " << filename << "." << std::endl;
 		std::exit(2);
 	}
 
@@ -155,7 +155,9 @@ void readExpMatrix(std::string filename) {
 		tot_num_subsample = tot_num_samps;
 	
 	// now, we can more efficiently load
+	uint32_t count = 0U;
 	while(std::getline(f, line, '\n')) {
+		++count;
 		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 			line.pop_back();
 		std::vector<float> expr_vec;
@@ -175,7 +177,7 @@ void readExpMatrix(std::string filename) {
 		/* This means that a user has inputted a matrix with unequal row 1 vs row 2 length
 		 */
 		if (expr_vec.size() > tot_num_samps) {
-			std::cerr << "\nWARNING: ROW 2 LENGTH DOES NOT EQUAL ROW 1 LENGTH.  SEGMENTATION FAULT MAY OCCUR.  MAKE SURE SIZE OF MATRIX IS G+1 x N+1" << std::endl;
+			std::cerr << std::endl << "WARNING: ROW " + std::to_string(count) + " LENGTH DOES NOT EQUAL ROW 1 LENGTH.  THIS MAY BE BECAUSE THE NUMBER OF HEADER COLUMNS DOES NOT EQUAL THE NUMBER OF COLUMS IN THE MATRIX.  SEGMENTATION FAULT MAY OCCUR.  CHECK THAT SIZE OF MATRIX IS G+1 x N+1." << std::endl;
 			tot_num_samps = expr_vec.size();
 			tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
 			if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0)
@@ -209,8 +211,8 @@ void readExpMatrix(std::string filename) {
 
 	}
 	
-	std::cout << "\nInitial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
-	std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) + "\n" << std::endl;
+	std::cout << std::endl << "Initial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
+	std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) << std::endl << std::endl;
 	
 	global_gm = gm;
 	global_gm_r = gm_r;
@@ -224,7 +226,7 @@ void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir,
 	const std::string filename = output_dir + "output_" + output_suffix + ".txt";
 	std::ofstream ofs{filename};
 	if (!ofs) {
-		std::cerr << "error: could not write to file: " << filename << ".\n";
+		std::cerr << "error: could not write to file: " << filename << "." << std::endl;
 		std::cerr << "Try making the output directory subdirectory of the working directory. Example \"-o ./runs\"." << std::endl;
 		std::exit(2);
 	}
@@ -241,7 +243,7 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, cons
 	const std::string filename = output_dir + "finalNet.txt";
 	std::ofstream ofs{filename};
 	if (!ofs) {
-		std::cerr << "error: could not write to file: " << filename << ".\n";
+		std::cerr << "error: could not write to file: " << filename << "." << std::endl;
 		std::cerr << "Try making the output directory subdirectory of the working directory. Example \"-o ./runs\"." << std::endl;
 		std::exit(2);
 	}

@@ -26,7 +26,7 @@ void cacheNullModel(const std::vector<float>& mi_vec, const float& m, const doub
 	std::ostream_iterator<float> cached_iterator(cached, " ");
 	std::copy(mi_vec.begin(), mi_vec.end(), cached_iterator);
 	
-	cached << "\n" << m << " " << b;
+	cached << std::endl << "" << m << " " << b;
 	
 	return;
 }
