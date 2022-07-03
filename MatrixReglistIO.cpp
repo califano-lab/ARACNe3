@@ -37,9 +37,9 @@ void makeDir(std::string &dir_name) {
 	makeUnixDirectoryNameUniversal(dir_name);
 	if (!std::filesystem::exists(dir_name)) {
 		if (std::filesystem::create_directory(dir_name)) {
-			std::cout << "Directory Created: " + dir_name << std::endl;
+			std::cout << "Directory Created: \"" + dir_name + "\"." << std::endl;
 		} else {
-			std::cerr << "failed to create directory: " + dir_name << std::endl;
+			std::cerr << "failed to create directory: \"" + dir_name + "\"." << std::endl;
 			std::exit(2);
 		}
 	}
@@ -80,7 +80,7 @@ void readRegList(std::string &filename) {
 	std::vector<std::string> regs;
 	
 	if (!f.is_open()) {
-		std::cerr << "error: file open failed " << filename << "." << std::endl;
+		std::cerr << "error: file open failed \"" << filename << "\"." << std::endl;
 		std::exit(2);
 	}
 	
@@ -168,9 +168,9 @@ void readExpMatrix(std::string &filename) {
 		tot_num_subsample = tot_num_samps;
 	
 	// now, we can more efficiently load
-	uint32_t count = 0U;
+	uint32_t linesread = 1U;
 	while(std::getline(f, line, '\n')) {
-		++count;
+		++linesread;
 		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 			line.pop_back();
 		std::vector<float> expr_vec;
@@ -190,7 +190,7 @@ void readExpMatrix(std::string &filename) {
 		/* This means that a user has inputted a matrix with unequal row 1 vs row 2 length
 		 */
 		if (expr_vec.size() > tot_num_samps) {
-			std::cerr << std::endl << "WARNING: ROW " + std::to_string(count) + " LENGTH DOES NOT EQUAL ROW 1 LENGTH.  THIS MAY BE BECAUSE THE NUMBER OF HEADER COLUMNS DOES NOT EQUAL THE NUMBER OF COLUMS IN THE MATRIX.  SEGMENTATION FAULT MAY OCCUR.  CHECK THAT SIZE OF MATRIX IS G+1 x N+1." << std::endl;
+			std::cerr << std::endl << "WARNING: ROW " + std::to_string(linesread) + " LENGTH DOES NOT EQUAL ROW 1 LENGTH.  THIS MAY BE BECAUSE THE NUMBER OF HEADER COLUMNS DOES NOT EQUAL THE NUMBER OF COLUMS IN THE MATRIX.  SEGMENTATION FAULT MAY OCCUR.  CHECK THAT SIZE OF MATRIX IS G+1 x N+1." << std::endl;
 			tot_num_samps = expr_vec.size();
 			tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
 			if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0)
