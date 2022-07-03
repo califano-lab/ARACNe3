@@ -86,6 +86,8 @@ typedef std::unordered_map<gene_id_t, std::unordered_map<gene_id_t, float>> map_
 
 
 //--------------------- MatrixReglistIO.cpp 		-----------------------
+std::string makeUnixDirectoryNameUniversal(std::string &dir_name);
+std::string makeUnixDirectoryNameUniversal(std::string &&dir_name);
 void makeDir(std::string &dir_name);
 std::vector<uint16_t> rank_indexes(const std::vector<float>& vec);
 
@@ -102,16 +104,16 @@ typedef std::unordered_map<gene_id_t, std::vector<uint16_t>> genemap_r;
 /*
  Does not return a list of regulators as a string vector, as we are using compression
  */
-void readRegList(std::string filename = "regulators.txt");
+void readRegList(std::string &filename);
 
 /*
  Returns a map of gene identifier -> gene expression.
  */
-void readExpMatrix(std::string filename = "exp_mat.txt");
+void readExpMatrix(std::string &filename);
 
 genemap sampleFromGlobalGenemap();
 
-void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const std::string &output_suffix = "0");
+void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const std::string &output_suffix);
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string& output_dir);
 

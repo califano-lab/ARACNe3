@@ -57,11 +57,11 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o /Users/andrew/Desktop/a3/output --subsample 0.63 --seed 23 --numnulls 10000 --alpha 0.05 --FDR -x 1 --threads 10"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e test/exp_mat.txt -r test/regulators.txt -o test_output_1_ --seed 1 -x 50 --threads 10 --adaptive"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug.txt -o /Users/andrew/Desktop/a3/output --subsample 0.99 --seed 23 --numnulls 10000 --alpha 0.05 --FDR -x 50 --threads 10 --adaptive"

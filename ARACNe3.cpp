@@ -147,7 +147,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	}
 	
 	//-------time module-------
-	log_output << std::endl << "PRINTING NETWORK IN DIRECTORY \"" + output_dir + "\"....." << std::endl;
+	log_output << std::endl << "PRINTING NETWORK IN DIRECTORY \"" + makeUnixDirectoryNameUniversal(output_dir) + "\"....." << std::endl;
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
 	auto last = std::chrono::high_resolution_clock::now();
 	
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
-		std::cout << "usage: " + ((std::string) argv[0]) + " -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05" << std::endl;
+		std::cout << "usage: " + ((std::string) argv[0]) + makeUnixDirectoryNameUniversal(" -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05") << std::endl;
 		return 1;
 	}
 	
@@ -284,7 +284,7 @@ int main(int argc, char *argv[]) {
 	std::ofstream log_output(output_dir + "finalLog.txt");
 	std::time_t t = std::time(nullptr);
 	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl;
-	std::cout << "Beginning ARACNe3 subnetwork generation.  See logs and progress reports in \"" + output_dir + "finalLog.txt\"." << std::endl;
+	std::cout << "Beginning ARACNe3 subnetwork generation.  See logs and progress reports in \"" + makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"." << std::endl;
 	log_output << "Beginning ARACNe3 subnetwork generation..." << std::endl;
 	
 	readRegList(reg_file);
