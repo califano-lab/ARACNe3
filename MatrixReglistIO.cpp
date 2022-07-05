@@ -248,7 +248,7 @@ void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const
 	ofs << "REGULATOR\tTARGET\tMI\t" << std::endl;
 	for (auto it = network.begin(); it != network.end(); ++it) {
 		for (auto &edge_tar : it->second) {
-				ofs << decompression_map[it->first] << '\t' << decompression_map[edge_tar.target] << '\t' << edge_tar.mi << '\t' << std::endl;
+				ofs << decompression_map[it->first] << '\t' << decompression_map[edge_tar.target] << '\t' << edge_tar.mi << '\t' << '\n'; // using '\n' over std::endl, better for performance
 		}
 	}
 }
@@ -270,5 +270,5 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std:
 		edge.final_mi << '\t' <<
 		edge.final_scc << '\t' <<
 		edge.num_subnets_incident << '\t' <<
-		edge.final_p << '\t' << std::endl;
+		edge.final_p << '\t' << '\n'; // using '\n' over std::endl, better for performance
 }
