@@ -106,25 +106,32 @@ g_10011_	0.055	0.73	4.64
 
 ``--seed`` sets the seed for all programmatic pseudorandom behavior (null model marginals and subsampling; default: `--seed 0`)
 
+``--threads`` sets the number of threads to use during subnetwork generation (default: `--threads 1`)
+
 ## Examples
 Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators). 
 
-### Example 1: generate one ARACNe3 subnetwork with no pruning steps, no subsampling, and seed equal to 343
+### Example 1: generate one ARACNe3 subnetwork, subsampling $1-e^{-1}%$ of expression profiles, controlling for FDR < 0.05, using only one CPU core
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 1.00 --noAlpha --noMaxEnt --seed 343
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output
 ```
 
-### Example 2: generate one ARACNe3 subnetwork with all pruning steps, subsampling 33.3% of profiles, controlling for FDR < 0.01
+### Example 2: generate one ARACNe3 subnetwork with no pruning steps, no subsampling, and seed equal to 343, using 10 CPU cores
+```
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 1.00 --noAlpha --noMaxEnt --seed 343 --threads 10
+```
+
+### Example 3: generate one ARACNe3 subnetwork with all pruning steps, subsampling 33.3% of profiles, controlling for FDR < 0.01
 ```
 ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 0.333 --alpha 0.01
 ``` 
 
-### Example 3: generate thirty ARACNe3 subnetworks, subsampling $1-e^{-1}%$ of expression profiles, controlling for FDR < 0.05
+### Example 4: generate thirty ARACNe3 subnetworks, subsampling $1-e^{-1}%$ of expression profiles, controlling for FDR < 0.05
 ```
 ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output -x 30
 ``` 
 
-### Example 4: generate ARACNe3 subnetworks adaptively, until at least 50 targets are observed per regulon in the consensus network, controlling for FWER < 0.10, and skipping the MaxEnt pruning step
+### Example 5: generate ARACNe3 subnetworks adaptively, until at least 50 targets are observed per regulon in the consensus network, controlling for FWER < 0.10, and skipping the MaxEnt pruning step
 ```
 ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output -x 50 -FWER --alpha 0.10 --adaptive --noMaxEnt
 ``` 
