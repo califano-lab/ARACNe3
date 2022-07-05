@@ -234,8 +234,6 @@ int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "-x")) 
 		num_subnets = targets_per_regulator = std::stoi(getCmdOption(argv, argv+argc, "-x"));
 
-	if (cmdOptionExists(argv, argv+argc, "--numNetworks"))
-		num_subnets = std::stoi(getCmdOption(argv, argv+argc, "--numNetworks"));
 	if (cmdOptionExists(argv, argv+argc, "--threads"))
 		nthreads = std::stoi(getCmdOption(argv, argv+argc, "--threads"));
 
