@@ -35,7 +35,7 @@ If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if yo
 ## Using ARACNe3
 ### Input files needed to run ARACNe3
 See below for file format specification (or download the test files from our repository)
-1.	A (G+1)x(N+1) normalized expression matrix (CPM, TPM, etc.)
+1.	A `(G+1)x(N+1)` normalized expression matrix (CPM, TPM, etc.)
 2.	List of regulators (e.g. Transcription Factors)
 
 *Note: All regulators must have a defined expression profile in the expression matrix*.
@@ -73,7 +73,7 @@ g_10011_
 g_1_
 ```
 ### Dataset
-A (G+1)x(N+1), normalized and transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for an equal number of columns (defined by tab) as the rows below. E.g.,
+A `(G+1)x(N+1)`, normalized and transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for an equal number of columns (defined by tab) as the rows below. E.g.,
 ```
 gene	Samp5	Sample2	Samp1
 g_1_	4.99	2.93	0.39
@@ -126,7 +126,7 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 
 ### Example 4: generate ARACNe3 subnetworks adaptively, until at least 50 targets are observed per regulon in the consensus network, controlling for FWER < 0.10, and skipping the MaxEnt pruning step
 ```
-./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output -x 50 -FWER --alpha 0.10 --adaptive
+./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output -x 50 -FWER --alpha 0.10 --adaptive --noMaxEnt
 ``` 
 
 ## Tracking Progress
