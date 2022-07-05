@@ -104,7 +104,7 @@ g_10011_	0.055	0.73	4.64
 
 ``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
 
-``--seed`` sets the seed for all programatic pseudorandom behavior (null model marginals and subsampling; default: `--seed 0`)
+``--seed`` sets the seed for all programmatic pseudorandom behavior (null model marginals and subsampling; default: `--seed 0`)
 
 ## Examples
 Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators). 
@@ -119,7 +119,7 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output --subsample 0.333 --alpha 0.01
 ``` 
 
-### Example 3: generate thiry ARACNe3 subnetworks, subsampling $1-e^{-1}%$ of expression profiles, controlling for FDR < 0.05
+### Example 3: generate thirty ARACNe3 subnetworks, subsampling $1-e^{-1}%$ of expression profiles, controlling for FDR < 0.05
 ```
 ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output -x 30
 ``` 
