@@ -92,7 +92,7 @@ g_10011_	0.055	0.73	4.64
 
 ``-x`` is the stopping criteria.  By default, it specifies a fixed number of subnetworks to generate (default: `-x 1`) 
 
-``--adaptive`` changes the stopping criteria `-x` to specify regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, if all subnetworks are consolidated into one (default `-x 30`)
+``--adaptive`` changes the stopping criteria `-x` to specify regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, if all subnetworks are consolidated into one (default: `-x 30`)
 
 ``--alpha`` is the alpha parameter for FDR or FWER pruning (default: `--alpha 0.05`)
 
@@ -104,7 +104,7 @@ g_10011_	0.055	0.73	4.64
 
 ``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
 
-``--seed`` sets the seed for all programmatic pseudorandom behavior (null model marginals and subsampling; default: `--seed 0`)
+``--seed`` sets the seed for all programmatic pseudorandom behavior (null model marginals and subsampling.  Default: `--seed 0`)
 
 ``--threads`` sets the number of threads to use during subnetwork generation (default: `--threads 1`)
 
