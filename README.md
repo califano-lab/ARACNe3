@@ -90,7 +90,7 @@ g_10011_	0.055	0.73	4.64
 
 ``-o`` is the output directory
 
-``-x`` is the stopping criteria.  By default, it specifies a fixed number of subnetworks to generate (default: `-x 1`) 
+``-x`` is the stopping criteria for generating multiple subnetworks.  By default, it specifies a fixed number of subnetworks to generate (default: `-x 1`) 
 
 ``--adaptive`` changes the stopping criteria `-x` to specify regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, if all subnetworks are consolidated into one (default: `-x 30`)
 
