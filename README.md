@@ -19,7 +19,7 @@ The C++20 standard is used when compiling `ARACNe3` into an executable.  `ARACNe
 
 `brew install llvm libomp`
 
-Build the executable by cloning the repository, compiling all C++ files, and then linking `ARACNe3` with object file dependencies in the manner below.  Make sure that `OpenMP` libraries have been installed, and their include directories and library directories have been implied by your [environment variables](https://en.wikipedia.org/wiki/PATH_(variable)).  Make sure to utilize all available runtime optimization compiler options.  
+Build the executable by cloning the repository, compiling all C++ files, and then linking `ARACNe3` with object file dependencies in the manner below.  Make sure that `OpenMP` libraries have been installed, and their include directories and library directories have been implied by your [environment variables](https://en.wikipedia.org/wiki/Environment_variable).  Make sure to utilize all available runtime optimization compiler options.  
 ### Compiling Example:
 ```
 clang++ -std=c++20 -O3 -Xpreprocessor -fopenmp -c NullModel.cpp MatrixReglistIO.cpp APMI.cpp AlphaPruning.cpp MaxEntPruning.cpp RegWebFns.cpp Consolidator.cpp

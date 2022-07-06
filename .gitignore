@@ -40,6 +40,10 @@ x86/
 bld/
 [Bb]in/
 [Oo]bj/
+*intermediates/
+*intermediates*
+products/windows/ARM64/intermediates/
+products/windows/x64/intermediates/
 
 # Visual Studio 2015 cache/options directory
 .vs/
