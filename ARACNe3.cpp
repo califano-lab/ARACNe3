@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
 	auto last = std::chrono::high_resolution_clock::now();
 	
 	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
-		std::cout << "usage: " + ((std::string) argv[0]) + makeUnixDirectoryNameUniversal(" -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory --alpha 0.05") << std::endl;
+		std::cout << "usage: " + ((std::string) argv[0]) + makeUnixDirectoryNameUniversal(" -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory") << std::endl;
 		return 1;
 	}
 	
