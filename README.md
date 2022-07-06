@@ -35,7 +35,7 @@ If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if yo
 ## Using ARACNe3
 ### Input files needed to run ARACNe3
 See below for file format specification (or download the test files from our repository)
-1.	A `(G+1)x(N+1)` normalized expression matrix (CPM, TPM, etc.)
+1.	A `G+1 x N+1` normalized expression matrix (CPM, TPM, etc.)
 2.	List of regulators (e.g. Transcription Factors)
 
 *Note: All regulators must have a defined expression profile in the expression matrix*.
@@ -73,7 +73,7 @@ g_10011_
 g_1_
 ```
 ### Dataset
-A `(G+1)x(N+1)`, normalized and transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for an equal number of columns (defined by tab) as the rows below. E.g.,
+A `G+1 x N+1`, normalized and transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for an equal number of columns (defined by tab) as the rows below. E.g.,
 ```
 gene	Samp5	Sample2	Samp1
 g_1_	4.99	2.93	0.39
@@ -90,15 +90,15 @@ g_10011_	0.055	0.73	4.64
 
 ``-o`` is the output directory
 
-``-x`` is the stopping criteria.  It specifies the number of subnetworks to generate (default: `-x 1`), unless the `--adaptive` flag is provided.  If the user applies `--adaptive`, this number will specify the minimum number of targets per regulator identified in a consensus regulon that consolidates every generated subnetwork (default: `-x 30` if `--adaptive` is specified)  
+``-x`` is the stopping criteria.  By default, it specifies a fixed number of subnetworks to generate (default: `-x 1`) 
 
-``-a`` or ``--alpha`` is the alpha parameter for FDR or FWER pruning (default: `--alpha 0.05`)
+``--adaptive`` changes the stopping criteria `-x` to specify regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, if all subnetworks are consolidated into one (default `-x 30`)
 
-``--FWER`` tells ARACNe3 to prune by control of FWER, instead of control by FDR (default)
+``--alpha`` is the alpha parameter for FDR or FWER pruning (default: `--alpha 0.05`)
+
+``--FWER`` tells ARACNe3 to prune by control of FWER alpha, instead of the default control for FDR alpha
 
 ``--subsample`` is the population percentage to subsample ($1-e^{-1}$ is default: `--subsample 0.63212...`)
-
-``--adaptive`` changes the stopping criteria `-x` to regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, when all subnetworks are compiled (default `-x 30`)
 
 ``--noAlpha`` tells ARACNe3 not to prune based on the FDR or FWER (same as: `--alpha 1`)
 
