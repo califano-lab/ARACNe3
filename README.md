@@ -55,12 +55,12 @@ See below for file format specification (or download the test files from our rep
 `ARACNe3` will output a directory structure within the output directory provided by the user (e.g., `-o outputdir/`) that contains the subnetworks (in `outputdir/subnets/`), the consensus network (`outputdir/finalNet.txt`), and log information for the subnetworks (in `outputdir/log/`) and the overall `ARACNe3` runtime (`outputdir/finalLog.txt`).  The subnetworks subdirectory will contain a file for each subnetwork (`-x`) requested, automatically named `output_subnet#.txt`. Each file shows every significant interaction in three columns:
 1.	The regulator.
 2.	The target.
-3.	The APMI (Mutual Information estimated by Adaptive Partitioning) of the pair, based on their subsampled gene expression profiles.
+3.	The APMI (Mutual Information estimated by Adaptive Partitioning) of the pair, based on the subsampled gene expression profiles of the regulator and target.
 
 The consensus network `outputdir/finalNet.txt` is a file that consolidates all generated networks and summarizes each edge in five columns:
 1.	The regulator.
 2.	The target.
-3.	The APMI of the pair, based on the full gene expression profile.
+3.	The APMI of the pair, based on the full gene expression profiles of the regulator and target.
 4.	The Spearman's Rank Correlation Coefficient of the pair, based on the full gene expression profile.
 5.	The p-value of the edge, based on how many subnetworks in which it was identified (see the [manuscript](https://github.com/califano-lab/ARACNe3-CPP) for methodology).
 
