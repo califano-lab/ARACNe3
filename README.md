@@ -109,7 +109,7 @@ g_10011_	0.055	0.73	4.64
 ``--threads`` sets the number of threads to use during subnetwork generation (default: `--threads 1`)
 
 ## Examples
-Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators). 
+Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators).  Due to the limited capacity of the repository, you may need to decompress the expression matrix before usage.
 
 ### Example 1: generate one ARACNe3 subnetwork, subsampling $1-e^{-1}%$ of expression profiles, controlling for FDR < 0.05, using only one CPU core
 ```
