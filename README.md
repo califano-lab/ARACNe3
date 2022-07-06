@@ -8,13 +8,13 @@ Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse eng
 
 Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Califano A. *ARACNE: an algorithm for the reconstruction of gene regulatory networks in a mammalian cellular context.* **BMC Bioinformatics.** 2006 Mar 20;7 Suppl 1:S7. doi: [10.1186/1471-2105-7-S1-S7](https://dx.doi.org/10.1186/1471-2105-7-S1-S7)
 
-## Download
+## Downloading ARACNe3
 
 `git clone https://github.com/califano-lab/ARACNe3-CPP # Clone the repo`
 
 After cloning the repository, you may build `ARACNe3` manually, or access the latest executables in the `products/` directory.  Currently, `ARACNe3` has been pre-compiled to work on MacOS 12.3 (in `products/macOS 12.3/`) and Windows 10 (`products/windows/`).  Make sure that if using Windows, you choose the version compiled for your CPU architecture. 
 
-## Building ARACNe3 Manually
+## Building ARACNe3 Manually (Optional)
 The C++20 standard is used when compiling `ARACNe3` into an executable.  `ARACNe3` utilizes multiple threads with `OpenMP` directives, so you must have libraries that support them installed.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) installed already.
 
 `brew install llvm libomp`
@@ -73,7 +73,7 @@ g_10011_
 g_1_
 ```
 ### Dataset
-A `G+1 x N+1`, normalized and transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for an equal number of columns (defined by tab) as the rows below. E.g.,
+A `G+1 x N+1`, normalized and transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for an equal number of columns (delimited by tab) as the rows below. E.g.,
 ```
 gene	Samp5	Sample2	Samp1
 g_1_	4.99	2.93	0.39
