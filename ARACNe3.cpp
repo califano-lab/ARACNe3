@@ -38,7 +38,7 @@ extern std::vector<float> FPR_estimates;
  */
 static void sinceLast(decltype(std::chrono::high_resolution_clock::now()) &last, std::ostream &ostream) {
 	auto cur = std::chrono::high_resolution_clock::now();
-	ostream << std::chrono::duration_cast<std::chrono::milliseconds>(cur-last).count() << "ms" << std::endl;
+	ostream << std::chrono::duration_cast<std::chrono::seconds>(cur-last).count() << "s" << std::endl;
 	last = cur;
 }
 
@@ -100,6 +100,8 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
+	auto size_prev = size_of_network;
+	
 	/*
 	 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
 	 */
@@ -109,6 +111,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	
 	//-------time module-------
 	sinceLast(last, log_output);
+	log_output << "EDGES REMOVED: " << size_prev - size_of_network << " EDGES." << std::endl;
 	log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
 	//-------------------------
 	
@@ -123,11 +126,13 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 		last = std::chrono::high_resolution_clock::now();
 		//-------------------------
 
+		size_prev = size_of_network;
 		
 		network = pruneMaxEnt(network, tftfNetwork, size_of_network);
 		
 		//-------time module-------
 		sinceLast(last, log_output);
+		log_output << "EDGES REMOVED: " << size_prev - size_of_network << " EDGES." << std::endl;
 		log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
 		//-------------------------
 		
