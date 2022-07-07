@@ -12,7 +12,9 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 
 `git clone https://github.com/califano-lab/ARACNe3-CPP # Clone the repo`
 
-After cloning the repository, you may build `ARACNe3` manually, or access the latest executables in the `products/` directory.  Currently, `ARACNe3` has been pre-compiled to work on MacOS 12.3 (in `products/macOS 12.3/`) and Windows 10 (`products/windows/`).  Make sure that if using Windows, you choose the version compiled for your CPU architecture. 
+After cloning the repository, you may build `ARACNe3` manually, or access the latest executables in the `products/` directory.  Currently, `ARACNe3` has been pre-compiled to work on MacOS 12.0 or later (in `products/macOS 12.0/`) and Windows 10 (`products/windows/`).  Make sure that if using Windows, you choose the version compiled for your CPU architecture (ARM 64-bit or x86 64-bit)
+
+Note that you may require additional software to run the C++ executables.  If running the `ARACNe3` executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://www.microsoft.com/en-ca/download/details.aspx?id=48145).  
 
 ## Building ARACNe3 Manually (Optional)
 The C++20 standard is used when compiling `ARACNe3` into an executable.  `ARACNe3` utilizes multiple threads with `OpenMP` directives, so you must have libraries that support them installed.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) installed already.
@@ -135,19 +137,6 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 ```
 ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output -x 50 -FWER --alpha 0.10 --adaptive --noMaxEnt
 ``` 
-
-## Tracking Progress
-
-All test results noted in git commit notes or within the `test/` directory reflect runtime performance of the most recent version of `ARACNe3` or a given executable.  Tests were run on a computer with the specifications listed below. 
-
-| System Feature | Value |
-| :----: | :----: |
-| Model Identifier: | MacBookPro18,1 |
-| Chip: | Apple M1 Pro |
-| Total Number of Cores: | 10 (8 performance and 2 efficiency) |
-| Memory: | 32 GB |
-| System Firmware Version: |7459.101.3 |
-| OS Loader Version: | 7459.101.3 |
 
 ## Contact
 Please contact Aaron Griffin for questions regarding this project.

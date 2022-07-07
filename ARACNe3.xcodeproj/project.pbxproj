@@ -23,7 +23,7 @@
 		49451D7C284509E500158C6D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
-			dstPath = "$(PROJECT_DIR)/products/macOS 12.3";
+			dstPath = "$(PROJECT_DIR)/products/macOS 12.0";
 			dstSubfolderSpec = 0;
 			files = (
 				4927A79A286EB66F00C6523D /* ARACNe3 in CopyFiles */,
