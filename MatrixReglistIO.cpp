@@ -262,7 +262,7 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std:
 		std::cerr << "Try making the output directory subdirectory of the working directory. Example \"-o " + makeUnixDirectoryNameUniversal("./runs") + "\"." << std::endl;
 		std::exit(2);
 	}
-	ofs << "REGULATOR\tTARGET\tMI\tSCC\t# SUBNETS INCIDENT\tP-VALUE (# SUBNETS INCIDENT)" << std::endl;
+	ofs << "REGULATOR\tTARGET\tMI\tSCC\t# SUBNETS INCIDENT\tP-VALUE" << std::endl;
 	for (const auto& edge : final_df)
 		ofs << 
 		decompression_map[edge.regulator] << '\t' <<
