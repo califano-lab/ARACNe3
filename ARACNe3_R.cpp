@@ -2,8 +2,7 @@
  This file is intended to contain functions callable from R that will allow for Rcpp usage and a custom analysis.  Right now, this file is not ready for release.  However, one might find these functions useful during ARACNe3 development.
  */
 
-// [[Rcpp::depends(BH)]]
-// [[Rcpp::plugins("cpp17")]]
+// [[Rcpp::plugins("cpp20")]]
 
 using namespace Rcpp;
 
