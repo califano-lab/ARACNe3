@@ -175,14 +175,14 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 
 //--------------------cmd line parser------------------------
 
-char* getCmdOption(char **begin, char **end, const std::string & option) {
+char* getCmdOption(char **begin, char **end, const std::string &option) {
 	char **itr = std::find(begin, end, option);
 	if (itr != end && ++itr != end)
 		return *itr;
 	return 0;
 }
 
-bool cmdOptionExists(char **begin, char **end, const std::string& option) {
+bool cmdOptionExists(char **begin, char **end, const std::string &option) {
 	return std::find(begin, end, option) != end;
 }
 
