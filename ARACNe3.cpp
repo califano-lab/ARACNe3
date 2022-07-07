@@ -175,19 +175,15 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 
 //--------------------cmd line parser------------------------
 
-char* getCmdOption(char **begin, char **end, const std::string & option)
-{
-    char **itr = std::find(begin, end, option);
-    if (itr != end && ++itr != end)
-    {
-	return *itr;
-    }
-    return 0;
+char* getCmdOption(char **begin, char **end, const std::string & option) {
+	char **itr = std::find(begin, end, option);
+	if (itr != end && ++itr != end)
+		return *itr;
+	return 0;
 }
 
-bool cmdOptionExists(char **begin, char **end, const std::string& option)
-{
-    return std::find(begin, end, option) != end;
+bool cmdOptionExists(char **begin, char **end, const std::string& option) {
+	return std::find(begin, end, option) != end;
 }
 
 //-----------------------------------------------------------
@@ -345,7 +341,7 @@ int main(int argc, char *argv[]) {
 		num_subnets = i;
 	} else {
 		subnets = std::vector<reg_web>(num_subnets);
-		for (uint16_t i = 0; i < num_subnets; ++i) {
+		for (int i = 0; i < num_subnets; ++i) {
 			genemap subnet_matrix = sampleFromGlobalGenemap(); 
 			subnets[i] = ARACNe3_subnet(subnet_matrix, i+1);
 		}
