@@ -35,7 +35,7 @@ float calcMI(const square &s) {
 	if (s.explicit_free)
 		std::free(s.pts);
 	const float pxy = s.num_pts/(float)tot_num_pts, marginal = s.width, mi = pxy*std::log(pxy/(marginal*marginal));
-	return std::isfinite(mi) ? mi : 0.0;
+	return std::isfinite(mi) ? mi : 0.0f;
 }
 
 /*
@@ -55,13 +55,13 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
 	if (num_pts < size_thresh) { return calcMI(s);}
 
 	// thresholds for potential partition of XY plane
-	const float x_thresh = x_bound1 + width*0.5,
-	      y_thresh = y_bound1 + width*0.5;
+	const float x_thresh = x_bound1 + width*0.5f,
+	      y_thresh = y_bound1 + width*0.5f;
 
 	/* The usage of VLAs on the stack is an extreme runtime advantage for the APMI estimator.  Depending on the stack size, this can cause stack overflow at runtime.  VLAs are a C99 feature, but we can attempt to make this safe and take the runtime disadvantage when necessary. -Wpedantic will reveal this as a warning.  We assume there is at least 800Kb remaining on a 1Mb stack.
 	 */
 	// indices for quadrants, to test chi-square, with num_pts for each
-	uint16_t *tr_pts, *br_pts, *bl_pts, *tl_pts, tr_num_pts=0, br_num_pts=0, bl_num_pts=0, tl_num_pts=0;
+	uint16_t *tr_pts, *br_pts, *bl_pts, *tl_pts, tr_num_pts=0U, br_num_pts=0U, bl_num_pts=0U, tl_num_pts=0U;
 	bool explicit_free = false;
 	if (sizeof(uint16_t) * tot_num_pts < 800000U) {
 		tr_pts = (uint16_t*)alloca(num_pts * sizeof(uint16_t));
@@ -78,7 +78,7 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
 
 	// points that belong to each quadrant are discovered and sorted
 	// outer for loop will iterate through the pts array
-	for (uint16_t i = 0; i < num_pts; ++i) {
+	for (uint16_t i = 0U; i < num_pts; ++i) {
 		// we must pull the actual point index from the pts array
 		const uint16_t p = pts[i];
 		if (p > tot_num_pts) {
@@ -93,7 +93,7 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
 	}
 
 	// compute chi-square, more efficient not to use pow()
-	const float E = num_pts*0.25, chisq = ((tr_num_pts-E)*(tr_num_pts-E) +
+	const float E = num_pts*0.25f, chisq = ((tr_num_pts-E)*(tr_num_pts-E) +
 		(br_num_pts-E)*(br_num_pts-E) +
 		(bl_num_pts-E)*(bl_num_pts-E) +
 		(tl_num_pts-E)*(tl_num_pts-E))/E;
@@ -133,14 +133,14 @@ float APMI(const std::vector<float>& vec_x, const std::vector<float>& vec_y,
 		::tot_num_pts = vec_x.size();
 		// Make an array of all indices, to be partitioned later
 		std::vector<uint16_t> all_pts(tot_num_pts);
-		for (uint16_t i = 0; i < tot_num_pts; i++) { all_pts[i] = i; }
+		for (uint16_t i = 0U; i < tot_num_pts; i++) { all_pts[i] = i; }
 		::all_pts = all_pts;
 	}
 
 
 	
 	// Initialize plane and calc all MIs
-	const square init{0.0, 0.0, 1.0, &all_pts[0], tot_num_pts};	
+	const square init{0.0f, 0.0f, 1.0f, &all_pts[0U], tot_num_pts};	
 	
 	return APMI_split(vec_x, vec_y, init);
 }
@@ -168,10 +168,10 @@ std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
 	if (tot_num_pts != vec_x.size()) {
 		::tot_num_pts = vec_x.size();
 		std::vector<uint16_t> all_pts(tot_num_pts);
-		for (uint16_t i = 0; i < tot_num_pts; ++i) { all_pts[i] = i; }
+		for (uint16_t i = 0U; i < tot_num_pts; ++i) { all_pts[i] = i; }
 		::all_pts = all_pts;
 	}
-	const square init{0.0, 0.0, 1.0, &all_pts[0], tot_num_pts};
+	const square init{0.0f, 0.0f, 1.0f, &all_pts[0U], tot_num_pts};
 	
 
 	
