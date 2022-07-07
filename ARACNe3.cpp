@@ -215,8 +215,8 @@ int main(int argc, char *argv[]) {
 	output_dir = (std::string) getCmdOption(argv, argv+argc, "-o");
 	
 	// make sure output_dir has a trailing slash
-	if (output_dir.back() != '/')
-	    output_dir += '/';
+	if (output_dir.back() != directory_slash)
+	    output_dir += directory_slash;
 	
 	if (cmdOptionExists(argv, argv+argc, "--alpha"))
 		alpha = std::stof(getCmdOption(argv, argv+argc, "--alpha"));
