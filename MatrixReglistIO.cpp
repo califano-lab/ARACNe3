@@ -116,8 +116,8 @@ genemap sampleFromGlobalGenemap() {
 	std::vector<uint16_t> fold(tot_num_subsample);
 	std::sample(idxs.begin(), idxs.end(), fold.begin(), tot_num_subsample, rand);
 	std::vector<std::vector<float>> subsampled_vecs(global_gm.size(), std::vector<float>(tot_num_subsample));
-	// parallelized can modify a vector
-#pragma omp parallel for num_threads(nthreads) if(adaptive)
+	// parallelized can modify a vector, which is why we have vector of vectors
+#pragma omp parallel for num_threads(nthreads)
 	for (int gene = 0; gene < static_cast<int>(subsampled_vecs.size()); ++gene) {
 		const std::vector<float> &expr_vec = global_gm[gene];
 		for (uint16_t i = 0U; i < tot_num_subsample; ++i)
@@ -130,10 +130,9 @@ genemap sampleFromGlobalGenemap() {
 	
 	genemap subsample_gm;
 	subsample_gm.reserve(global_gm.size());	
-	// non parallelized must set the genemap
-	for (unsigned long gene = 0; gene < subsampled_vecs.size(); ++gene) {
+	// non parallelized must set the genemap, by going through the vector of vectors
+	for (unsigned long gene = 0; gene < subsampled_vecs.size(); ++gene)
 		subsample_gm[gene] = subsampled_vecs[gene];
-	}
 	
 	return subsample_gm;
 }
