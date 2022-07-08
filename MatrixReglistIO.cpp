@@ -116,7 +116,6 @@ genemap sampleFromGlobalGenemap() {
 	std::vector<uint16_t> fold(tot_num_subsample);
 #pragma omp critical
 	std::sample(idxs.begin(), idxs.end(), fold.begin(), tot_num_subsample, rand);
-	
 	std::vector<std::vector<float>> subsampled_vecs(global_gm.size(), std::vector<float>(tot_num_subsample));
 	// parallelized can modify a vector
 #pragma omp parallel for num_threads(nthreads) if(adaptive)
