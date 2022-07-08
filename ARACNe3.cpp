@@ -340,6 +340,8 @@ int main(int argc, char *argv[]) {
 		}
 		num_subnets = i;
 	} else {
+		if (nthreads > 1)
+			std::cout << "Note: Because more than one thread is used to compute a fixed number of subnetworks, their completion times may not be in order.  This is not an error." << std::endl;
 		subnets = std::vector<reg_web>(num_subnets);
 #pragma omp parallel for num_threads(nthreads)
 		for (int i = 0; i < num_subnets; ++i) {
