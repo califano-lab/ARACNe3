@@ -282,6 +282,7 @@ int main(int argc, char *argv[]) {
 
 	std::ofstream log_output(output_dir + "finalLog.txt");
 	std::time_t t = std::time(nullptr);
+	std::cout << "\n---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl;
 	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl;
 	std::cout << "Beginning ARACNe3 subnetwork generation.  See logs and progress reports in \"" + makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"." << std::endl;
 	log_output << "Beginning ARACNe3 subnetwork generation..." << std::endl;
