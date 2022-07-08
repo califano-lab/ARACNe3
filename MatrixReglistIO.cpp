@@ -19,6 +19,7 @@ extern uint32_t global_seed;
 extern uint16_t num_subnets;
 extern double subsampling_percent;
 extern uint16_t nthreads;
+extern bool adaptive;
 
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name) {
 	std::replace(dir_name.begin(), dir_name.end(), '/', directory_slash);
@@ -117,7 +118,7 @@ genemap sampleFromGlobalGenemap() {
 	
 	std::vector<std::vector<float>> subsampled_vecs(global_gm.size(), std::vector<float>(tot_num_subsample));
 	// parallelized can modify a vector
-#pragma omp parallel for num_threads(nthreads)
+#pragma omp parallel for num_threads(nthreads) if(adaptive)
 	for (int gene = 0; gene < static_cast<int>(subsampled_vecs.size()); ++gene) {
 		const std::vector<float> &expr_vec = global_gm[gene];
 		for (uint16_t i = 0U; i < tot_num_subsample; ++i)
