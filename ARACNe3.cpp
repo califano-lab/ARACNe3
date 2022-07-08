@@ -345,7 +345,6 @@ int main(int argc, char *argv[]) {
 		subnets = std::vector<reg_web>(num_subnets);
 #pragma omp parallel for num_threads(nthreads)
 		for (int i = 0; i < num_subnets; ++i) {
-#pragma omp critical
 			genemap subnet_matrix = sampleFromGlobalGenemap(); 
 			subnets[i] = ARACNe3_subnet(subnet_matrix, i+1);
 		}
