@@ -14,7 +14,7 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 
 After cloning the repository, you may build `ARACNe3` manually, or access the latest executables in the `products/` directory.  Currently, `ARACNe3` has been pre-compiled to work on MacOS 12.0 or later (in `products/macOS 12.0/`) and Windows 10 (`products/windows/`).  Make sure that if using Windows, you choose the version compiled for your CPU architecture (ARM 64-bit or x86 64-bit)
 
-Note that you may require additional software to run the C++ executables.  If running the `ARACNe3` executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170).  
+Note that you may require additional software to run the C++ executables.  If running the `ARACNe3` executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
 
 ## Building ARACNe3 Manually (Optional)
 The C++20 standard is used when compiling `ARACNe3` into an executable.  `ARACNe3` utilizes multiple threads with `OpenMP` directives, so you must have libraries that support them installed.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) installed already.
