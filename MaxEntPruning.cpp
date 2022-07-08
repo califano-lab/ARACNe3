@@ -4,6 +4,7 @@
 // for MaxEnt pruning, regulator -> regulator -> mi
 extern uint16_t tot_num_regulators;
 extern uint16_t nthreads;
+extern bool adaptive;
 
 
 /*
@@ -25,7 +26,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_net
 	map_map finalNet = regweb_to_mapmap(network); 
 	
 	// must sort the network edge_tars based on target identifier (least->greatest) for below
-#pragma omp parallel for firstprivate(finalNet, tftfNetwork) num_threads(nthreads) schedule(static,1) //block cyclic good for triangular matrices
+#pragma omp parallel for firstprivate(finalNet, tftfNetwork) num_threads(nthreads) if(adaptive) schedule(static,1) //block cyclic good for triangular matrices
 	for (int reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.contains(reg1)) {
 			auto &fin1 = finalNet[reg1];
