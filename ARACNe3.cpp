@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
 		num_subnets = i;
 	} else {
 		if (nthreads > 1 && num_subnets > 1)
-			std::cout << "Note: Because more than one thread is used to compute a fixed number of subnetworks, their completion times may not be in order.  This is not an error." << std::endl;
+			std::cout << "Note: Because more than one thread is used to compute a fixed number of subnetworks (--adaptive not specified), completion times may not be in order.  This is not an error." << std::endl;
 		std::vector<genemap> subnet_matrices(num_subnets);
 		for (uint16_t i = 0U; i < num_subnets; ++i)
 			subnet_matrices[i] = sampleFromGlobalGenemap();
