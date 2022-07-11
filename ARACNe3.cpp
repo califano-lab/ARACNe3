@@ -77,7 +77,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	
 	uint32_t size_of_network = 0;
 	std::vector<std::vector<edge_tar>> network_vec(tot_num_regulators); 
-#pragma omp parallel for firstprivate(subnet_matrix) num_threads(nthreads) if(adaptive)
+#pragma omp parallel for firstprivate(subnet_matrix) num_threads(nthreads)
 	for (int reg = 0; reg < tot_num_regulators; ++reg) {
 		network_vec[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
 		size_of_network += network_vec[reg].size();
@@ -347,7 +347,6 @@ int main(int argc, char *argv[]) {
 		if (nthreads > 1 && num_subnets > 1)
 			std::cout << "Note: Because more than one thread is used to compute a fixed number of subnetworks (--adaptive not specified), completion times may not be in order.  This is not an error.\n" << std::endl;
 		subnets = std::vector<reg_web>(num_subnets);
-#pragma omp parallel for num_threads(nthreads)
 		for (int i = 0; i < num_subnets; ++i) {
 			genemap subnet_matrix = sampleFromGlobalGenemap();
 			subnets[i] = ARACNe3_subnet(subnet_matrix, i+1);

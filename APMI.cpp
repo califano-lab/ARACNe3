@@ -218,7 +218,7 @@ const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec_x,
 
 	const square init{0.0, 0.0, 1.0, &all_pts[0], tot_num_pts};
 	
-#pragma omp parallel for num_threads(nthreads) if(adaptive)
+#pragma omp parallel for num_threads(nthreads)
 	for (int i = 0; i < static_cast<int>(target_vecs.size()); ++i)
 		mi_vec[i] = APMI_split(ref_vec_x, target_vecs[i], init);
 
