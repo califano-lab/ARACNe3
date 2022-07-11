@@ -24,10 +24,10 @@ void cacheNullModel(const std::vector<float>& mi_vec, const float& m, const doub
 	std::ofstream cached(filename, std::ios::out | std::ios::binary);
 
 	//comma-delinate the data
-	std::ostream_iterator<float> cached_iterator(cached, " ");
+	std::ostream_iterator<float> cached_iterator(cached, "\t");
 	std::copy(mi_vec.begin(), mi_vec.end(), cached_iterator);
 	
-	cached << std::endl << "" << m << " " << b;
+	cached << '\n' << m << "\t" << b;
 	
 	return;
 }
