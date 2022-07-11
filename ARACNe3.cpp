@@ -313,7 +313,7 @@ int main(int argc, char *argv[]) {
 	
 	std::vector<reg_web> subnets;
 	if (adaptive) {
-		subnets = std::vector<reg_web>(num_subnets);
+		std::vector<reg_web> subnets;
 		bool stoppingCriteriaMet = false;
 		std::unordered_map<gene_id_t, std::unordered_set<gene_id_t>> regulon_set;
 		for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) regulon_set[reg];
@@ -330,7 +330,7 @@ int main(int argc, char *argv[]) {
 			// check stoping criteria
 			uint16_t min = 65535U;
 			for (const auto &[reg, regulon] : regulon_set)
-				if (regulon.size() < min) 
+				if (regulon.size() < min)
 					min = regulon.size();
 			if (min >= targets_per_regulator) 
 				stoppingCriteriaMet = true;
