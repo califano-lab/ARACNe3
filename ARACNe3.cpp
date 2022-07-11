@@ -313,7 +313,6 @@ int main(int argc, char *argv[]) {
 	
 	std::vector<reg_web> subnets;
 	if (adaptive) {
-		std::vector<reg_web> subnets;
 		bool stoppingCriteriaMet = false;
 		std::unordered_map<gene_id_t, std::unordered_set<gene_id_t>> regulon_set;
 		for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) regulon_set[reg];
