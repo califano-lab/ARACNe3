@@ -114,10 +114,11 @@ genemap sampleFromGlobalGenemap() {
 	std::vector<uint16_t> idxs(tot_num_samps);
 	std::iota(idxs.begin(), idxs.end(), 0U);
 	std::vector<uint16_t> fold(tot_num_subsample);
+#pragma omp critical
 	std::sample(idxs.begin(), idxs.end(), fold.begin(), tot_num_subsample, rand);
 	std::vector<std::vector<float>> subsampled_vecs(global_gm.size(), std::vector<float>(tot_num_subsample));
 	// parallelized can modify a vector, which is why we have vector of vectors
-#pragma omp parallel for num_threads(nthreads)
+#pragma omp parallel for num_threads(nthreads) if(adaptive)
 	for (int gene = 0; gene < static_cast<int>(subsampled_vecs.size()); ++gene) {
 		const std::vector<float> &expr_vec = global_gm[gene];
 		for (uint16_t i = 0U; i < tot_num_subsample; ++i)
