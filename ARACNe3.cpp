@@ -284,7 +284,7 @@ int main(int argc, char *argv[]) {
 	
 	// print the initial command to the log output
 	for (uint16_t i = 0; i < argc; ++i)
-		log_output << std::string(argv[i]);
+		log_output << std::string(argv[i]) << " ";
 	log_output << std::endl;
 	
 	std::time_t t = std::time(nullptr);
