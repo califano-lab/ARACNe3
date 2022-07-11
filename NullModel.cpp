@@ -13,6 +13,7 @@ static float m, b; // parameters for OLS regression p-val estimation
  */
 extern bool verbose;
 extern std::string cached_dir;
+extern std::string output_dir;
 extern uint32_t global_seed;
 extern uint16_t nthreads;
 
@@ -64,7 +65,7 @@ std::pair<float, float> linreg(uint32_t N, const std::vector<float>& x, const st
  Computes 1 million null mutual information values for the sample size.  Checks whether there already exists a null_mi vector (nulls_filename) in the cached directory.
  */
 const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
-	std::string nulls_filename = cached_dir + "numnulls-" + std::to_string(num_null_marginals) + "_numsamps-" + std::to_string(tot_num_subsample);
+	std::string nulls_filename = "numnulls-" + std::to_string(num_null_marginals) + "_numsamps-" + std::to_string(tot_num_subsample);
 	/*
 	 If there already is a null model for this number of samples cached in the cached_dir, then we just pull values from that.  Also pull parameters from regression.
 	 */
@@ -83,7 +84,6 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		
 		global_seed++; //global_seed is incremented when calculating null
 		null_mis = mi_vec;
-		return mi_vec;
 	} else {
 		// make the permute vector, the ref vector, send to permuteAPMI
 		std::vector<float> ref_vec;
@@ -126,14 +126,13 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		b = sol.second;
 		
 		// cache the null model in memory for future calculations
-		cacheNullModel(mi_vec, m, b, nulls_filename);
+		cacheNullModel(mi_vec, m, b, cached_dir + nulls_filename);
 		
 		// finally, set file static variable and/or return mi_vec to caller
 		null_mis = mi_vec;
-		return mi_vec;
 	}
-	
-
+	cacheNullModel(null_mis, m, b, output_dir + nulls_filename + ".txt");
+	return null_mis;
 }
 
 /*
