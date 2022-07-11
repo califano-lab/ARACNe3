@@ -245,10 +245,10 @@ void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const
 		std::exit(2);
 	}
 	
-	ofs << "REGULATOR\tTARGET\tMI\t" << std::endl;
+	ofs << "regulator.values\ttarget.values\tmi.values" << std::endl;
 	for (auto it = network.begin(); it != network.end(); ++it) {
 		for (auto &edge_tar : it->second) {
-				ofs << decompression_map[it->first] << '\t' << decompression_map[edge_tar.target] << '\t' << edge_tar.mi << '\t' << '\n'; // using '\n' over std::endl, better for performance
+				ofs << decompression_map[it->first] << '\t' << decompression_map[edge_tar.target] << '\t' << edge_tar.mi << '\n'; // using '\n' over std::endl, better for performance
 		}
 	}
 }
