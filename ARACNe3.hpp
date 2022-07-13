@@ -85,7 +85,7 @@ typedef std::unordered_map<gene_id_t, std::vector<edge_tar>> reg_web;
 typedef std::unordered_map<gene_id_t, std::unordered_map<gene_id_t, float>> map_map;
 
 
-//--------------------- MatrixReglistIO.cpp 		-----------------------
+//--------------------- IO.cpp 		-----------------------
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name);
 std::string makeUnixDirectoryNameUniversal(std::string &&dir_name);
 void makeDir(std::string &dir_name);

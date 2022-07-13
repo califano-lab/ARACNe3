@@ -10,7 +10,7 @@
 		4927A79A286EB66F00C6523D /* ARACNe3 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 49451D7E284509E500158C6D /* ARACNe3 */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		49451D9028450A1300158C6D /* APMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8828450A1300158C6D /* APMI.cpp */; };
 		49451D9128450A1300158C6D /* ARACNe3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8928450A1300158C6D /* ARACNe3.cpp */; };
-		49451D9328450A1300158C6D /* MatrixReglistIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */; };
+		49451D9328450A1300158C6D /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8D28450A1300158C6D /* IO.cpp */; };
 		49451D9428450A1300158C6D /* NullModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49451D8E28450A1300158C6D /* NullModel.cpp */; };
 		49451D9628453A0700158C6D /* ARACNe3.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 49451D8C28450A1300158C6D /* ARACNe3.hpp */; };
 		497234F8285E50FA005E1BB8 /* Consolidator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497234F7285E50FA005E1BB8 /* Consolidator.cpp */; };
@@ -38,7 +38,7 @@
 		49451D8928450A1300158C6D /* ARACNe3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8A28450A1300158C6D /* test */ = {isa = PBXFileReference; lastKnownFileType = folder; path = test; sourceTree = "<group>"; };
 		49451D8C28450A1300158C6D /* ARACNe3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.h; path = ARACNe3.hpp; sourceTree = "<group>"; tabWidth = 8; };
-		49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixReglistIO.cpp; sourceTree = "<group>"; tabWidth = 8; };
+		49451D8D28450A1300158C6D /* IO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = IO.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8E28450A1300158C6D /* NullModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.cpp.cpp; path = NullModel.cpp; sourceTree = "<group>"; tabWidth = 8; };
 		49451D8F28450A1300158C6D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; tabWidth = 8; };
 		49451DA7284563D300158C6D /* ARACNe3_R.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ARACNe3_R.cpp; sourceTree = "<group>"; };
@@ -66,7 +66,7 @@
 				49451D8C28450A1300158C6D /* ARACNe3.hpp */,
 				49451D8928450A1300158C6D /* ARACNe3.cpp */,
 				49451D8E28450A1300158C6D /* NullModel.cpp */,
-				49451D8D28450A1300158C6D /* MatrixReglistIO.cpp */,
+				49451D8D28450A1300158C6D /* IO.cpp */,
 				49451D8828450A1300158C6D /* APMI.cpp */,
 				49F6F59C2846A73400C681BC /* AlphaPruning.cpp */,
 				49F6F59E2846A75100C681BC /* MaxEntPruning.cpp */,
@@ -165,7 +165,7 @@
 				49451D9128450A1300158C6D /* ARACNe3.cpp in Sources */,
 				49F6F5A02846A75100C681BC /* MaxEntPruning.cpp in Sources */,
 				49F6F59D2846A73400C681BC /* AlphaPruning.cpp in Sources */,
-				49451D9328450A1300158C6D /* MatrixReglistIO.cpp in Sources */,
+				49451D9328450A1300158C6D /* IO.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
