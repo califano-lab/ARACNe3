@@ -372,7 +372,7 @@ int main(int argc, char *argv[]) {
 		
 		log_output << "TOTAL SUBNETS GENERATED: " + std::to_string(num_subnets) << std::endl;
 	} else {
-		
+		/*TODO: Write functions in IO.cpp that read subnets one by one and update FPR estimates*/
 	}
 	
 	if (!do_not_consolidate) {	
