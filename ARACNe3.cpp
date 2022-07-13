@@ -5,6 +5,8 @@
  */
 bool prune_alpha = true;
 bool adaptive = false;
+bool noconsolidate = false;
+bool consolidate = false;
 float alpha = 0.05f;
 double subsampling_percent = 1 - std::exp(-1);
 bool prune_MaxEnt = true;
@@ -248,6 +250,10 @@ int main(int argc, char *argv[]) {
 		method = "FWER";
 	if (cmdOptionExists(argv, argv+argc, "--adaptive"))
 		adaptive = true;
+	if (cmdOptionExists(argv, argv+argc, "--noconsolidate"))
+		noconsolidate = true;
+	if (cmdOptionExists(argv, argv+argc, "--consolidate"))
+		consolidate = true;
 
 	//----------------------DEVELOPER--------------------------
 	
@@ -366,7 +372,7 @@ int main(int argc, char *argv[]) {
 	log_output << std::endl << "CONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
 	//-------------------------
 	
-	std::vector<consolidated_df> final_df = consolidate(subnets);
+	std::vector<consolidated_df> final_df = consolidate_subnets_vec(subnets);
 	
 	//-------time module-------
 	sinceLast(last, log_output);
