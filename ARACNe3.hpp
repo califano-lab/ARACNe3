@@ -155,7 +155,7 @@ reg_web sort_edge_tars(reg_web &regweb);
  */
 std::unordered_map<gene_id_t, std::unordered_map<gene_id_t, float>> regweb_to_mapmap(reg_web &network);
 //--------------------- Consolidator.cpp	 	-----------------------
-std::vector<consolidated_df> consolidate(std::vector<reg_web> &subnets);
+std::vector<consolidated_df> consolidate_subnets_vec(std::vector<reg_web> &subnets);
 
 
 //--------------------- ARACNe3.cpp	 		-----------------------
