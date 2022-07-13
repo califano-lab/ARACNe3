@@ -5,8 +5,8 @@
  */
 bool prune_alpha = true;
 bool adaptive = false;
-bool noconsolidate = false;
-bool consolidate = false;
+bool do_not_consolidate = false;
+bool go_to_consolidate = false;
 float alpha = 0.05f;
 double subsampling_percent = 1 - std::exp(-1);
 bool prune_MaxEnt = true;
@@ -251,9 +251,9 @@ int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "--adaptive"))
 		adaptive = true;
 	if (cmdOptionExists(argv, argv+argc, "--noconsolidate"))
-		noconsolidate = true;
+		do_not_consolidate = true;
 	if (cmdOptionExists(argv, argv+argc, "--consolidate"))
-		consolidate = true;
+		go_to_consolidate = true;
 
 	//----------------------DEVELOPER--------------------------
 	
@@ -296,96 +296,101 @@ int main(int argc, char *argv[]) {
 	std::time_t t = std::time(nullptr);
 	std::cout << "\n---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl;
 	log_output << "\n---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl;
-	std::cout << "Beginning ARACNe3 subnetwork generation.  See logs and progress reports in \"" + makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"." << std::endl;
-	log_output << "Beginning ARACNe3 subnetwork generation..." << std::endl;
-	
-	readRegList(reg_file);
-	
-	readExpMatrix(exp_file);
-	
-	//-------time module-------
-	log_output << std::endl << "MATRIX & REGULATORS READ TIME:" << std::endl;
-	sinceLast(last, log_output);
-	//-------------------------
-	
-	//-------time module-------
-	log_output << std::endl << "NULL MI MODEL TIME:" << std::endl;
-	last = std::chrono::high_resolution_clock::now();
-	//-------------------------
-	
-	initNullMIs(tot_num_subsample);
-	
-	//-------time module-------
-	sinceLast(last, log_output);
-	//-------------------------
-	
-	//-------time module-------
-	log_output << std::endl << "CREATING SUB-NETWORK(s) TIME: " << std::endl;
-	//-------------------------
-	
-	std::vector<reg_web> subnets;
-	if (adaptive) {
-		bool stoppingCriteriaMet = false;
-		std::unordered_map<gene_id_t, std::unordered_set<gene_id_t>> regulon_set;
-		for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) regulon_set[reg];
-		uint16_t i = 0U;
-		while (!stoppingCriteriaMet) {
-			genemap subnet_matrix = sampleFromGlobalGenemap();
-			subnets.push_back(ARACNe3_subnet(subnet_matrix, i+1));
-			
-			// add any new edges to the regulon_set
-			for (const auto &[reg, edge_tars] : subnets[i])
-				for (const auto &edge : edge_tars)
-					regulon_set[reg].insert(edge.target);
-			
-			// check stoping criteria
-			uint16_t min = 65535U;
-			for (const auto &[reg, regulon] : regulon_set)
-				if (regulon.size() < min)
-					min = regulon.size();
-			if (min >= targets_per_regulator) 
-				stoppingCriteriaMet = true;
-			
-			++i;
+
+	if(!go_to_consolidate) {
+		std::cout << "Beginning ARACNe3 subnetwork generation.  See logs and progress reports in \"" + makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"." << std::endl;
+		log_output << "Beginning ARACNe3 subnetwork generation..." << std::endl;
+		
+		readRegList(reg_file);
+		
+		readExpMatrix(exp_file);
+		
+		//-------time module-------
+		log_output << std::endl << "MATRIX & REGULATORS READ TIME:" << std::endl;
+		sinceLast(last, log_output);
+		//-------------------------
+		
+		//-------time module-------
+		log_output << std::endl << "NULL MI MODEL TIME:" << std::endl;
+		last = std::chrono::high_resolution_clock::now();
+		//-------------------------
+		
+		initNullMIs(tot_num_subsample);
+		
+		//-------time module-------
+		sinceLast(last, log_output);
+		//-------------------------
+		
+		//-------time module-------
+		log_output << std::endl << "CREATING SUB-NETWORK(s) TIME: " << std::endl;
+		//-------------------------
+		
+		std::vector<reg_web> subnets;
+		if (adaptive) {
+			bool stoppingCriteriaMet = false;
+			std::unordered_map<gene_id_t, std::unordered_set<gene_id_t>> regulon_set;
+			for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) regulon_set[reg];
+			uint16_t i = 0U;
+			while (!stoppingCriteriaMet) {
+				genemap subnet_matrix = sampleFromGlobalGenemap();
+				subnets.push_back(ARACNe3_subnet(subnet_matrix, i+1));
+				
+				// add any new edges to the regulon_set
+				for (const auto &[reg, edge_tars] : subnets[i])
+					for (const auto &edge : edge_tars)
+						regulon_set[reg].insert(edge.target);
+				
+				// check stoping criteria
+				uint16_t min = 65535U;
+				for (const auto &[reg, regulon] : regulon_set)
+					if (regulon.size() < min)
+						min = regulon.size();
+				if (min >= targets_per_regulator) 
+					stoppingCriteriaMet = true;
+				
+				++i;
+			}
+			num_subnets = i;
+		} else {
+			if (nthreads > 1 && num_subnets > 1)
+				std::cout << "Note: Because more than one thread is used to compute a fixed number of subnetworks (--adaptive not specified), completion times may not be in order.  This is not an error.\n" << std::endl;
+			subnets = std::vector<reg_web>(num_subnets);
+			for (int i = 0; i < num_subnets; ++i) {
+				genemap subnet_matrix = sampleFromGlobalGenemap();
+				subnets[i] = ARACNe3_subnet(subnet_matrix, i+1);
+			}
 		}
-		num_subnets = i;
-	} else {
-		if (nthreads > 1 && num_subnets > 1)
-			std::cout << "Note: Because more than one thread is used to compute a fixed number of subnetworks (--adaptive not specified), completion times may not be in order.  This is not an error.\n" << std::endl;
-		subnets = std::vector<reg_web>(num_subnets);
-		for (int i = 0; i < num_subnets; ++i) {
-			genemap subnet_matrix = sampleFromGlobalGenemap();
-			subnets[i] = ARACNe3_subnet(subnet_matrix, i+1);
-		}
+		
+		// set the FPR estimate
+		FPR_estimate = std::accumulate(FPR_estimates.begin(), FPR_estimates.end(), 0.0f) / FPR_estimates.size();
+		
+		//-------time module-------
+		sinceLast(last, log_output);
+		//-------------------------
+		
+		log_output << "TOTAL SUBNETS GENERATED: " + std::to_string(num_subnets) << std::endl;
 	}
 	
-	// set the FPR estimate
-	FPR_estimate = std::accumulate(FPR_estimates.begin(), FPR_estimates.end(), 0.0f) / FPR_estimates.size();
+	if (!do_not_consolidate) {	
+		//-------time module-------
+		log_output << std::endl << "CONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
+		//-------------------------
+		
+		std::vector<consolidated_df> final_df = consolidate_subnets_vec(subnets);
+		
+		//-------time module-------
+		sinceLast(last, log_output);
+		//-------------------------
+		
+		//-------time module-------
+		log_output << std::endl << "WRITING FINAL NETWORK..." << std::endl;
+		//-------------------------
+		
+		writeConsolidatedNetwork(final_df, output_dir);
+	}
 	
-	//-------time module-------
-	sinceLast(last, log_output);
-	//-------------------------
-	
-	log_output << "TOTAL SUBNETS GENERATED: " + std::to_string(num_subnets) << std::endl;
-	
-	//-------time module-------
-	log_output << std::endl << "CONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
-	//-------------------------
-	
-	std::vector<consolidated_df> final_df = consolidate_subnets_vec(subnets);
-	
-	//-------time module-------
-	sinceLast(last, log_output);
-	//-------------------------
-	
-	//-------time module-------
-	log_output << std::endl << "WRITING FINAL NETWORK..." << std::endl;
-	//-------------------------
-	
-	writeConsolidatedNetwork(final_df, output_dir);
-	
-		using namespace std::string_literals;
-		const char* success_A3 =
+	using namespace std::string_literals;
+	const char* success_A3 =
 R"(
 
                 |
