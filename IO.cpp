@@ -272,7 +272,18 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std:
 		edge.final_p << '\n'; // using '\n' over std::endl, better for performance
 }
 
-#if 0
+/*
+ This function will add genes to the compression scheme in any order.  It's use is currently only when reading subnets.
+ */
+void addToCompressionVecs(const std::string &gene) {
+	if (compression_map[gene] == 0) {
+		// we must have a new gene
+		decompression_map.push_back(gene);
+		// the last index of decompression_vec is the new uint16_t
+		compression_map[gene] = decompression_map.size();
+	}
+}
+
 reg_web readSubNet(std::string &subnet_fullfilename) {
 	makeUnixDirectoryNameUniversal(subnet_fullfilename);
 	std::ifstream ifs{subnet_fullfilename};
@@ -288,62 +299,24 @@ reg_web readSubNet(std::string &subnet_fullfilename) {
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
 	
+	reg_web subnet;
 	while(std::getline(ifs, line, '\n')) {
 		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 			line.pop_back();
 		
 		std::size_t prev = 0U, pos = line.find_first_of("\t", prev);
-		std::string reg = line.substr(prev, pos-prev);
-		
-		std::vector<float> expr_vec;
-		reg_web[reg].emplace_back(tar, mi)
-		expr_vec.reserve(tot_num_samps);
-		
-		
+		const std::string reg = line.substr(prev, pos-prev);
+		addToCompressionVecs(reg);
 		prev = pos + 1;
-		while ((pos = line.find_first_of("\t, ", prev)) != std::string::npos) {
-			if (pos > prev) {
-				expr_vec.emplace_back(stof(line.substr(prev, pos-prev)));
-			}
-			prev = pos + 1;
-		}
-		expr_vec.emplace_back(stof(line.substr(prev, std::string::npos)));
 		
-		/* This means that a user has inputted a matrix with unequal row 1 vs row 2 length
-		 */
-		if (expr_vec.size() > tot_num_samps) {
-			std::cerr << std::endl << "WARNING: ROW " + std::to_string(linesread) + " LENGTH DOES NOT EQUAL ROW 1 LENGTH.  THIS MAY BE BECAUSE THE NUMBER OF HEADER COLUMNS DOES NOT EQUAL THE NUMBER OF COLUMS IN THE MATRIX.  SEGMENTATION FAULT MAY OCCUR.  CHECK THAT SIZE OF MATRIX IS G+1 x N+1." << std::endl;
-			tot_num_samps = expr_vec.size();
-			tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
-			if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0)
-				tot_num_subsample = tot_num_samps;
-		}
-				
-		// copula-transform expr_vec values
-		std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec);
+		pos = line.find_first_of("\t", prev);
+		const std::string tar = line.substr(prev, pos-prev);
+		addToCompressionVecs(tar);
+		prev = pos + 1;
 		
-		std::vector<uint16_t> expr_vec_ranked(tot_num_samps);
-		for (uint16_t r = 0; r < tot_num_samps; ++r) {
-			expr_vec_ranked[idx_ranks[r]] = r + 1; // ranks the values of expr_vec
-			expr_vec[idx_ranks[r]] = (r + 1)/((float)tot_num_samps + 1); // switches out expr_vec with copula-transformed values
-		}
-		
-		// Note: decompression must be accessed by subtracting 1
-		if (compression_map[gene] == 0) {
-			// we must have a new gene
-			decompression_map.push_back(gene);
-			// the last index of decompression_vec is the new uint16_t
-			compression_map[gene] = decompression_map.size();
-		}
-
+		const float mi = std::stof(line.substr(prev, std::string::npos));
+		subnet[compression_map[reg]-1].emplace_back(compression_map[tar]-1, mi);
 	}
 	
-	std::cout << std::endl << "Initial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
-	std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) << std::endl << std::endl;
-	
-	global_gm = gm;
-	global_gm_r = gm_r;
-	return;
-
+	return subnet;
 } 
-#endif
