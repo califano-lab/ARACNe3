@@ -13,6 +13,7 @@
 #include <math.h>
 #include <filesystem>
 #include <chrono>
+#include <regex>
 
 #ifndef _ARACNE3_HPP_
 #define _ARACNE3_HPP_

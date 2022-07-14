@@ -20,6 +20,7 @@ extern uint16_t num_subnets;
 extern double subsampling_percent;
 extern uint16_t nthreads;
 extern bool adaptive;
+extern std::vector<float> FPR_estimates;
 
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name) {
 	std::replace(dir_name.begin(), dir_name.end(), '/', directory_slash);
@@ -284,7 +285,10 @@ void addToCompressionVecs(const std::string &gene) {
 	}
 }
 
-reg_web readSubNet(std::string &subnet_fullfilename) {
+/*
+ Reads a subnet file and then updates the FPR_estimates vector defined in "Consolidator.cpp"
+ */
+reg_web readSubNetAndUpdateFPRFromLog(std::string &subnet_fullfilename) {
 	makeUnixDirectoryNameUniversal(subnet_fullfilename);
 	std::ifstream ifs{subnet_fullfilename};
 	if (!ifs) {
@@ -317,6 +321,41 @@ reg_web readSubNet(std::string &subnet_fullfilename) {
 		const float mi = std::stof(line.substr(prev, std::string::npos));
 		subnet[compression_map[reg]-1].emplace_back(compression_map[tar]-1, mi);
 	}
+	
+	std::string subnetlog_fullfilename = subnet_fullfilename;
+	std::regex_replace(subnetlog_fullfilename, std::regex("subnets"), "log");
+	std::regex_replace(subnetlog_fullfilename, std::regex("output_subnet"), "log_subnet");
+	ifs = std::ifstream{subnetlog_fullfilename};
+	if (!ifs) {
+		std::cerr << "error: could read from implied subnet log file: " << subnetlog_fullfilename << "." << std::endl;
+		std::cerr << "Try verifying that subnet log files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("log/") + "\", which has subnet log files formatted exactly how ARACNe3 outputs subnet log files." << std::endl;
+		std::exit(2);
+	}
+	
+#if 0
+	
+	alpha 
+	num_edges_after_threshold_pruning)
+	tot_num_regulators
+	tot_num_targets
+	
+	if(prune_maxent) {
+		num_edges_fater_MaxEnt_pruning
+		
+		if (method == "FDR") {
+			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		} else if (method == "FWER") {
+			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_MaxEnt_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		}
+	} else {
+		if (method == "FDR") {
+			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		} else if (method == "FWER") {
+			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_threshold_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		}
+	}
+	FPR_estimates.push_back();
+#endif
 	
 	return subnet;
 } 
