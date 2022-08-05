@@ -110,6 +110,10 @@ g_10011_	0.055	0.73	4.64
 
 ``--threads`` sets the number of threads to use during subnetwork generation (default: `--threads 1`)
 
+``--noconsolidate`` tells ARACNe3 to skip the consolidation step and instead only preserve the null model, the final log, the `log/` subdirectory, and all subnetworks generated in `subnets/` 
+
+``--consolidate`` tells ARACNe3 to run in consolidate mode using `-o` to specify the directory location and `-x` to specify how many subnetwork files to use (default: `-x 1`). The output directory structure `-o` must contain subdirectories `subnets/` and `log/` that follow the exact conventions as the ARACNe3 output.
+
 ## Examples
 Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators).  Due to the limited capacity of the repository, you may need to decompress the expression matrix before usage.
 
