@@ -10,7 +10,7 @@ extern bool adaptive;
 /*
  Prune the network according to the MaxEnt weakest-edge reduction.
  */
-reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_network) {
+reg_web pruneMaxEnt(reg_web& network, map_map &tftfNetwork, uint32_t &size_of_network) {
 	// primed will store the edges that are weakest.  we use a set to eliminate redundancy if the same edge is identified twice; same as hash set?
 	std::vector<std::vector<std::set<gene_id_t>>> removedEdgesForThread(nthreads, std::vector<std::set<gene_id_t>>(tot_num_regulators));
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {

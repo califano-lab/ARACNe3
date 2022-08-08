@@ -146,7 +146,7 @@ const std::vector<float> getMIPVals(const std::vector<float>& mis, const float& 
 std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_network);
 
 //--------------------- MaxEntPruning.cpp	 	-----------------------
-reg_web pruneMaxEnt(reg_web &network, map_map tftfNetwork, uint32_t &size_of_network);
+reg_web pruneMaxEnt(reg_web &network, map_map &tftfNetwork, uint32_t &size_of_network);
 
 //--------------------- RegWebFns.cpp	 		-----------------------
 reg_web sort_edge_tars(reg_web &regweb);	
