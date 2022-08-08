@@ -47,7 +47,7 @@ static void sinceLast(decltype(std::chrono::high_resolution_clock::now()) &last,
 /*
  This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
  */
-reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
+reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	auto last = std::chrono::high_resolution_clock::now();
 	
 	// set the individual subnet log file
@@ -81,13 +81,16 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	std::vector<std::vector<edge_tar>> network_vec(tot_num_regulators); 
 #pragma omp parallel for firstprivate(subnet_matrix) num_threads(nthreads)
 	for (int reg = 0; reg < tot_num_regulators; ++reg) {
-		network_vec[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
-		size_of_network += network_vec[reg].size();
+		if (subnet_matrix.contains(reg)) {
+			network_vec[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
+			size_of_network += network_vec[reg].size();
+		}
 	}
 	reg_web network;
 	network.reserve(tot_num_regulators);
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
-		network[reg] = network_vec[reg];
+		if (subnet_matrix.contains(reg))
+			network[reg] = network_vec[reg];
 	std::vector<std::vector<edge_tar>>().swap(network_vec);
 	
 	//-------time module-------
@@ -107,6 +110,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	/*
 	 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
 	 */
+	
 	std::pair<reg_web, map_map> pair = pruneAlpha(network, size_of_network);
 	network = pair.first;
 	map_map& tftfNetwork = pair.second;
@@ -121,6 +125,14 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	 Save for binomial theta
 	 */
 	uint32_t num_edges_after_threshold_pruning = size_of_network; 
+	
+	/*
+	 Important to note actual number of regulators in expression matrix for FPR estimation 
+	 */
+	decltype(tot_num_regulators) defined_regulators = 0U;
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+		if (subnet_matrix.contains(reg))
+			++defined_regulators;
 	
 	if (prune_MaxEnt) {
 		//-------time module-------
@@ -140,16 +152,16 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 		
 		uint32_t num_edges_after_MaxEnt_pruning = size_of_network;
 		if (method == "FDR") {
-			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
 		} else if (method == "FWER") {
-			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_MaxEnt_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
 		}
 		
 	} else {
 		if (method == "FDR") {
-			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
 		} else if (method == "FWER") {
-			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_threshold_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_threshold_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
 		}
 	}
 	
@@ -169,11 +181,6 @@ reg_web ARACNe3_subnet(genemap subnet_matrix,const uint16_t& subnet_num) {
 	
 	return network;
 }
-
-
-/* This is the consolidation step.  Takes the subnetworks generated, 
- */
-
 
 //--------------------cmd line parser------------------------
 

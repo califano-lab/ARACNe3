@@ -22,9 +22,8 @@ std::vector<gene_id_t> get_targets(gene_id_t regID, reg_web &regweb) {
 	std::vector<edge_tar> &edges = regweb[regID];
 	std::vector<gene_id_t> tars;
 	tars.reserve(edges.size());
-	for (auto &et : edges) {
+	for (auto &et : edges)
 		tars.emplace_back(et.target);
-	}
 	return tars;
 }
 
@@ -35,9 +34,8 @@ std::vector<float> get_MIs(gene_id_t regID, reg_web &regweb) {
 	std::vector<edge_tar> &edges = regweb[regID];
 	std::vector<float> mis;
 	mis.reserve(edges.size());
-	for (auto &et : edges) {
+	for (auto &et : edges)
 		mis.emplace_back(et.mi);
-	}
 	return mis;
 }
 
@@ -54,9 +52,8 @@ std::vector<float> get_p_vals(gene_id_t regID, reg_web &regweb) {
  Sorts all the edge_tar vectors in a reg_web based on the target identifier, from smallest to largest.
  */
 reg_web sort_edge_tars(reg_web &regweb) {
-	for (gene_id_t i = 0; i < tot_num_regulators; ++i) {
+	for (gene_id_t i = 0; i < tot_num_regulators; ++i)
 		std::sort(regweb[i].begin(), regweb[i].end());
-	}
 	return regweb;
 }
 
@@ -65,9 +62,8 @@ reg_web sort_edge_tars(reg_web &regweb) {
  */
 map_map regweb_to_mapmap(reg_web &network) {
 	map_map mapmap;
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
 		for (edge_tar &et : network[reg])
 			mapmap[reg][et.target] = et.mi;
-	}
 	return mapmap;
 }

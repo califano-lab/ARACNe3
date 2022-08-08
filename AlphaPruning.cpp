@@ -11,14 +11,14 @@ extern std::string method;
  */
 std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_network) {
 
+	/* A vector that describes each regulator-mi-target interaction must be initialized for sorting-based pruning */
 	std::vector<std::pair<gene_id_t, edge_tar>> reg_edge_tar;
 	reg_edge_tar.reserve(size_of_network);
 	
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
-		for (auto &et : network[reg]) {
-			reg_edge_tar.emplace_back(reg, et);
-		}
-	}
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+		if (network.contains(reg)) 
+			for (auto &et : network[reg]) 
+				reg_edge_tar.emplace_back(reg, et);
 	
 	/*
 	 Sort using the Comparator as a Lambda function.  std::sort sends < to sort in ascending order, so we use > for descending order.

@@ -25,8 +25,8 @@ reg_web pruneMaxEnt(reg_web& network, map_map &tftfNetwork, uint32_t &size_of_ne
 			
 	map_map finalNet = regweb_to_mapmap(network); 
 	
-	// must sort the network edge_tars based on target identifier (least->greatest) for below
-#pragma omp parallel for firstprivate(finalNet, tftfNetwork) num_threads(nthreads) schedule(static,1) //block cyclic good for triangular matrices
+#pragma omp parallel for firstprivate(finalNet, tftfNetwork) num_threads(nthreads) schedule(static,1) 
+	// We schedule the parallelization like this because we have a triangular matrix.  reg2 is always reg1+1, so the first block of regulators will have the largest groups to iterate over under standard scheduling.
 	for (int reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.contains(reg1)) {
 			std::unordered_map<gene_id_t, float> &fin1 = finalNet[reg1];
@@ -56,13 +56,13 @@ reg_web pruneMaxEnt(reg_web& network, map_map &tftfNetwork, uint32_t &size_of_ne
 		}
 	}
 	
+	/* This is currently how all the vectors of sets are consolidated.  It 'collapses' the thread dimension, though this is an inefficiency.
+	 */
 	std::vector<std::set<gene_id_t>> removedEdges(tot_num_regulators);
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
-		for (uint16_t th = 0; th < nthreads; ++th) {
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+		for (uint16_t th = 0; th < nthreads; ++th)
 			for (const auto &tar : removedEdgesForThread[th][reg])
 				removedEdges[reg].insert(tar);
-		}
-	}
 	
 	for (const auto &removedSet : removedEdges) 
 		 size_of_network -= removedSet.size();
@@ -71,7 +71,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map &tftfNetwork, uint32_t &size_of_ne
 	pruned_net.reserve(tot_num_regulators);
 	for (const auto &[reg, tarmap] : finalNet) {
 		pruned_net[reg].reserve(network[reg].size());
-		auto &rem = removedEdges[reg];
+		std::set<gene_id_t> &rem = removedEdges[reg];
 		for (const auto &[tar, mi] : tarmap) {
 			if (!rem.contains(tar)) {
 				pruned_net[reg].emplace_back(tar, mi);

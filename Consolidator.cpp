@@ -39,24 +39,22 @@ std::vector<consolidated_df> consolidate_subnets_vec(std::vector<reg_web> &subne
 	final_df.reserve(tot_poss_edgs);
 	
 	std::vector<map_map> subnets_mpmp;
-	for (uint16_t i = 0; i < subnets.size(); ++i) {
+	for (uint16_t i = 0; i < subnets.size(); ++i)
 		subnets_mpmp.emplace_back(regweb_to_mapmap(subnets[i]));
-	}
 	
-	
-		for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) {
-			for (uint16_t tar = 0; tar < global_gm.size(); ++tar) {
-				uint16_t num_occurrences = 0;
-				for (uint16_t sn = 0; sn < subnets.size(); ++sn) {
-					if (subnets_mpmp[sn][reg].contains(tar))
-						++num_occurrences;
-				}
-				if (num_occurrences > 0) {
-					const float final_mi = APMI(global_gm[reg], global_gm[tar]);
-					const float final_scc = consolidate_scc(global_gm_r[reg], global_gm_r[tar]);
-					const double final_p = right_tail_binomial_p(num_occurrences);
-					final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences, final_p);
-				}
+	for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) {
+		for (auto &[tar, tar_vec] : global_gm) {
+			uint16_t num_occurrences = 0;
+			for (uint16_t sn = 0; sn < subnets.size(); ++sn) {
+				if (subnets_mpmp[sn][reg].contains(tar))
+					++num_occurrences;
+			}
+			if (num_occurrences > 0) {
+				const float final_mi = APMI(global_gm[reg], global_gm[tar]);
+				const float final_scc = consolidate_scc(global_gm_r[reg], global_gm_r[tar]);
+				const double final_p = right_tail_binomial_p(num_occurrences);
+				final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences, final_p);
+			}
 		}
 	}
 	
