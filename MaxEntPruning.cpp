@@ -18,7 +18,9 @@ reg_web pruneMaxEnt(reg_web& network, map_map &tftfNetwork, uint32_t &size_of_ne
 		for (uint16_t th = 0; th < nthreads; ++th)
 			removedEdgesForThread[th][reg] = std::set<gene_id_t>(); // TODO: Can we remove this initialization entirely?
 	
-	/* Our 'network' is a hash map of vectors that contain the MI and target information.  This is good for several of our uses, but it is better to make a hash map of hashmaps for the MaxEnt pruning, as in ARACNe-AP.  This is because finding whether a pair of regulators share a target is O(1), as we just hash the targets in the regulator hashmap, as opposed to searching for the target which would be necessary in the 'regweb' type.
+	/* Our 'network' is a hash map of vectors that contain the MI and target information.  This is good for several of our uses, but it is better to make a hash map of hashmaps for the MaxEnt pruning, as in ARACNe-AP.  This is because finding whether a pair of regulators share a target is O(1), as we just hash the targets in the regulator hashmap, as opposed to searching for the target which would be necessary in the 'reg_web' type.
+	 
+	 The operation below converts between data structures.
 	 */
 			
 	map_map finalNet = regweb_to_mapmap(network); 
@@ -27,13 +29,13 @@ reg_web pruneMaxEnt(reg_web& network, map_map &tftfNetwork, uint32_t &size_of_ne
 #pragma omp parallel for firstprivate(finalNet, tftfNetwork) num_threads(nthreads) schedule(static,1) //block cyclic good for triangular matrices
 	for (int reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.contains(reg1)) {
-			auto &fin1 = finalNet[reg1];
-			auto &tft1 = tftfNetwork[reg1]; 
-			auto &rem1 = removedEdgesForThread[omp_get_thread_num()][reg1];
+			std::unordered_map<gene_id_t, float> &fin1 = finalNet[reg1];
+			std::unordered_map<gene_id_t, float> &tft1 = tftfNetwork[reg1]; 
+			std::set<gene_id_t> &rem1 = removedEdgesForThread[omp_get_thread_num()][reg1];
 			for (gene_id_t reg2 = reg1 + 1; reg2 < tot_num_regulators; ++reg2) {
 				if (tft1.contains(reg2)) {
-					auto &fin2 = finalNet[reg2];
-					auto &rem2 = removedEdgesForThread[omp_get_thread_num()][reg2];
+					std::unordered_map<gene_id_t, float> &fin2 = finalNet[reg2];
+					std::set<gene_id_t> &rem2 = removedEdgesForThread[omp_get_thread_num()][reg2];
 					const float tftfMI = tft1[reg2];
 					for(const auto &[target, v2] : fin2) {
 						if (fin1.contains(target)) {
