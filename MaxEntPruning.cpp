@@ -11,16 +11,14 @@ extern bool adaptive;
  Prune the network according to the MaxEnt weakest-edge reduction.
  */
 reg_web pruneMaxEnt(reg_web& network, map_map &tftfNetwork, uint32_t &size_of_network) {
-	// primed will store the edges that are weakest.  we use a set to eliminate redundancy if the same edge is identified twice; same as hash set?
+	/* Since the same weakest edge may be identified multiple times, we use std::set to store the edges we know to remove, so that they are all removed at the end.  However, since the same set is being accessed by multiple threads at once, this creates clashing errors.  Hence, for now, each thread gets its own set in the vector below, which will be 'sifted' through by the master thread.
+	 */
 	std::vector<std::vector<std::set<gene_id_t>>> removedEdgesForThread(nthreads, std::vector<std::set<gene_id_t>>(tot_num_regulators));
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg) {
-		for (uint16_t th = 0; th < nthreads; ++th) {
-			removedEdgesForThread[th][reg] = std::set<gene_id_t>(); // prevent re-hashing later?
-		}
-	}
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+		for (uint16_t th = 0; th < nthreads; ++th)
+			removedEdgesForThread[th][reg] = std::set<gene_id_t>(); // TODO: Can we remove this initialization entirely?
 	
-	/*
-	 Inefficient conversion operation here.  Makes searching whether a target is contained an O(1) operation due to the hash map of hash maps, as opposed to a hash map of edge_tar vectors, which would make checking for a particular edge_tar.target an O(n) operation.
+	/* Our 'network' is a hash map of vectors that contain the MI and target information.  This is good for several of our uses, but it is better to make a hash map of hashmaps for the MaxEnt pruning, as in ARACNe-AP.  This is because finding whether a pair of regulators share a target is O(1), as we just hash the targets in the regulator hashmap, as opposed to searching for the target which would be necessary in the 'regweb' type.
 	 */
 			
 	map_map finalNet = regweb_to_mapmap(network); 
