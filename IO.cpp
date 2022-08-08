@@ -120,6 +120,8 @@ genemap sampleFromGlobalGenemap() {
 	genemap subsample_gm;
 	subsample_gm.reserve(global_gm.size());	
 	for (const auto &[gene, expr_vec] : global_gm) {
+		subsample_gm[gene] = std::vector<float>(tot_num_subsample, 0.0f);
+		
 		for (uint16_t i = 0U; i < tot_num_subsample; ++i)
 			subsample_gm[gene][i] = expr_vec[fold[i]];
 		
