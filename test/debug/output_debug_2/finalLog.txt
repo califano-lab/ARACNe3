@@ -1,0 +1,35 @@
+/Users/andrew/Library/Developer/Xcode/DerivedData/ARACNe3-gxrhankaryfexydupqdpkaecxxlx/Build/Products/Release/ARACNe3 -e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o test/output_debug_2 --adaptive -x 50 --threads 10 
+
+---------Mon Aug  8 18:23:09 2022 EDT---------
+Beginning ARACNe3 subnetwork generation...
+
+MATRIX & REGULATORS READ TIME:
+0s
+
+NULL MI MODEL TIME:
+4s
+
+CREATING SUB-NETWORK(s) TIME: 
+0s
+TOTAL SUBNETS GENERATED: 3
+
+CONSOLIDATING SUB-NETWORK(s) TIME: 
+0s
+
+WRITING FINAL NETWORK...
+
+
+                |
+                |
+                ;                            
+                ;                            
+                |                            
+           ,  / | \   ,
+         , ;_/ ,L-, `_;  ,
+         \._/.ARACNe3.\_./
+           \_./(::)\._/                      
+                ''
+
+
+SUCCESS!
+

@@ -1,0 +1,29 @@
+---------Mon Aug  8 18:22:50 2022 EDT---------
+
+Subnetwork #: 6
+Total # regulators: 404
+Total # targets: 3351
+Total # samples: 277
+Subsampled quantity: 176
+Total possible edges: 1353400
+Method of first pruning step: FDR
+Alpha: 0.050000
+
+-----------Begin Network Generation-----------
+
+RAW NETWORK COMPUTATION TIME:
+0s
+SIZE OF NETWORK: 1353400 EDGES.
+
+ALPHA PRUNING TIME (FDR): 
+0s
+EDGES REMOVED: 1245540 EDGES.
+SIZE OF NETWORK: 107860 EDGES.
+
+MaxEnt PRUNING TIME:
+0s
+EDGES REMOVED: 91292 EDGES.
+SIZE OF NETWORK: 16568 EDGES.
+
+PRINTING NETWORK IN DIRECTORY "test/output_debug_1/".....
+0s
