@@ -32,10 +32,11 @@
    </TestAction>
    <LaunchAction
       buildConfiguration = "Release"
-      selectedDebuggerIdentifier = ""
-      selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      enableAddressSanitizer = "YES"
       enableASanStackUseAfterReturn = "YES"
-      disableMainThreadChecker = "YES"
+      enableUBSanitizer = "YES"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
       customWorkingDirectory = "/Users/andrew/Library/CloudStorage/OneDrive-Personal/Columbia/Califano Lab/Califano Git/ARACNe3-CPP"
@@ -56,8 +57,8 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o /Users/andrew/Desktop/a3/outputCOMPCHANGE --subsample 0.63 --seed 23 --numnulls 10000 --alpha 0.05 --FDR -x 20 --threads 10 --adaptive"
-            isEnabled = "YES">
+            argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o /Users/andrew/Desktop/a3/outputFWER --subsample 0.63 --seed 23 --numnulls 10000 --alpha 0.05 --FWER -x 20 --threads 10"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e test/exp_mat.txt -r test/regulators.txt -o test_output_1_ -x 10 --threads 10"
@@ -75,7 +76,39 @@
             argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug3.txt -o /Users/andrew/Desktop/a3/output --subsample 0.63 --seed 23 --numnulls 500001 --alpha 0.05 --FDR"
             isEnabled = "NO">
          </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug.txt -o test/output_debug_1 -x 10 --threads 6"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o test/output_debug_2 --adaptive -x 50 --threads 10"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = ""
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = ""
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-r test/regulators.txt -e test/debug/exp_mat_debug.txt -o tmp_output_1_ --alpha 0.05 --FWER -x 3 --threads 10"
+            isEnabled = "YES">
+         </CommandLineArgument>
       </CommandLineArguments>
+      <AdditionalOptions>
+         <AdditionalOption
+            key = "NSZombieEnabled"
+            value = "YES"
+            isEnabled = "YES">
+         </AdditionalOption>
+         <AdditionalOption
+            key = "MallocScribble"
+            value = ""
+            isEnabled = "YES">
+         </AdditionalOption>
+      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
