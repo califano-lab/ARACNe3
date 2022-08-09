@@ -154,6 +154,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 		if (method == "FDR") {
 			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
 		} else if (method == "FWER") {
+			// TODO: Source of NaN p-values is here.  The FPR_estimates average is above 1.
 			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
 		}
 		

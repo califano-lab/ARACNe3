@@ -93,7 +93,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-r test/regulators.txt -e test/debug/exp_mat_debug.txt -o tmp_output_1_ --alpha 0.05 --FWER -x 3 --threads 10"
+            argument = "-r test/regulators.txt -e test/exp_mat.txt -o tmp_output_1_ --alpha 0.05 --FWER -x 3 --threads 10"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

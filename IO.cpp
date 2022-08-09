@@ -327,6 +327,7 @@ reg_web readSubNetAndUpdateFPRFromLog(std::string &subnet_fullfilename) {
 		std::exit(2);
 	}
 	
+//TODO: You must have a way to interpret log files and generate FPR estimates from them.
 #if 0
 	
 	alpha 

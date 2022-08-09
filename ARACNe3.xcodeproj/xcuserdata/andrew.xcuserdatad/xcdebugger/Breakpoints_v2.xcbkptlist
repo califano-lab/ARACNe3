@@ -7,48 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "0A214469-1604-40F4-B5CB-6738A184353F"
-            shouldBeEnabled = "No"
+            uuid = "FBF3F463-DC42-411E-A0B2-72442A331197"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "MaxEntPruning.cpp"
+            filePath = "ARACNe3.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "58"
-            endingLineNumber = "58"
-            landmarkName = "pruneMaxEnt(network, tftfNetwork, size_of_network)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "559AEC85-FFE9-4880-96F7-ECB462233049"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "MaxEntPruning.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "70"
-            endingLineNumber = "70"
-            landmarkName = "pruneMaxEnt(network, tftfNetwork, size_of_network)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "FE7F99A2-4F3B-43CB-ADD0-39B533F0F6E0"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "MaxEntPruning.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "57"
-            endingLineNumber = "57"
-            landmarkName = "pruneMaxEnt(network, tftfNetwork, size_of_network)"
+            startingLineNumber = "157"
+            endingLineNumber = "157"
+            landmarkName = "ARACNe3_subnet(subnet_matrix, subnet_num)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
