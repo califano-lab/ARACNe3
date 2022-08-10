@@ -68,14 +68,14 @@ std::pair<float, float> linreg(uint32_t N, const std::vector<float>& x, const st
  */
 const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 	std::string nulls_filename = "numnulls-" + std::to_string(num_null_marginals) + "_numsamps-" + std::to_string(tot_num_subsample);
+	std::string OLS_coef_filename = nulls_filename + "_OLS";
 	/*
 	 If there already is a null model for this number of samples cached in the cached_dir, then we just pull values from that.  Also pull parameters from regression.
 	 */
-	if ( /*never use cache for debugging;*/ std::filesystem::exists(nulls_filename)) {
-		std::string OLS_coef_filename = nulls_filename + "_OLS";
+	if ( /*never use cache for debugging;*/ std::filesystem::exists(cached_dir + nulls_filename + ".txt") && std::filesystem::exists(cached_dir + OLS_coef_filename + ".txt")) {
 
-		std::ifstream nulls_file(nulls_filename + ".txt", std::ios::in | std::ios::binary);
-		std::ifstream OLS_coef_file(OLS_coef_filename + ".txt", std::ios::in | std::ios::binary);
+		std::ifstream nulls_file(cached_dir + nulls_filename + ".txt", std::ios::in | std::ios::binary);
+		std::ifstream OLS_coef_file(cached_dir + OLS_coef_filename + ".txt", std::ios::in | std::ios::binary);
 		
 		std::vector<float> mi_vec;
 		mi_vec.reserve(num_null_marginals);
