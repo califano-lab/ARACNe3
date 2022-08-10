@@ -335,20 +335,17 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 	tot_num_targets
 	
 	if(prune_maxent) {
-		num_edges_fater_MaxEnt_pruning
-		
-		if (method == "FDR") {
-			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		} else if (method == "FWER") {
-			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_MaxEnt_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		}
+		if (method == "FDR")
+			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		else if (method == "FWER")
+			FPR_estimates.emplace_back((alpha/(defined_regulators*(global_gm.size()-1)))*(num_edges_after_MaxEnt_pruning)/(num_edges_after_threshold_pruning));
 	} else {
-		if (method == "FDR") {
-			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		} else if (method == "FWER") {
-			FPR_estimates.emplace_back(((alpha*num_edges_after_threshold_pruning)*num_edges_after_threshold_pruning)/(tot_num_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		}
+		if (method == "FDR")
+			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+		else if (method == "FWER")
+			FPR_estimates.emplace_back(alpha/(defined_regulators*(global_gm.size()-1)));
 	}
+	
 	FPR_estimates.push_back();
 #endif
 	
