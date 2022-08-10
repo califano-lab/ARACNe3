@@ -308,34 +308,33 @@ int main(int argc, char *argv[]) {
 	// Must exist regardless of whether we skip to consolidation
 	std::vector<reg_web> subnets;
 	
+	std::cout << "Beginning ARACNe3 instance.  See logs and progress reports in \"" + makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"." << std::endl;
+	log_output << "Beginning ARACNe3 instance..." << std::endl;
+	
+	readRegList(reg_file);
+	
+	readExpMatrix(exp_file);
+	
+	//-------time module-------
+	log_output << std::endl << "MATRIX & REGULATORS READ TIME:" << std::endl;
+	sinceLast(last, log_output);
+	//-------------------------
+	
+	//-------time module-------
+	log_output << std::endl << "NULL MI MODEL TIME:" << std::endl;
+	last = std::chrono::high_resolution_clock::now();
+	//-------------------------
+	
+	initNullMIs(tot_num_subsample);
+	
+	//-------time module-------
+	sinceLast(last, log_output);
+	//-------------------------
+	
 	if(!go_to_consolidate) {
-		std::cout << "Beginning ARACNe3 subnetwork generation.  See logs and progress reports in \"" + makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"." << std::endl;
-		log_output << "Beginning ARACNe3 subnetwork generation..." << std::endl;
-		
-		readRegList(reg_file);
-		
-		readExpMatrix(exp_file);
-		
-		//-------time module-------
-		log_output << std::endl << "MATRIX & REGULATORS READ TIME:" << std::endl;
-		sinceLast(last, log_output);
-		//-------------------------
-		
-		//-------time module-------
-		log_output << std::endl << "NULL MI MODEL TIME:" << std::endl;
-		last = std::chrono::high_resolution_clock::now();
-		//-------------------------
-		
-		initNullMIs(tot_num_subsample);
-		
-		//-------time module-------
-		sinceLast(last, log_output);
-		//-------------------------
-		
-		//-------time module-------
-		log_output << std::endl << "CREATING SUB-NETWORK(s) TIME: " << std::endl;
-		//-------------------------
-		
+	//-------time module-------
+	log_output << std::endl << "CREATING SUB-NETWORK(s) TIME: " << std::endl;
+	//-------------------------
 		if (adaptive) {
 			bool stoppingCriteriaMet = false;
 			std::unordered_map<gene_id_t, std::unordered_set<gene_id_t>> regulon_set;
