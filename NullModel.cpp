@@ -18,16 +18,18 @@ extern uint32_t global_seed;
 extern uint16_t nthreads;
 
 /*
- Will cache the null_mis vector in the cached directory.  The vector will be a BLOB named 'Null_tot_num_samps_###'.
+ Will cache the null_mis vector as the specified filename.
  */
-void cacheNullModel(const std::vector<float>& mi_vec, const float& m, const double& b, const std::string& filename) {
-	std::ofstream cached(filename, std::ios::out | std::ios::binary);
-
-	//comma-delinate the data
-	std::ostream_iterator<float> cached_iterator(cached, "\t");
-	std::copy(mi_vec.begin(), mi_vec.end(), cached_iterator);
+void cacheNullModel(const std::vector<float>& mi_vec, const float& m, const double& b, const std::string& nulls_filename) {
+	std::string OLS_coef_filename = nulls_filename + "_OLS";
 	
-	cached << '\n' << m << "\t" << b;
+	std::ofstream nulls_file(nulls_filename + ".txt", std::ios::out | std::ios::binary);
+	std::ofstream OLS_coef_file(OLS_coef_filename + ".txt", std::ios::out | std::ios::binary);
+	
+	for (auto it = mi_vec.cbegin(); it != mi_vec.cend(); ++it)
+		nulls_file << *it << '\n';
+	
+	OLS_coef_file << m << '\n' << b << '\n';
 	
 	return;
 }
@@ -70,17 +72,20 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 	 If there already is a null model for this number of samples cached in the cached_dir, then we just pull values from that.  Also pull parameters from regression.
 	 */
 	if ( /*never use cache for debugging;*/ std::filesystem::exists(nulls_filename)) {
-		std::ifstream cached(nulls_filename, std::ios::in | std::ios::binary);
+		std::string OLS_coef_filename = nulls_filename + "_OLS";
+
+		std::ifstream nulls_file(nulls_filename + ".txt", std::ios::in | std::ios::binary);
+		std::ifstream OLS_coef_file(OLS_coef_filename + ".txt", std::ios::in | std::ios::binary);
 		
-		//read tab-delineated data
 		std::vector<float> mi_vec;
 		mi_vec.reserve(num_null_marginals);
-		std::istream_iterator<float> cached_iterator(cached);
+		std::istream_iterator<float> nulls_iterator(nulls_file);
+		std::istream_iterator<float> OLS_iterator(OLS_coef_file);
 		uint32_t i = 0;
 		for (; i < num_null_marginals; ++i)
-			mi_vec.emplace_back(*cached_iterator++);
-		m = *cached_iterator++;
-		b = *cached_iterator;
+			mi_vec.emplace_back(*nulls_iterator++);
+		m = *OLS_iterator++;
+		b = *OLS_iterator;
 		
 		global_seed++; //global_seed is incremented when calculating null
 		null_mis = mi_vec;
@@ -131,7 +136,7 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		// finally, set file static variable and/or return mi_vec to caller
 		null_mis = mi_vec;
 	}
-	cacheNullModel(null_mis, m, b, output_dir + nulls_filename + ".txt");
+	cacheNullModel(null_mis, m, b, output_dir + nulls_filename);
 	return null_mis;
 }
 
