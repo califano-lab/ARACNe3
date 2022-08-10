@@ -116,7 +116,7 @@ genemap sampleFromGlobalGenemap();
 
 void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const std::string &output_suffix);
 
-void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string& output_dir);
+void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string filename);
 
 
 //--------------------- APMI.cpp	 		-----------------------

@@ -17,6 +17,7 @@ std::string subnets_dir;
 std::string method = "FDR";
 float DEVELOPER_mi_cutoff = 0.0f;
 uint16_t num_subnets = 1U;
+uint16_t num_subnets_to_consolidate = 1U;
 uint16_t targets_per_regulator = 30U;
 uint16_t nthreads = 1U;
 
@@ -243,7 +244,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	if (cmdOptionExists(argv, argv+argc, "-x")) 
-		num_subnets = targets_per_regulator = std::stoi(getCmdOption(argv, argv+argc, "-x"));
+		num_subnets = targets_per_regulator = num_subnets_to_consolidate = std::stoi(getCmdOption(argv, argv+argc, "-x"));
 
 	if (cmdOptionExists(argv, argv+argc, "--threads"))
 		nthreads = std::stoi(getCmdOption(argv, argv+argc, "--threads"));
@@ -397,7 +398,15 @@ int main(int argc, char *argv[]) {
 		log_output << std::endl << "WRITING FINAL NETWORK..." << std::endl;
 		//-------------------------
 		
-		writeConsolidatedNetwork(final_df, output_dir);
+		writeConsolidatedNetwork(final_df, output_dir + "finalNet_" + std::to_string(num_subnets) + "subnets.txt");
+		
+		/* Now that we know how many subnets, we can rename finalLog to include that. */
+		std::string final_log_newname = "finalLog_" + std::to_string(num_subnets) + "subnets.txt";
+		//-------time module-------
+		log_output << std::endl << "RENAMING \"finalLog.txt\" TO \"" + final_log_newname + "\"..." << std::endl;
+		std::cout << std::endl << "RENAMING \"finalLog.txt\" TO \"" + final_log_newname + "\"..." << std::endl;
+		//-------------------------
+		std::filesystem::rename(output_dir + "finalLog.txt", output_dir  + final_log_newname);
 	}
 	
 	using namespace std::string_literals;

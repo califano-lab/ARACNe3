@@ -248,16 +248,15 @@ void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const
 	}
 }
 
-void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string& output_dir) {
-	makeUnixDirectoryNameUniversal(output_dir);
-	const std::string filename = output_dir + "finalNet.txt";
+void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string filename) {
+	makeUnixDirectoryNameUniversal(filename);
 	std::ofstream ofs{filename};
 	if (!ofs) {
 		std::cerr << "error: could not write to file: " << filename << "." << std::endl;
 		std::cerr << "Try making the output directory subdirectory of the working directory. Example \"-o " + makeUnixDirectoryNameUniversal("./runs") + "\"." << std::endl;
 		std::exit(2);
 	}
-	ofs << "regulator.values\ttarget.values\tmi.values\tscc.values\tcount.values\tp.values" << std::endl;
+	ofs << "regulator.values\ttarget.values\tmi.values\tscc.values\tcount.values\tp.values\n";
 	for (const auto& edge : final_df)
 		ofs << 
 		decompression_map[edge.regulator] << '\t' <<
