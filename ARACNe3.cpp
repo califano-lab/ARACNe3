@@ -17,7 +17,7 @@ std::string subnets_dir;
 std::string method = "FDR";
 float DEVELOPER_mi_cutoff = 0.0f;
 uint16_t num_subnets = 1U;
-uint16_t num_subnets_to_consolidate = 1U;
+uint16_t num_subnets_to_consolidate = 0U;
 uint16_t targets_per_regulator = 30U;
 uint16_t nthreads = 1U;
 

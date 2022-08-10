@@ -208,6 +208,8 @@ void readExpMatrix(std::string &filename) {
 		if (compression_map[gene] == 0) {
 			// we must have a target
 			decompression_map.push_back(gene);
+			compression_map[gene] = decompression_map.size(); // note: it's i+1
+			
 			// the last index of decompression_vec is the new uint16_t
 			gm[decompression_map.size()-1] = expr_vec;
 			gm_r[decompression_map.size()-1] = expr_vec_ranked; //store ranks of idx's for SCC later
@@ -282,53 +284,51 @@ void addToCompressionVecs(const std::string &gene) {
 /*
  Reads a subnet file and then updates the FPR_estimates vector defined in "Consolidator.cpp"
  */
-reg_web readSubNetAndUpdateFPRFromLog(std::string &subnet_fullfilename) {
-	makeUnixDirectoryNameUniversal(subnet_fullfilename);
-	std::ifstream ifs{subnet_fullfilename};
-	if (!ifs) {
-		std::cerr << "error: could read from implied subnet file: " << subnet_fullfilename << "." << std::endl;
+reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint16_t subnet_num) {
+	std::string subnet_filename = output_dir + "subnets/output_subnet" + std::to_string(subnet_num) + ".txt";
+	std::string log_filename = output_dir + "log/log_subnet" + std::to_string(subnet_num) + ".txt";
+	
+	makeUnixDirectoryNameUniversal(subnet_filename);
+	makeUnixDirectoryNameUniversal(log_filename);
+	
+	std::ifstream subnet_ifs{subnet_filename};
+	if (!subnet_ifs) {
+		std::cerr << "error: could read from implied subnet file: " << subnet_filename << "." << std::endl;
 		std::cerr << "Try verifying that subnet files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("subnets/") + "\", which has subnet files formatted exactly how ARACNe3 outputs subnet files." << std::endl;
 		std::exit(2);
 	}
-	
 	// discard the first line (header)
 	std::string line;
-	getline(ifs, line, '\n');
+	getline(subnet_ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
-	
 	reg_web subnet;
-	while(std::getline(ifs, line, '\n')) {
+	while(std::getline(subnet_ifs, line, '\n')) {
 		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 			line.pop_back();
 		
 		std::size_t prev = 0U, pos = line.find_first_of("\t", prev);
 		const std::string reg = line.substr(prev, pos-prev);
-		addToCompressionVecs(reg);
 		prev = pos + 1;
 		
 		pos = line.find_first_of("\t", prev);
 		const std::string tar = line.substr(prev, pos-prev);
-		addToCompressionVecs(tar);
 		prev = pos + 1;
 		
 		const float mi = std::stof(line.substr(prev, std::string::npos));
+		
 		subnet[compression_map[reg]-1].emplace_back(compression_map[tar]-1, mi);
 	}
 	
-	std::string subnetlog_fullfilename = subnet_fullfilename;
-	std::regex_replace(subnetlog_fullfilename, std::regex("subnets"), "log");
-	std::regex_replace(subnetlog_fullfilename, std::regex("output_subnet"), "log_subnet");
-	ifs = std::ifstream{subnetlog_fullfilename};
-	if (!ifs) {
-		std::cerr << "error: could read from implied subnet log file: " << subnetlog_fullfilename << "." << std::endl;
+	std::ifstream log_ifs{log_filename};
+	if (!log_ifs) {
+		std::cerr << "error: could read from implied subnet log file: " << log_filename << "." << std::endl;
 		std::cerr << "Try verifying that subnet log files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("log/") + "\", which has subnet log files formatted exactly how ARACNe3 outputs subnet log files." << std::endl;
 		std::exit(2);
 	}
 	
 //TODO: You must have a way to interpret log files and generate FPR estimates from them.
 #if 0
-	
 	alpha 
 	num_edges_after_threshold_pruning)
 	tot_num_regulators
