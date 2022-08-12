@@ -61,11 +61,11 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	std::time_t t = std::time(nullptr);
 	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl << std::endl;
 	log_output << "Subnetwork #: " + std::to_string(subnet_num) << std::endl;
-	log_output << "Total # regulators (gexp profile defined): " + std::to_string(defined_regulators) << std::endl;
+	log_output << "Total # regulators (with gexp profile defined): " + std::to_string(defined_regulators) << std::endl;
 	log_output << "Total # targets: " + std::to_string(subnet_matrix.size()) << std::endl;
 	log_output << "Total # samples: " + std::to_string(tot_num_samps) << std::endl;
 	log_output << "Subsampled quantity: " + std::to_string(tot_num_subsample) << std::endl;
-	log_output << "Total possible edges: " + std::to_string(tot_num_regulators*subnet_matrix.size()-tot_num_regulators) << std::endl;
+	log_output << "Total possible edges: " + std::to_string(defined_regulators*subnet_matrix.size()-defined_regulators) << std::endl;
 	log_output << "Method of first pruning step: " + method << std::endl;
 	log_output << "Alpha: " + std::to_string(alpha) << std::endl;
 	log_output << std::endl << "-----------Begin Network Generation-----------" << std::endl;
@@ -83,7 +83,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	std::vector<std::vector<edge_tar>> network_vec(tot_num_regulators); 
 #pragma omp parallel for firstprivate(subnet_matrix) num_threads(nthreads)
 	for (int reg = 0; reg < tot_num_regulators; ++reg) {
-		if (subnet_matrix.contains(reg)) {
+		if (global_gm.contains(reg)) {
 			network_vec[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
 			size_of_network += network_vec[reg].size();
 		}
@@ -91,7 +91,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	reg_web network;
 	network.reserve(tot_num_regulators);
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
-		if (subnet_matrix.contains(reg))
+		if (global_gm.contains(reg))
 			network[reg] = network_vec[reg];
 	std::vector<std::vector<edge_tar>>().swap(network_vec);
 	
@@ -342,8 +342,9 @@ int main(int argc, char *argv[]) {
 				// check stoping criteria
 				uint16_t min = 65535U;
 				for (const auto &[reg, regulon] : regulon_set)
-					if (regulon.size() < min)
-						min = regulon.size();
+					if (global_gm.contains(reg))
+						if (regulon.size() < min)
+							min = regulon.size();
 				if (min >= targets_per_regulator) 
 					stoppingCriteriaMet = true;
 				

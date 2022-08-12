@@ -4,6 +4,7 @@ extern uint16_t tot_num_regulators;
 extern bool prune_MaxEnt;
 extern float alpha;
 extern std::string method;
+extern genemap global_gm;
 
 
 /*
@@ -16,7 +17,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 	reg_edge_tar.reserve(size_of_network);
 	
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
-		if (network.contains(reg)) 
+		if (global_gm.contains(reg)) 
 			for (auto &et : network[reg]) 
 				reg_edge_tar.emplace_back(reg, et);
 	

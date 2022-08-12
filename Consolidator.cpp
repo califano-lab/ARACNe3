@@ -9,7 +9,7 @@ float FPR_estimate = 1.5E-4f;
 
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_subsample;
-extern uint16_t tot_num_regulators;
+extern uint16_t tot_num_regulators, defined_regulators;
 extern genemap global_gm;
 extern genemap_r global_gm_r; 
 extern uint16_t num_subnets;
@@ -35,7 +35,7 @@ double right_tail_binomial_p(const uint16_t& num_occurrences) {
 
 std::vector<consolidated_df> consolidate_subnets_vec(std::vector<reg_web> &subnets) {
 	std::vector<consolidated_df> final_df;
-	const auto tot_poss_edgs = tot_num_regulators*global_gm.size()-tot_num_regulators;
+	const auto tot_poss_edgs = defined_regulators*(global_gm.size()-1);
 	final_df.reserve(tot_poss_edgs);
 	
 	std::vector<map_map> subnets_mpmp;

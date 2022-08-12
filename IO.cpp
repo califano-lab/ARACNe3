@@ -338,16 +338,17 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 		std::cerr << "Try verifying that subnet log files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("log/") + "\", which has subnet log files formatted exactly how ARACNe3 outputs subnet log files." << std::endl;
 		std::exit(2);
 	}
-	// discard 8 lines
-	for (uint8_t l = 0; l < 8; ++l) {
+	// discard 3 lines
+	for (uint8_t l = 0; l < 3; ++l) {
 		getline(log_ifs, line, '\n');
 		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 			line.pop_back();
 	}
-	// next line contains method
+	// next line contains the # of defined regulators
 	getline(log_ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
+	
 	if (line.find("FDR", 0) != std::string::npos)
 		method = "FDR";
 	else
