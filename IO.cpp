@@ -227,7 +227,7 @@ void readExpMatrix(std::string &filename) {
 	
 	// now we must determine how many regulators are actually defined in the expression profile
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
-		if (global_gm.contains(reg))
+		if (gm.contains(reg))
 			++defined_regulators;
 		else
 			std::cout << "WARNING: REGULATOR " + decompression_map[reg] + " DOES NOT HAVE A DEFINED GENE EXPRESSION PROFILE." << std::endl;
