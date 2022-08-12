@@ -29,6 +29,7 @@ uint32_t global_seed = 0U;
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_subsample;
 extern uint16_t tot_num_regulators;
+extern uint16_t defined_regulators;
 extern genemap global_gm;
 
 extern uint32_t num_null_marginals;
@@ -60,7 +61,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	std::time_t t = std::time(nullptr);
 	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl << std::endl;
 	log_output << "Subnetwork #: " + std::to_string(subnet_num) << std::endl;
-	log_output << "Total # regulators: " + std::to_string(tot_num_regulators) << std::endl;
+	log_output << "Total # regulators (gexp profile defined): " + std::to_string(defined_regulators) << std::endl;
 	log_output << "Total # targets: " + std::to_string(subnet_matrix.size()) << std::endl;
 	log_output << "Total # samples: " + std::to_string(tot_num_samps) << std::endl;
 	log_output << "Subsampled quantity: " + std::to_string(tot_num_subsample) << std::endl;
@@ -126,14 +127,6 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	 Save for binomial theta
 	 */
 	uint32_t num_edges_after_threshold_pruning = size_of_network; 
-	
-	/*
-	 Important to note actual number of regulators in expression matrix for FPR estimation 
-	 */
-	decltype(tot_num_regulators) defined_regulators = 0U;
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
-		if (subnet_matrix.contains(reg))
-			++defined_regulators;
 	
 	if (prune_MaxEnt) {
 		//-------time module-------

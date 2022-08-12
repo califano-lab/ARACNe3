@@ -9,9 +9,9 @@ static std::vector<std::string> decompression_map;
 /*
  Global variables are passed from ARACNe3.cpp, which are the user-defined parameters.
  */
-uint16_t tot_num_samps = 0;
-uint16_t tot_num_subsample = 0;
-uint16_t tot_num_regulators = 0;
+uint16_t tot_num_samps = 0U;
+uint16_t tot_num_subsample = 0U;
+uint16_t tot_num_regulators, defined_regulators = 0U;
 genemap global_gm;
 genemap_r global_gm_r;
 
@@ -20,6 +20,9 @@ extern uint16_t num_subnets;
 extern double subsampling_percent;
 extern uint16_t nthreads;
 extern bool adaptive;
+
+extern float alpha;
+extern std::string method;
 extern std::vector<float> FPR_estimates;
 
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name) {
@@ -221,6 +224,13 @@ void readExpMatrix(std::string &filename) {
 
 	}
 	
+	// now we must determine how many regulators are actually defined in the expression profile
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+		if (global_gm.contains(reg))
+			++defined_regulators;
+		else
+			std::cout << "WARNING: REGULATOR " + decompression_map[reg] + " DOES NOT HAVE A DEFINED GENE EXPRESSION PROFILE." << std::endl;
+	
 	std::cout << std::endl << "Initial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
 	std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) << std::endl << std::endl;
 	
@@ -320,15 +330,43 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 		subnet[compression_map[reg]-1].emplace_back(compression_map[tar]-1, mi);
 	}
 	
+	uint32_t num_edges_after_threshold_pruning, num_edges_after_MaxEnt_pruning;
+	uint16_t defined_regulators;
 	std::ifstream log_ifs{log_filename};
 	if (!log_ifs) {
 		std::cerr << "error: could read from implied subnet log file: " << log_filename << "." << std::endl;
 		std::cerr << "Try verifying that subnet log files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("log/") + "\", which has subnet log files formatted exactly how ARACNe3 outputs subnet log files." << std::endl;
 		std::exit(2);
 	}
+	// discard 8 lines
+	for (uint8_t l = 0; l < 8; ++l) {
+		getline(log_ifs, line, '\n');
+		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+			line.pop_back();
+	}
+	// next line contains method
+	getline(log_ifs, line, '\n');
+	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+		line.pop_back();
+	if (line.find("FDR", 0) != std::string::npos)
+		method = "FDR";
+	else
+		method = "FWER";
+	// next line contains alpha
+	getline(log_ifs, line, '\n');
+	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+		line.pop_back();
+	std::stringstream linestr(line);
+	std::string discard;
+	linestr >> discard >> alpha;
+	// skip 10 lines, the 11th contains edges after threshold pruning
+	
+		
 	
 //TODO: You must have a way to interpret log files and generate FPR estimates from them.
+	
 #if 0
+	method
 	alpha 
 	num_edges_after_threshold_pruning)
 	tot_num_regulators
