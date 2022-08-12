@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <sstream>
 #include <tuple>
 #include <unordered_set>
 #include <set>
