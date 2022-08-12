@@ -23,6 +23,7 @@ extern bool adaptive;
 
 extern float alpha;
 extern std::string method;
+extern bool prune_MaxEnt;
 extern std::vector<float> FPR_estimates;
 
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name) {
@@ -301,6 +302,9 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 	makeUnixDirectoryNameUniversal(subnet_filename);
 	makeUnixDirectoryNameUniversal(log_filename);
 	
+	/*
+	 Read in the subnet file
+	 */
 	std::ifstream subnet_ifs{subnet_filename};
 	if (!subnet_ifs) {
 		std::cerr << "error: could read from implied subnet file: " << subnet_filename << "." << std::endl;
@@ -330,50 +334,62 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 		subnet[compression_map[reg]-1].emplace_back(compression_map[tar]-1, mi);
 	}
 	
-	uint32_t num_edges_after_threshold_pruning, num_edges_after_MaxEnt_pruning;
-	uint16_t defined_regulators;
+	/* 
+	 Read in the log file
+	 */
 	std::ifstream log_ifs{log_filename};
 	if (!log_ifs) {
 		std::cerr << "error: could read from implied subnet log file: " << log_filename << "." << std::endl;
 		std::cerr << "Try verifying that subnet log files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("log/") + "\", which has subnet log files formatted exactly how ARACNe3 outputs subnet log files." << std::endl;
 		std::exit(2);
 	}
-	// discard 3 lines
-	for (uint8_t l = 0; l < 3; ++l) {
-		getline(log_ifs, line, '\n');
-		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
-			line.pop_back();
-	}
-	// next line contains the # of defined regulators
+	// discard 8 lines
+	std::string discard;
+	for (uint8_t l = 0; l < 3; ++l)
+		getline(log_ifs, discard, '\n');
+	// next line contains the method 
 	getline(log_ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
-	
-	if (line.find("FDR", 0) != std::string::npos)
+	if (line.find("FDR") != std::string::npos)
 		method = "FDR";
-	else
+	else if (line.find("FWER") != std::string::npos)
 		method = "FWER";
+	else if (line.find("FPR") != std::string::npos)
+		method = "FPR";
 	// next line contains alpha
 	getline(log_ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
-	std::stringstream linestr(line);
-	std::string discard;
-	linestr >> discard >> alpha;
+	std::stringstream line_stream(line);
+	line_stream >> discard >> alpha;
+	// next line contains whether we have MaxEnt pruning
+	getline(log_ifs, line, '\n');
+	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+		line.pop_back();
+	line_stream = std::stringstream(line);
+	line_stream >> discard >> discard >> prune_MaxEnt;
 	// skip 10 lines, the 11th contains edges after threshold pruning
-	
-		
-	
-//TODO: You must have a way to interpret log files and generate FPR estimates from them.
-	
-#if 0
-	method
-	alpha 
-	num_edges_after_threshold_pruning)
-	tot_num_regulators
-	tot_num_targets
-	
-	if(prune_maxent) {
+	uint32_t num_edges_after_threshold_pruning = 0U;
+	for (uint8_t l = 0; l < 10; ++l)
+		getline(log_ifs, discard, '\n');
+	getline(log_ifs, line, '\n');
+	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+		line.pop_back();
+	line_stream = std::stringstream(line);
+	line_stream >> discard >> discard >> discard >> num_edges_after_threshold_pruning;
+	// skip 4 lines, the 5th contains edges after MaxEnt pruning if done so
+	uint32_t num_edges_after_MaxEnt_pruning = 0U;
+	if (prune_MaxEnt) {
+		for (uint8_t l = 0; l < 4; ++l)
+			getline(log_ifs, discard, '\n');
+		getline(log_ifs, line, '\n');
+		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+			line.pop_back();
+		line_stream = std::stringstream(line);
+		line_stream >> discard >> discard >> discard >> num_edges_after_MaxEnt_pruning;
+	}
+	if(prune_MaxEnt) {
 		if (method == "FDR")
 			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
 		else if (method == "FWER")
@@ -384,9 +400,5 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 		else if (method == "FWER")
 			FPR_estimates.emplace_back(alpha/(defined_regulators*(global_gm.size()-1)));
 	}
-	
-	FPR_estimates.push_back();
-#endif
-	
 	return subnet;
 } 
