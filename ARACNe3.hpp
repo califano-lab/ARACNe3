@@ -119,6 +119,13 @@ void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string filename);
 
+class TooManySubnetsRequested : public std::exception {	
+public:
+	const char * what() {
+		return "WARNING: TRIED TO CONSOLIDATE TOO MANY NETWORKS.  LOG/SUBNET FILE DOES NOT EXIST UP TO SPECIFIED NUMBER OF REQUESTED SUBNETS TO CONSOLIDATE.";
+	}
+};
+reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint16_t subnet_num);
 
 //--------------------- APMI.cpp	 		-----------------------
 

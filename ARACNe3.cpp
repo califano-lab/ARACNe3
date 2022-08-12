@@ -295,9 +295,6 @@ int main(int argc, char *argv[]) {
 	std::time_t t = std::time(nullptr);
 	std::cout << "\n---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl;
 	log_output << "\n---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl;
-
-	// Must exist regardless of whether we skip to consolidation
-	std::vector<reg_web> subnets;
 	
 	std::cout << "Beginning ARACNe3 instance.  See logs and progress reports in \"" + makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"." << std::endl;
 	log_output << "Beginning ARACNe3 instance..." << std::endl;
@@ -322,10 +319,13 @@ int main(int argc, char *argv[]) {
 	sinceLast(last, log_output);
 	//-------------------------
 	
+	// Must exist regardless of whether we skip to consolidation
+	std::vector<reg_web> subnets;
 	if(!go_to_consolidate) {
-	//-------time module-------
-	log_output << std::endl << "CREATING SUB-NETWORK(s) TIME: " << std::endl;
-	//-------------------------
+		//-------time module-------
+		log_output << std::endl << "CREATING SUB-NETWORK(s) TIME: " << std::endl;
+		//-------------------------
+		
 		if (adaptive) {
 			bool stoppingCriteriaMet = false;
 			std::unordered_map<gene_id_t, std::unordered_set<gene_id_t>> regulon_set;
@@ -362,17 +362,33 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		
-		// set the FPR estimate
-		FPR_estimate = std::accumulate(FPR_estimates.begin(), FPR_estimates.end(), 0.0f) / FPR_estimates.size();
+		//-------time module-------
+		sinceLast(last, log_output);
+		//-------------------------
+		log_output << "TOTAL SUBNETS GENERATED: " + std::to_string(num_subnets) << std::endl;
+	} else if (go_to_consolidate) {
+		//-------time module-------
+		log_output << std::endl << "READING SUB-NETWORK(s) TIME: " << std::endl;
+		//-------------------------
+		
+		for (uint16_t subnet_num = 1; subnet_num <= num_subnets_to_consolidate; ++subnet_num) {
+			try {
+				subnets.push_back(readSubNetAndUpdateFPRFromLog(output_dir, subnet_num));
+				num_subnets = subnet_num;
+			} catch (TooManySubnetsRequested e) {
+				std::cout << "WARNING: " + std::string(e.what()) << std::endl;
+				break;
+			}
+		}
 		
 		//-------time module-------
 		sinceLast(last, log_output);
 		//-------------------------
-		
-		log_output << "TOTAL SUBNETS GENERATED: " + std::to_string(num_subnets) << std::endl;
-	} else {
-		/*TODO: Write functions in IO.cpp that read subnets one by one and update FPR estimates*/
+		log_output << "TOTAL SUBNETS READ: " + std::to_string(num_subnets) << std::endl;
 	}
+	
+	// set the FPR estimate
+	FPR_estimate = std::accumulate(FPR_estimates.begin(), FPR_estimates.end(), 0.0f) / FPR_estimates.size();
 	
 	if (!do_not_consolidate) {	
 		//-------time module-------

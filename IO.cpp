@@ -309,7 +309,7 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 	if (!subnet_ifs) {
 		std::cerr << "error: could read from implied subnet file: " << subnet_filename << "." << std::endl;
 		std::cerr << "Try verifying that subnet files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("subnets/") + "\", which has subnet files formatted exactly how ARACNe3 outputs subnet files." << std::endl;
-		std::exit(2);
+		throw TooManySubnetsRequested();
 	}
 	// discard the first line (header)
 	std::string line;
@@ -341,7 +341,7 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 	if (!log_ifs) {
 		std::cerr << "error: could read from implied subnet log file: " << log_filename << "." << std::endl;
 		std::cerr << "Try verifying that subnet log files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("log/") + "\", which has subnet log files formatted exactly how ARACNe3 outputs subnet log files." << std::endl;
-		std::exit(2);
+		throw TooManySubnetsRequested();
 	}
 	// discard 8 lines
 	std::string discard;
