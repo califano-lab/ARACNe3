@@ -389,6 +389,7 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 		line_stream = std::stringstream(line);
 		line_stream >> discard >> discard >> discard >> num_edges_after_MaxEnt_pruning;
 	}
+	
 	if(prune_MaxEnt) {
 		if (method == "FDR")
 			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
@@ -400,5 +401,6 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 		else if (method == "FWER")
 			FPR_estimates.emplace_back(alpha/(defined_regulators*(global_gm.size()-1)));
 	}
+	
 	return subnet;
 } 
