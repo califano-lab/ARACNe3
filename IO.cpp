@@ -345,7 +345,7 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 	}
 	// discard 8 lines
 	std::string discard;
-	for (uint8_t l = 0; l < 3; ++l)
+	for (uint8_t l = 0; l < 8; ++l)
 		getline(log_ifs, discard, '\n');
 	// next line contains the method 
 	getline(log_ifs, line, '\n');
