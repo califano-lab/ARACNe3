@@ -75,7 +75,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	 Begin Network computation
 	 */
 	//-------time module-------
-	log_output << std::endl << "RAW NETWORK COMPUTATION TIME:" << std::endl;
+	log_output << std::endl << "Raw network computation time:" << std::endl;
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -98,13 +98,13 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	
 	//-------time module-------
 	sinceLast(last, log_output);
-	log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
+	log_output << "Size of network: " << size_of_network << " edges." << std::endl;
 	//-------------------------
 	
 	if (!prune_alpha) alpha = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
 	
 	//-------time module-------
-	log_output << std::endl << "ALPHA PRUNING TIME (" + method + "): " << std::endl;
+	log_output << std::endl << "Alpha/threshold pruning time (" + method + "): " << std::endl;
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -120,8 +120,8 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	
 	//-------time module-------
 	sinceLast(last, log_output);
-	log_output << "EDGES REMOVED: " << size_prev - size_of_network << " EDGES." << std::endl;
-	log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
+	log_output << "Edges removed: " << size_prev - size_of_network << " edges." << std::endl;
+	log_output << "Size of network: " << size_of_network << " edges." << std::endl;
 	//-------------------------
 	
 	/*
@@ -131,7 +131,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	
 	if (prune_MaxEnt) {
 		//-------time module-------
-		log_output << std::endl << "MaxEnt PRUNING TIME:" << std::endl;
+		log_output << std::endl << "MaxEnt pruning time:" << std::endl;
 		last = std::chrono::high_resolution_clock::now();
 		//-------------------------
 
@@ -141,8 +141,8 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 		
 		//-------time module-------
 		sinceLast(last, log_output);
-		log_output << "EDGES REMOVED: " << size_prev - size_of_network << " EDGES." << std::endl;
-		log_output << "SIZE OF NETWORK: " << size_of_network << " EDGES." << std::endl;
+		log_output << "Edges removed: " << size_prev - size_of_network << " edges." << std::endl;
+		log_output << "Size of network: " << size_of_network << " edges." << std::endl;
 		//-------------------------
 		
 		uint32_t num_edges_after_MaxEnt_pruning = size_of_network;
@@ -158,7 +158,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	}
 	
 	//-------time module-------
-	log_output << std::endl << "PRINTING NETWORK IN DIRECTORY \"" + makeUnixDirectoryNameUniversal(output_dir) + "\"....." << std::endl;
+	log_output << std::endl << "Printing network in directory \"" + makeUnixDirectoryNameUniversal(output_dir) + "\"....." << std::endl;
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -304,12 +304,12 @@ int main(int argc, char *argv[]) {
 	readExpMatrix(exp_file);
 	
 	//-------time module-------
-	log_output << std::endl << "MATRIX & REGULATORS READ TIME:" << std::endl;
+	log_output << std::endl << "Gene expression matrix & regulators list read time:" << std::endl;
 	sinceLast(last, log_output);
 	//-------------------------
 	
 	//-------time module-------
-	log_output << std::endl << "NULL MI MODEL TIME:" << std::endl;
+	log_output << std::endl << "Mutual Information null model calculation time:" << std::endl;
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
@@ -323,7 +323,7 @@ int main(int argc, char *argv[]) {
 	std::vector<reg_web> subnets;
 	if(!go_to_consolidate) {
 		//-------time module-------
-		log_output << std::endl << "CREATING SUB-NETWORK(s) TIME: " << std::endl;
+		log_output << std::endl << "Creating subnetwork(s) time: " << std::endl;
 		//-------------------------
 		
 		if (adaptive) {
@@ -365,10 +365,10 @@ int main(int argc, char *argv[]) {
 		//-------time module-------
 		sinceLast(last, log_output);
 		//-------------------------
-		log_output << "TOTAL SUBNETS GENERATED: " + std::to_string(num_subnets) << std::endl;
+		log_output << "Total subnetworks generated: " + std::to_string(num_subnets) << std::endl;
 	} else if (go_to_consolidate) {
 		//-------time module-------
-		log_output << std::endl << "READING SUB-NETWORK(s) TIME: " << std::endl;
+		log_output << std::endl << "Reading subnetwork(s) time: " << std::endl;
 		//-------------------------
 		
 		for (uint16_t subnet_num = 1; subnet_num <= num_subnets_to_consolidate; ++subnet_num) {
@@ -384,7 +384,7 @@ int main(int argc, char *argv[]) {
 		//-------time module-------
 		sinceLast(last, log_output);
 		//-------------------------
-		log_output << "TOTAL SUBNETS READ: " + std::to_string(num_subnets) << std::endl;
+		log_output << "Total subnets read: " + std::to_string(num_subnets) << std::endl;
 	}
 	
 	// set the FPR estimate
@@ -392,7 +392,7 @@ int main(int argc, char *argv[]) {
 	
 	if (!do_not_consolidate) {	
 		//-------time module-------
-		log_output << std::endl << "CONSOLIDATING SUB-NETWORK(s) TIME: " << std::endl;
+		log_output << std::endl << "Consolidating subnetwork(s) time: " << std::endl;
 		//-------------------------
 		
 		std::vector<consolidated_df> final_df = consolidate_subnets_vec(subnets);
@@ -402,21 +402,21 @@ int main(int argc, char *argv[]) {
 		//-------------------------
 		
 		//-------time module-------
-		log_output << std::endl << "WRITING FINAL NETWORK..." << std::endl;
+		log_output << std::endl << "Writing final network..." << std::endl;
 		//-------------------------
 		
 		writeConsolidatedNetwork(final_df, output_dir + "finalNet_" + std::to_string(num_subnets) + "subnets.txt");
 	} else if (do_not_consolidate) {
 		//-------time module-------
-		log_output << std::endl << "NO CONSOLIDATION REQUESTED." << std::endl;
+		log_output << std::endl << "No consolidation requested." << std::endl;
 		//-------------------------
 	}
 	
 	/* Now that we know how many subnets, we can rename finalLog to include that. */
 	std::string final_log_newname = "finalLog_" + std::to_string(num_subnets) + "subnets.txt";
 	//-------time module-------
-	log_output << std::endl << "RENAMING \"finalLog.txt\" TO \"" + final_log_newname + "\"..." << std::endl;
-	std::cout << std::endl << "RENAMING \"finalLog.txt\" TO \"" + final_log_newname + "\"..." << std::endl;
+	log_output << std::endl << "Renaming \"finalLog.txt\" to \"" + final_log_newname + "\"..." << std::endl;
+	std::cout << std::endl << "Renaming \"finalLog.txt\" to \"" + final_log_newname + "\"..." << std::endl;
 	//-------------------------
 	std::filesystem::rename(output_dir + "finalLog.txt", output_dir  + final_log_newname);
 	
