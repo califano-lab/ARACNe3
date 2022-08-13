@@ -122,7 +122,7 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std:
 class TooManySubnetsRequested : public std::exception {	
 public:
 	const char * what() {
-		return "WARNING: TRIED TO CONSOLIDATE TOO MANY NETWORKS.  LOG/SUBNET FILE DOES NOT EXIST UP TO SPECIFIED NUMBER OF REQUESTED SUBNETS TO CONSOLIDATE.";
+		return "TRIED TO CONSOLIDATE TOO MANY NETWORKS.  LOG/SUBNET FILE DOES NOT EXIST UP TO SPECIFIED NUMBER OF REQUESTED SUBNETS TO CONSOLIDATE.";
 	}
 };
 reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint16_t subnet_num);
