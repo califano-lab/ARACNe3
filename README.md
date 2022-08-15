@@ -86,33 +86,33 @@ g_10011_	0.055	0.73	4.64
 ```
 
 ## Parameters
-``-e`` is the expression file
+``-e`` is the expression file.
 
-``-r`` is the list of regulators (e.g., TFs)
+``-r`` is the list of regulators (e.g., TFs).
 
-``-o`` is the output directory
+``-o`` is the output directory.
 
-``-x`` is the stopping criteria for generating multiple subnetworks.  By default, it specifies a fixed number of subnetworks to generate (default: `-x 1`) 
+``-x`` is the stopping criteria for generating multiple subnetworks or consolidating subnetworks.  By default, it specifies a fixed number of subnetworks to generate (default: `-x 1`).
 
-``--adaptive`` changes the stopping criteria `-x` to specify regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, if all subnetworks are consolidated into one (default: `-x 30`)
+``--adaptive`` changes the stopping criteria `-x` to specify regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, if all subnetworks are consolidated into one (default: `-x 30`).
 
-``--alpha`` is the alpha parameter for FDR or FWER pruning (default: `--alpha 0.05`)
+``--alpha`` is the alpha parameter for FDR or FWER pruning (default: `--alpha 0.05`).
 
-``--FWER`` tells ARACNe3 to prune by control of FWER alpha, instead of the default control for FDR alpha
+``--FWER`` tells ARACNe3 to prune by control of FWER alpha, instead of the default control for FDR alpha.
 
-``--subsample`` is the population percentage to subsample ($1-e^{-1}$ is default: `--subsample 0.63212...`)
+``--subsample`` is the population percentage to subsample ($1-e^{-1}$ is default: `--subsample 0.63212...`).
 
-``--noAlpha`` tells ARACNe3 not to prune based on the FDR or FWER (same as: `--alpha 1`)
+``--noAlpha`` tells ARACNe3 not to prune based on the FDR or FWER (same as: `--alpha 1`).
 
-``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy
+``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy.
 
-``--seed`` sets the seed for all programmatic pseudorandom behavior (default: `--seed 0`)
+``--seed`` sets the seed for all programmatic pseudorandom behavior (default: `--seed 0`).
 
-``--threads`` sets the number of threads to use during subnetwork generation (default: `--threads 1`)
+``--threads`` sets the number of threads to use during subnetwork generation (default: `--threads 1`).
 
-``--noconsolidate`` tells ARACNe3 to skip the consolidation step and instead only preserve the null model, the final log, the `log/` subdirectory, and all subnetworks generated in `subnets/` 
+``--noconsolidate`` tells ARACNe3 to skip the consolidation step and instead only preserve the null model, the final log, the `log/` subdirectory, and all subnetworks generated in `subnets/`.
 
-``--consolidate`` tells ARACNe3 to run in consolidate mode using `-o` to specify the directory location and `-x` to specify how many subnetwork files to use (default: `-x 1`). The output directory structure `-o` must contain subdirectories `subnets/` and `log/` that follow the exact conventions as the ARACNe3 output.
+``--consolidate`` tells ARACNe3 to run in consolidate mode.  An expression file and a list of regulators still must be provided with `-e` and `-r`, respectively.  `-o` specifies the directory location.  Finally, `-x` specifies how many subnetwork files to use (default: `-x 1`). Note that output directory structure `-o` **must** contain subdirectories `subnets/` and `log/` that follow the exact conventions as an ARACNe3 output.
 
 ## Examples
 Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators).  Due to the limited capacity of the repository, you may need to decompress the expression matrix before usage.
