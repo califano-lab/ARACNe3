@@ -135,7 +135,7 @@
     <ClCompile Include="APMI.cpp" />
     <ClCompile Include="ARACNe3.cpp" />
     <ClCompile Include="Consolidator.cpp" />
-    <ClCompile Include="MatrixReglistIO.cpp" />
+    <ClCompile Include="IO.cpp" />
     <ClCompile Include="MaxEntPruning.cpp" />
     <ClCompile Include="NullModel.cpp" />
     <ClCompile Include="RegWebFns.cpp" />

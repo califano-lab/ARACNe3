@@ -10,7 +10,7 @@ extern bool adaptive;
 /*
  Prune the network according to the MaxEnt weakest-edge reduction.
  */
-reg_web pruneMaxEnt(reg_web& network, map_map &tftfNetwork, uint32_t &size_of_network) {
+reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_network) {
 	/* Since the same weakest edge may be identified multiple times, we use std::set to store the edges we know to remove, so that they are all removed at the end.  However, since the same set is being accessed by multiple threads at once, this creates clashing errors.  Hence, for now, each thread gets its own set in the vector below, which will be 'sifted' through by the master thread.
 	 */
 	std::vector<std::vector<std::set<gene_id_t>>> removedEdgesForThread(nthreads, std::vector<std::set<gene_id_t>>(tot_num_regulators));
