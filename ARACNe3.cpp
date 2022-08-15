@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
 	if (cmdOptionExists(argv, argv+argc, "--FWER"))
 		method = "FWER";
 	if (cmdOptionExists(argv, argv+argc, "--FPR"))
-		method = "FPR"
+		method = "FPR";
 	if (cmdOptionExists(argv, argv+argc, "--adaptive"))
 		adaptive = true;
 	if (cmdOptionExists(argv, argv+argc, "--noconsolidate"))
