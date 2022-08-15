@@ -12,7 +12,7 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 
 `git clone https://github.com/califano-lab/ARACNe3-CPP # Clone the repo`
 
-After cloning the repository, you may build `ARACNe3` manually, or access the latest executables in the `products/` directory.  Currently, `ARACNe3` has been pre-compiled to work on MacOS 12.0 or later (in `products/macOS 12.0/`) and Windows 10 (`products/windows/`).  Make sure that if using Windows, you choose the version compiled for your CPU architecture (ARM 64-bit or x86 64-bit)
+After cloning the repository, you may build `ARACNe3` manually or access the latest executables in the `products/` directory.  Currently, `ARACNe3` has been pre-compiled to work on MacOS 12.0 or later (in `products/macOS 12.0/`) and Windows 10 (`products/windows/`).  Make sure that if using Windows, you choose the version compiled for your CPU architecture (ARM 64-bit or x86 64-bit)
 
 Note that you may require additional software to run the C++ executables.  If running the `ARACNe3` executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
 
