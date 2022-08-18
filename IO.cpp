@@ -393,13 +393,17 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 	if(prune_MaxEnt) {
 		if (method == "FDR")
 			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		else if (method == "FWER" || method == "FPR")
+		else if (method == "FWER")
 			FPR_estimates.emplace_back((alpha/(defined_regulators*(global_gm.size()-1)))*(num_edges_after_MaxEnt_pruning)/(num_edges_after_threshold_pruning));
+		else if (method == "FPR")
+			FPR_estimates.emplace_back(alpha*num_edges_after_MaxEnt_pruning/num_edges_after_threshold_pruning);
 	} else {
 		if (method == "FDR")
 			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		else if (method == "FWER" || method == "FPR")
+		else if (method == "FWER")
 			FPR_estimates.emplace_back(alpha/(defined_regulators*(global_gm.size()-1)));
+		else if (method == "FPR")
+			FPR_estimates.emplace_back(alpha);
 	}
 	
 	return subnet;
