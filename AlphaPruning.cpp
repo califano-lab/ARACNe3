@@ -35,7 +35,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 		for (auto it = reg_edge_tar.begin(); it != reg_edge_tar.end(); ++it) {
 			auto k = it - reg_edge_tar.begin();
 			float p_k = getMIPVal(it->second.mi);
-			if (p_k <= k*alpha/m)
+			if (p_k < k*alpha/m)
 				argmax_k = static_cast<uint32_t>(k) + 1;
 		}
 	} else if (method == "FWER") {
@@ -45,7 +45,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 		for (auto it = reg_edge_tar.begin(); it != reg_edge_tar.end(); ++it) {
 			auto k = it - reg_edge_tar.begin();
 			float p_k = getMIPVal(it->second.mi);
-			if (p_k <= alpha/m)
+			if (p_k < alpha/m)
 				argmax_k = static_cast<uint32_t>(k) + 1;
 		}
 	} else if (method == "FPR") {
@@ -55,7 +55,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 		for (auto it = reg_edge_tar.begin(); it != reg_edge_tar.end(); ++it) {
 			auto k = it - reg_edge_tar.begin();
 			float p_k = getMIPVal(it->second.mi);
-			if (p_k <= alpha)
+			if (p_k < alpha)
 				argmax_k = static_cast<uint32_t>(k) + 1;
 		}
 	}
