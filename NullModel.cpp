@@ -147,7 +147,7 @@ const float getMIPVal(const float& mi, const float& p_precise) {
 	// . 
 	/* Returns an iterator that points to the first index for which mi is greater than the rest.  
 	 */
-	auto it = std::upper_bound(null_mis.begin(), null_mis.end(), mi, std::greater<float>());
+	auto it = std::upper_bound(null_mis.begin(), null_mis.end(), mi, std::greater_equal<float>());
 	
 	/* p-value is the percentile.  Since it's an index, it underestimates p-value, so we add 1 later.
 	 */
