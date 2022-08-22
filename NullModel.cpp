@@ -154,7 +154,7 @@ const float getMIPVal(const float& mi, const float& p_precise) {
 	const float p = (it-null_mis.begin()+1)/(float)num_null_marginals;
 	
 	if (p < p_precise)
-		return std::exp(m*mi+b); // invert log
+		return std::min(p, std::exp(m*mi+b)); // invert log
 	else
 		return p;
 }
