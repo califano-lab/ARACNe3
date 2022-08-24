@@ -28,17 +28,17 @@ reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_net
 #pragma omp parallel for firstprivate(finalNet, tftfNetwork) num_threads(nthreads) schedule(static,1) 
 	// We schedule the parallelization like this because we have a triangular matrix.  reg2 is always reg1+1, so the first block of regulators will have the largest groups to iterate over under standard scheduling.
 	for (int reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
-		if (tftfNetwork.contains(reg1)) {
+		if (tftfNetwork.find(reg1) != tftfNetwork.end()) {
 			std::unordered_map<gene_id_t, float> &fin1 = finalNet[reg1];
 			std::unordered_map<gene_id_t, float> &tft1 = tftfNetwork[reg1]; 
 			std::set<gene_id_t> &rem1 = removedEdgesForThread[omp_get_thread_num()][reg1];
 			for (gene_id_t reg2 = reg1 + 1; reg2 < tot_num_regulators; ++reg2) {
-				if (tft1.contains(reg2)) {
+				if (tft1.find(reg2) != tft1.end()) {
 					std::unordered_map<gene_id_t, float> &fin2 = finalNet[reg2];
 					std::set<gene_id_t> &rem2 = removedEdgesForThread[omp_get_thread_num()][reg2];
 					const float tftfMI = tft1[reg2];
 					for(const auto &[target, v2] : fin2) {
-						if (fin1.contains(target)) {
+						if (fin1.find(target) != fin1.end()) {
 							const float v1 = fin1[target];
 							if (v1 < tftfMI && v1 < v2)
 								rem1.insert(target);
@@ -73,7 +73,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_net
 		pruned_net[reg].reserve(network[reg].size());
 		std::set<gene_id_t> &rem = removedEdges[reg];
 		for (const auto &[tar, mi] : tarmap) {
-			if (!rem.contains(tar)) {
+			if (rem.find(tar) == rem.end()) {
 				pruned_net[reg].emplace_back(tar, mi);
 			}
 		}

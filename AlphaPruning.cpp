@@ -17,7 +17,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 	reg_edge_tar.reserve(size_of_network);
 	
 	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
-		if (global_gm.contains(reg)) 
+		if (global_gm.find(reg) != global_gm.end()) 
 			for (auto &et : network[reg]) 
 				reg_edge_tar.emplace_back(reg, et);
 	

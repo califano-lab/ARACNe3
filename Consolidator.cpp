@@ -46,7 +46,7 @@ std::vector<consolidated_df> consolidate_subnets_vec(std::vector<reg_web> &subne
 		for (const auto &[tar, tar_vec] : global_gm) {
 			uint16_t num_occurrences = 0;
 			for (uint16_t sn = 0; sn < subnets.size(); ++sn) {
-				if (subnets_mpmp[sn][reg].contains(tar))
+				if (subnets_mpmp[sn][reg].find(tar) != subnets_mpmp[sn][reg].end())
 					++num_occurrences;
 			}
 			if (num_occurrences > 0) {
