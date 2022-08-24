@@ -24,12 +24,11 @@ The C++17 standard is used when compiling `ARACNe3` into an executable.  `ARACNe
 Build the executable by cloning the repository, compiling all C++ files, and then linking `ARACNe3` with object file dependencies in the manner below.  Make sure that `OpenMP` libraries have been installed, and their include directories and library directories have been implied by your [environment variables](https://en.wikipedia.org/wiki/Environment_variable).  Make sure to utilize all available runtime optimization compiler options.  
 ### Compiling Example:
 ```
-g++ -std=c++17 -O3 -Xpreprocessor -fopenmp -c NullModel.cpp IO.cpp APMI.cpp AlphaPruning.cpp MaxEntPruning.cpp RegWebFns.cpp Consolidator.cpp
- 
+g++ -std=gnu++17 -O3 -Xpreprocessor -fopenmp -c ARACNe3.cpp NullModel.cpp IO.cpp APMI.cpp AlphaPruning.cpp MaxEntPruning.cpp RegWebFns.cpp Consolidator.cpp 
 ```
 ### Linking Example:
 ```
-g++ -std=c++17 -O3 -Xpreprocessor -fopenmp  ARACNe3.cpp NullModel.o IO.o APMI.o AlphaPruning.o MaxEntPruning.o RegWebFns.o Consolidator.o -o ARACNe3
+g++ -std=c++17 -O3 -Xpreprocessor -fopenmp ARACNe3.o NullModel.o IO.o APMI.o AlphaPruning.o MaxEntPruning.o RegWebFns.o Consolidator.o -o ARACNe3 -lstdc++fs
 ``` 
 ### Troubleshooting Build Issues
 If you face issues building `ARACNe3` besides lacking a C++17 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the clang `-O3` compiler optimization option, or repace it with `-O2`. 
