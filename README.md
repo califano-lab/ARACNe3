@@ -17,7 +17,7 @@ After cloning the repository, you may build `ARACNe3` manually or access the lat
 Note that you may require additional software to run the C++ executables.  If running the `ARACNe3` executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
 
 ## Building ARACNe3 Manually (Optional)
-The C++20 standard is used when compiling `ARACNe3` into an executable.  `ARACNe3` utilizes multiple threads with `OpenMP` directives, so you must have libraries that support them installed.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) installed already.
+The C++17 standard is used when compiling `ARACNe3` into an executable.  `ARACNe3` utilizes multiple threads with `OpenMP` directives, so you must have libraries that support them installed.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) installed already.
 
 `brew install llvm libomp`
 
@@ -32,7 +32,7 @@ g++ -std=c++17 -O3 -Xpreprocessor -fopenmp -c NullModel.cpp IO.cpp APMI.cpp Alph
 g++ -std=c++17 -O3 -Xpreprocessor -fopenmp  ARACNe3.cpp NullModel.o IO.o APMI.o AlphaPruning.o MaxEntPruning.o RegWebFns.o Consolidator.o -o ARACNe3
 ``` 
 ### Troubleshooting Build Issues
-If you face issues building `ARACNe3` besides lacking a C++20 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the clang `-O3` compiler optimization option, or repace it with `-O2`. 
+If you face issues building `ARACNe3` besides lacking a C++17 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the clang `-O3` compiler optimization option, or repace it with `-O2`. 
 
 ## Using ARACNe3
 ### Input files needed to run ARACNe3
