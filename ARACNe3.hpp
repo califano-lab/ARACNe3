@@ -16,6 +16,7 @@
 #include <experimental/filesystem>
 #include <chrono>
 #include <regex>
+#include <omp.h>
 
 #ifndef _ARACNE3_HPP_
 #define _ARACNE3_HPP_
