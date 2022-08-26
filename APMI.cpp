@@ -64,7 +64,7 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
 	// indices for quadrants, to test chi-square, with num_pts for each
 	uint16_t *tr_pts, *br_pts, *bl_pts, *tl_pts, tr_num_pts=0U, br_num_pts=0U, bl_num_pts=0U, tl_num_pts=0U;
 	bool explicit_free = false;
-	if (sizeof(uint16_t) * tot_num_pts < 800000U) { //TODO: Need a better estimate for reducing stack overflow
+	if (sizeof(uint16_t) * tot_num_pts * 4 < 800000U) { //TODO: Need a better estimate for reducing stack overflow
 		tr_pts = (uint16_t*)alloca(num_pts * sizeof(uint16_t));
 		br_pts = (uint16_t*)alloca(num_pts * sizeof(uint16_t));
 		bl_pts = (uint16_t*)alloca(num_pts * sizeof(uint16_t));
