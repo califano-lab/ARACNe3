@@ -82,9 +82,6 @@ const float APMI_split(const std::vector<float>& vec_x, const std::vector<float>
 	for (uint16_t i = 0U; i < num_pts; ++i) {
 		// we must pull the actual point index from the pts array
 		const uint16_t p = pts[i];
-		if (p > tot_num_pts) {
-			std::cout << p << std::endl;
-		}
 		const bool top = vec_y[p] >= y_thresh,
 		      right = vec_x[p] >= x_thresh;
 		if (top && right) { tr_pts[tr_num_pts++] = p; } 
