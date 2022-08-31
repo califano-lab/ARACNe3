@@ -6,6 +6,7 @@
 
 extern uint16_t tot_num_regulators;
 extern uint16_t tot_num_subsample;
+extern uint32_t num_null_marginals;
 
 /*
  Simply returns a vector of the same regID duplicated for every edge it has associated
@@ -45,7 +46,7 @@ std::vector<float> get_MIs(gene_id_t regID, reg_web &regweb) {
 std::vector<float> get_p_vals(gene_id_t regID, reg_web &regweb) {
 	initNullMIs(tot_num_subsample);
 	const std::vector<float> mis = get_MIs(regID, regweb);
-	return getMIPVals(mis);
+	return getMIPVals(mis, 100.0/num_null_marginals);
 }
 
 /*
