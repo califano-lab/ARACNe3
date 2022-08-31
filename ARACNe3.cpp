@@ -79,7 +79,6 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	last = std::chrono::high_resolution_clock::now();
 	//-------------------------
 	
-	
 	uint32_t size_of_network = 0;
 	std::vector<std::vector<edge_tar>> network_vec(tot_num_regulators); 
 #pragma omp parallel for firstprivate(subnet_matrix) num_threads(nthreads)
