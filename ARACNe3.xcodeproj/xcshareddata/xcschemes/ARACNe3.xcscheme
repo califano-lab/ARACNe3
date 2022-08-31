@@ -31,9 +31,9 @@
       </Testables>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
-      selectedDebuggerIdentifier = ""
-      selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       enableASanStackUseAfterReturn = "YES"
       disableMainThreadChecker = "YES"
       launchStyle = "0"
@@ -56,12 +56,12 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o test/output  --threads 8"
-            isEnabled = "NO">
+            argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug2.txt -o test/output  --threads 4 --alpha 0.005"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e test/exp_mat.txt -r test/regulators.txt -o test/_output_1_ --threads 10"
-            isEnabled = "YES">
+            argument = "-e test/exp_mat.txt -r test/regulators.txt -o test/_output_1_ --threads 10 --alpha 0.001"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e test/debug/exp_mat_debug.txt -r test/debug/regulators_debug.txt -o /Users/andrew/Desktop/a3/output --subsample 0.99 --seed 23 --numnulls 10000 --alpha 0.05 --FDR -x 50 --threads 10 --adaptive"
