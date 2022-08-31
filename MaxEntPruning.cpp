@@ -36,7 +36,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_net
 				if (tft1.find(reg2) != tft1.end()) {
 					std::unordered_map<gene_id_t, float> &fin2 = finalNet[reg2];
 					std::set<gene_id_t> &rem2 = removedEdgesForThread[omp_get_thread_num()][reg2];
-					const float tftfMI = tft1[reg2];
+					const float &tftfMI = tft1[reg2];
 					for(const auto &[target, v2] : fin2) {
 						if (fin1.find(target) != fin1.end()) {
 							const float v1 = fin1[target];
@@ -45,7 +45,6 @@ reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_net
 							else if (v2 < tftfMI && v2 < v1)
 								rem2.insert(target);
 							else {
-								// is ARACNe-AP removing the r1-r2 edge?
 								rem1.insert(reg2);
 								rem2.insert(reg1);
 							}
@@ -72,11 +71,9 @@ reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_net
 	for (const auto &[reg, tarmap] : finalNet) {
 		pruned_net[reg].reserve(network[reg].size());
 		std::set<gene_id_t> &rem = removedEdges[reg];
-		for (const auto &[tar, mi] : tarmap) {
-			if (rem.find(tar) == rem.end()) {
+		for (const auto &[tar, mi] : tarmap)
+			if (rem.find(tar) == rem.end())
 				pruned_net[reg].emplace_back(tar, mi);
-			}
-		}
 	}
 
 	return pruned_net;
