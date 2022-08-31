@@ -163,8 +163,10 @@ void readExpMatrix(std::string &filename) {
 	
 	// find subsample number
 	tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
-	if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0)
+	if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0) {
+		std::cerr << std::endl << "WARNING: SUBSAMPLE QUANTITY INVALID.  ALL SAMPLES WILL BE USED." << std::endl;
 		tot_num_subsample = tot_num_samps;
+	}
 	
 	// now, we can more efficiently load
 	uint32_t linesread = 1U;
@@ -188,7 +190,7 @@ void readExpMatrix(std::string &filename) {
 		
 		/* This means that a user has inputted a matrix with unequal row 1 vs row 2 length
 		 */
-		if (expr_vec.size() > tot_num_samps) {
+		if (expr_vec.size() != tot_num_samps) {
 			std::cerr << std::endl << "WARNING: ROW " + std::to_string(linesread) + " LENGTH DOES NOT EQUAL ROW 1 LENGTH.  ROWS MUST SHARE THE SAME NUMBER OF DELIMITERS.  SEGMENTATION FAULT MAY OCCUR.  CHECK THAT HEADER ROW CONTAINS G+1 COLUMNS." << std::endl;
 			tot_num_samps = expr_vec.size();
 			tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
