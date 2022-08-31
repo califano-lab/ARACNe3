@@ -5,6 +5,7 @@ extern bool prune_MaxEnt;
 extern float alpha;
 extern std::string method;
 extern genemap global_gm;
+extern uint32_t num_null_marginals;
 
 
 /*
@@ -34,7 +35,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 		*/
 		for (auto it = reg_edge_tar.begin(); it != reg_edge_tar.end(); ++it) {
 			auto k = it - reg_edge_tar.begin();
-			float p_k = getMIPVal(it->second.mi);
+			float p_k = getMIPVal(it->second.mi, 100.0/num_null_marginals);
 			if (p_k < k*alpha/m)
 				argmax_k = static_cast<uint32_t>(k) + 1;
 		}
@@ -44,7 +45,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 		*/
 		for (auto it = reg_edge_tar.begin(); it != reg_edge_tar.end(); ++it) {
 			auto k = it - reg_edge_tar.begin();
-			float p_k = getMIPVal(it->second.mi);
+			float p_k = getMIPVal(it->second.mi, 100.0/num_null_marginals);
 			if (p_k < alpha/m)
 				argmax_k = static_cast<uint32_t>(k) + 1;
 		}
@@ -54,7 +55,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 		 */
 		for (auto it = reg_edge_tar.begin(); it != reg_edge_tar.end(); ++it) {
 			auto k = it - reg_edge_tar.begin();
-			float p_k = getMIPVal(it->second.mi);
+			float p_k = getMIPVal(it->second.mi, 100.0/num_null_marginals);
 			if (p_k < alpha)
 				argmax_k = static_cast<uint32_t>(k) + 1;
 		}
