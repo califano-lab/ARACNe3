@@ -74,7 +74,7 @@ g_10011_
 g_1_
 ```
 ### Dataset
-A `G+1 x N+1`, normalized and transformed expression profile as a `.tsv` (tab separated value) file, with genes on rows and samples on columns.  Do not include any important information in the first row, except for an equal number of columns (delimited by tab) as the rows below. E.g.,
+A `G+1 x N+1`, normalized and transformed expression profile, with genes on rows and samples on columns.  All columns should be tab-delimited (`\t`), and all rows should be newline delimited (`\n`).  Do not include any important information in the first row, except for an equal number of columns (delimited by tab) as the rows below. E.g.,
 ```
 gene	Samp5	Sample2	Samp1
 g_1_	4.99	2.93	0.39
