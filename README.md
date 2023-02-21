@@ -140,11 +140,13 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 ``` 
 
 ## Contact
-Please contact Aaron Griffin for questions regarding this project.
+Please contact Aaron Griffin (theory) or Andrew Howe (codebase) for questions regarding this project.
 
-Aaron T. Griffin - atg2142@cumc.columbia.edu 
+Aaron T. Griffin - atg2142@cumc.columbia.edu
 
-Previous commits and developments can be found in the following repository:
+Andrew R. Howe - arh2207@columbia.edu
+
+Previous commits are found in the following repository:
 ```
 https://github.com/arhowe00/ARACNe3_Prototypes
 ```
