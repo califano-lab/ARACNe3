@@ -10,7 +10,7 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 
 ## Downloading ARACNe3
 
-`git clone https://github.com/califano-lab/ARACNe3-CPP # Clone the repo`
+`git clone https://github.com/califano-lab/ARACNe3 # Clone the repo`
 
 After cloning the repository, you may build `ARACNe3` manually or access the latest executables in the `products/` directory.  Currently, `ARACNe3` has been pre-compiled to work on MacOS 12.0 or later (in `products/macOS 12.0/`) and Windows 10 (`products/windows/`).  Make sure that if using Windows, you choose the version compiled for your CPU architecture (ARM 64-bit or x86 64-bit)
 
@@ -145,8 +145,3 @@ Please contact Aaron Griffin (theory) or Andrew Howe (codebase) for questions re
 Aaron T. Griffin - atg2142@cumc.columbia.edu
 
 Andrew R. Howe - arh2207@columbia.edu
-
-Previous commits are found in the following repository:
-```
-https://github.com/arhowe00/ARACNe3_Prototypes
-```
