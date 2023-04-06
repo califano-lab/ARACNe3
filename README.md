@@ -83,15 +83,19 @@ g_10011_	0.055	0.73	4.64
 ```
 
 ## Parameters
+### Required
 ``-e`` is the expression file.
 
 ``-r`` is the list of regulators (e.g., TFs).
 
 ``-o`` is the output directory.
 
+### Optional
 ``-x`` is the stopping criteria for generating multiple subnetworks or consolidating subnetworks.  By default, it specifies a fixed number of subnetworks to generate (default: `-x 1`).
 
 ``--adaptive`` changes the stopping criteria `-x` to specify regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, if all subnetworks are consolidated into one (default: `-x 30`).
+
+``--threads`` sets the number of threads to use during subnetwork generation (default: `--threads 1`).
 
 ``--alpha`` is the alpha parameter for FDR or FWER pruning (default: `--alpha 0.05`).
 
@@ -104,8 +108,6 @@ g_10011_	0.055	0.73	4.64
 ``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy.
 
 ``--seed`` sets the seed for all programmatic pseudorandom behavior (default: `--seed 0`).
-
-``--threads`` sets the number of threads to use during subnetwork generation (default: `--threads 1`).
 
 ``--noconsolidate`` tells ARACNe3 to skip the consolidation step and instead only preserve the null model, the final log, the `log/` subdirectory, and all subnetworks generated in `subnets/`.
 
