@@ -51,7 +51,7 @@ See below for file format specification (or download the test files from our rep
 5.	Using regulon occupancy, or minimum targets per regulator, as a stopping criteria as opposed to number of subnetworks (`--adaptive -x 30`).
 
 ### Output of ARACNe3
-`ARACNe3` will output a directory structure within the output directory provided by the user (e.g., `-o outputdir/`) that contains the subnetworks (in `outputdir/subnets/`), the consensus network (`outputdir/finalNet.txt`), and log information for the subnetworks (in `outputdir/log/`) and the overall `ARACNe3` runtime (`outputdir/finalLog.txt`).  The subnetworks subdirectory will contain a file for each subnetwork (`-x`) requested, automatically named `output_subnet#.txt`. Each file shows every significant interaction in three columns:
+`ARACNe3` will output a directory structure within the output directory provided by the user (e.g., `-o outputdir/`) that contains the subnetworks (in `outputdir/subnets/`), the consensus network (`outputdir/finalNet.txt`), and log information for the subnetworks (in `outputdir/log/`) and the overall `ARACNe3` runtime (`outputdir/finalLog.txt`).  The subnetworks subdirectory will contain a file for each subnetwork (`-x #`) requested, automatically named `output_subnet#.txt`. Each file shows every significant interaction in three columns:
 1.	The regulator.
 2.	The target.
 3.	The APMI (Mutual Information estimated by Adaptive Partitioning) of the pair, based on the subsampled gene expression profiles of the regulator and target.
