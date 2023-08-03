@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.1...3.15)
 
-project(MINDy3	VERSION 1.0.0
+project(ARACNe3	VERSION 1.0.0
 		DESCRIPTION "Modulator Inference by Network Dynamics 3"
 		LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-include(cmake/Utils.cmake)
-list(APPEND CMAKE_MODULE_PATH "${MINDy3_SOURCE_DIR}/cmake/modules")
 
 if(${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
@@ -31,9 +28,6 @@ add_subdirectory(deps/boost EXCLUDE_FROM_ALL)
 
 
 ##### OPTIONS #####
-
-## User options
-option(USE_OPENMP "Build with OpenMP support." ON)
 
 ## Dev
 option(ENABLE_ALL_WARNINGS "Enable all compiler warnings. Only effective for
