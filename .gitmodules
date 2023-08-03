@@ -1,0 +1,6 @@
+[submodule "deps/gtest"]
+	path = deps/gtest
+	url = https://github.com/google/googletest.git
+[submodule "deps/boost"]
+	path = deps/boost
+	url = https://github.com/boostorg/boost.git
