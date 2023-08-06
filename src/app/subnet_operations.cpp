@@ -12,8 +12,8 @@ float FPR_estimate = 1.5E-4f;
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_subsample;
 extern uint16_t tot_num_regulators, defined_regulators;
-extern genemap global_gm;
-extern genemap_r global_gm_r; 
+extern gene_to_floats global_gm;
+extern gene_to_shorts global_gm_r; 
 extern uint16_t num_subnets;
 
 float consolidate_scc(const std::vector<uint16_t>& x_ranked, const std::vector<uint16_t>& y_ranked) {
@@ -37,7 +37,7 @@ double right_tail_binomial_p(const uint16_t& num_occurrences) {
 /*
  Generates an ARACNe3 subnet (called from main).   
 */
-reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t subnet_num, const bool prune_alpha, const std::string& method, const float alpha, const bool prune_MaxEnt, const std::string& output_dir, const std::string& subnets_dir, const std::string& log_dir, const uint16_t nthreads) {
+gene_to_edge_tars ARACNe3_subnet(gene_to_floats subnet_matrix, const uint16_t subnet_num, const bool prune_alpha, const std::string& method, const float alpha, const bool prune_MaxEnt, const std::string& output_dir, const std::string& subnets_dir, const std::string& log_dir, const uint16_t nthreads) {
 	std::ofstream log_output(log_dir + "log_subnet" + std::to_string(subnet_num) + ".txt");
 	std::time_t t = std::time(nullptr);
 	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl << std::endl;
@@ -65,11 +65,11 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t subnet_num, const b
 #pragma omp parallel for firstprivate(subnet_matrix) num_threads(nthreads)
 	for (int reg = 0; reg < tot_num_regulators; ++reg) {
 		if (global_gm.find(reg) != global_gm.end()) {
-			network_vec[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
+			network_vec[reg] = gene_to_floatsAPMI(subnet_matrix, reg, 7.815, 4);
 			size_of_network += network_vec[reg].size();
 		}
 	}
-	reg_web network;
+	gene_to_edge_tars network;
 	network.reserve(tot_num_regulators);
 	for (gene_id reg = 0; reg < tot_num_regulators; ++reg)
 		if (global_gm.find(reg) != global_gm.end())
@@ -92,9 +92,9 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t subnet_num, const b
 	 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
 	 */
 	
-	std::pair<reg_web, map_map> pair = pruneAlpha(network, size_of_network);
+	std::pair<gene_to_edge_tars, gene_to_gene_to_float> pair = pruneAlpha(network, size_of_network);
 	network = pair.first;
-	map_map& tftfNetwork = pair.second;
+	gene_to_gene_to_float& tftfNetwork = pair.second;
 	
 	//-------time module-------
 	log_output << watch1.getSeconds() << std::endl;
@@ -154,12 +154,12 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t subnet_num, const b
 }
 
 
-std::vector<consolidated_df_row> consolidate_subnets_vec(std::vector<reg_web> &subnets) {
+std::vector<consolidated_df_row> consolidate_subnets_vec(std::vector<gene_to_edge_tars> &subnets) {
 	std::vector<consolidated_df_row> final_df;
 	const auto tot_poss_edgs = defined_regulators*(global_gm.size()-1);
 	final_df.reserve(tot_poss_edgs);
 	
-	std::vector<map_map> subnets_mpmp;
+	std::vector<gene_to_gene_to_float> subnets_mpmp;
 	for (uint16_t i = 0; i < subnets.size(); ++i)
 		subnets_mpmp.emplace_back(regweb_to_mapmap(subnets[i]));
 	

@@ -29,9 +29,9 @@ void readRegList(std::string &filename);
  */
 void readExpMatrix(std::string &filename);
 
-genemap sampleFromGlobalGenemap();
+gene_to_floats sampleFromGlobalGenemap();
 
-void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir, const std::string &output_suffix);
+void writeNetworkRegTarMI(const gene_to_edge_tars &network, const std::string &output_dir, const std::string &output_suffix);
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df_row>& final_df, std::string filename);
 
@@ -41,5 +41,5 @@ public:
 		return "TRIED TO CONSOLIDATE TOO MANY NETWORKS.  LOG/SUBNET FILE DOES NOT EXIST UP TO SPECIFIED NUMBER OF REQUESTED SUBNETS TO CONSOLIDATE.";
 	}
 };
-reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint16_t subnet_num);
+gene_to_edge_tars readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint16_t subnet_num);
 

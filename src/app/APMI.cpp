@@ -144,19 +144,19 @@ float APMI(const std::vector<float>& vec_x, const std::vector<float>& vec_y,
 }
 
 
-/* Computes the APMI between a regulator and all targets in the genemap.  This
+/* Computes the APMI between a regulator and all targets in the gene_to_floats.  This
  * function is intended to reduce the number of times the regulator vector is
  * passed in memory, with the advance knowledge that we need to use the same
  * vec_x many times.  It assumes a particular usage case in the ARACNe3.cpp main
  * function.  
  *
- * Inputs are the entire genemap of gene->expression, the regulator name, and
+ * Inputs are the entire gene_to_floats of gene->expression, the regulator name, and
  * then the q_thresh and size_thresh same as above
  * 
  * Returns a vector of 'edge' structs
  * corresponding to each edge and their MI.
  */
-std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id& reg,
+std::vector<edge_tar> gene_to_floatsAPMI(gene_to_floats &matrix, const gene_id& reg,
 		    const float& q_thresh,
 		    const uint16_t& size_thresh) {
 	// set file static variables
@@ -188,7 +188,7 @@ std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id& reg,
 	
 /*
  * Computes the MI for a reference vector ref and a vector of vector targets.
- * Similar to genemapAPMI, but faster run time and used when creating edge
+ * Similar to gene_to_floatsAPMI, but faster run time and used when creating edge
  * structs is not necessary, i.e. when computing 1 million null MI values.
  *
  * ref is the vector that will be referenced for all MI calculations

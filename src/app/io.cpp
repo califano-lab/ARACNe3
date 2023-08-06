@@ -12,8 +12,8 @@ static std::vector<std::string> decompression_map;
 uint16_t tot_num_samps = 0U;
 uint16_t tot_num_subsample = 0U;
 uint16_t tot_num_regulators, defined_regulators = 0U;
-genemap global_gm;
-genemap_r global_gm_r;
+gene_to_floats global_gm;
+gene_to_shorts global_gm_r;
 
 extern uint32_t global_seed;
 extern uint16_t num_subnets;
@@ -112,16 +112,16 @@ void readRegList(std::string &filename) {
 }
 
 /*
- Create a subsampled genemap.  Requires that global_gm and tot_num_subsample are set by readExpMat(), which must occur on program launch anyway
+ Create a subsampled gene_to_floats.  Requires that global_gm and tot_num_subsample are set by readExpMat(), which must occur on program launch anyway
  */
-genemap sampleFromGlobalGenemap() {
+gene_to_floats sampleFromGlobalGenemap() {
 	static std::mt19937 rand{global_seed++};
 	std::vector<uint16_t> idxs(tot_num_samps);
 	std::iota(idxs.begin(), idxs.end(), 0U);
 	std::vector<uint16_t> fold(tot_num_subsample);
 	std::sample(idxs.begin(), idxs.end(), fold.begin(), tot_num_subsample, rand);
 	
-	genemap subsample_gm;
+	gene_to_floats subsample_gm;
 	subsample_gm.reserve(global_gm.size());	
 	for (const auto &[gene, expr_vec] : global_gm) {
 		subsample_gm[gene] = std::vector<float>(tot_num_subsample, 0.0f);
@@ -137,13 +137,13 @@ genemap sampleFromGlobalGenemap() {
 	return subsample_gm;
 }
 
-/* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the genemap for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
+/* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the gene_to_floats for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
  */
 void readExpMatrix(std::string &filename) {
 	makeUnixDirectoryNameUniversal(filename);
 	std::fstream f{filename};
-	genemap gm;
-	genemap_r gm_r; //to store ranks of gexp values
+	gene_to_floats gm;
+	gene_to_shorts gm_r; //to store ranks of gexp values
 	if (!f.is_open()) {
 		std::cerr << "error: file open failed " << filename << "." << std::endl;
 		std::exit(2);
@@ -243,9 +243,9 @@ void readExpMatrix(std::string &filename) {
 }
 
 /*
- Function that prints the Regulator, Target, and MI to the output_dir given the output_suffix.  Does not print to the console.  The data structure input is a reg_web, which is defined in "ARACNe3.hpp".
+ Function that prints the Regulator, Target, and MI to the output_dir given the output_suffix.  Does not print to the console.  The data structure input is a gene_to_edge_tars, which is defined in "ARACNe3.hpp".
  */
-void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir, const std::string &output_suffix) {
+void writeNetworkRegTarMI(const gene_to_edge_tars &network, const std::string &output_dir, const std::string &output_suffix) {
 	const std::string filename = output_dir + "output_" + output_suffix + ".txt";
 	std::ofstream ofs{filename};
 	if (!ofs) {
@@ -296,7 +296,7 @@ void addToCompressionVecs(const std::string &gene) {
 /*
  Reads a subnet file and then updates the FPR_estimates vector defined in "subnet_operations.cpp"
  */
-reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint16_t subnet_num) {
+gene_to_edge_tars readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint16_t subnet_num) {
 	std::string subnet_filename = output_dir + "subnets/output_subnet" + std::to_string(subnet_num) + ".txt";
 	std::string log_filename = output_dir + "log/log_subnet" + std::to_string(subnet_num) + ".txt";
 	
@@ -317,7 +317,7 @@ reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint1
 	getline(subnet_ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
-	reg_web subnet;
+	gene_to_edge_tars subnet;
 	while(std::getline(subnet_ifs, line, '\n')) {
 		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 			line.pop_back();

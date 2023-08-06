@@ -65,31 +65,27 @@ typedef struct edge_tar {
 	}
 } edge_tar;
 
-/*
- * Maps gene identifiers to gene expression matrices
- */
-typedef std::unordered_map<gene_id, std::vector<float>> genemap;
+// Maps gene to regulon
+typedef std::unordered_map<gene_id, std::unordered_set<gene_id>>
+    gene_to_geneset;
+typedef std::unordered_map<gene_id, std::vector<edge_tar>> gene_to_edge_tars;
 
-/*
- Same as genemap, except mapped to ranked vectors
- */
-typedef std::unordered_map<gene_id, std::vector<uint16_t>> genemap_r;
+// Used for gexp and ranked gexp matrix storage
+typedef std::unordered_map<gene_id, std::vector<float>> gene_to_floats;
+typedef std::unordered_map<gene_id, std::vector<uint16_t>> gene_to_shorts;
 
-/*
- * The regulator and target list is represented by this data type, an unordered
- * hash map between regulator names (string or number in uncompressed/compressed
- * implementation) as well as a vector of "ball-on-stick" structs, or all the
- * targets and their MIs.
- */
-typedef std::unordered_map<gene_id, std::vector<edge_tar>> reg_web;
-typedef std::unordered_map<gene_id, std::unordered_map<gene_id, float>> map_map;
+// used for edge strength
+typedef std::unordered_map<gene_id, std::unordered_map<gene_id, float>>
+    gene_to_gene_to_float;
+typedef std::unordered_map<gene_id, std::unordered_map<gene_id, float>>
+    gene_to_gene_to_float;
 
 //--------------------- APMI.cpp	 		-----------------------
 
 float APMI(const std::vector<float>& vec_x, const std::vector<float>& vec_y, const float& q_thresh = 7.815, 
 		const uint16_t& size_thresh = 4);
 
-std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id& identifier, const float& q_thresh = 7.815, const uint16_t& size_thresh = 4);
+std::vector<edge_tar> gene_to_floatsAPMI(gene_to_floats &matrix, const gene_id& identifier, const float& q_thresh = 7.815, const uint16_t& size_thresh = 4);
 
 const std::vector<float> permuteAPMI(const std::vector<float> &ref_vec,
 		const std::vector<std::vector<float>> &target_vec, const float &q_thresh = 7.815,
@@ -108,17 +104,17 @@ const std::vector<float> getMIPVals(const std::vector<float>& mis, const float& 
 
 
 //--------------------- AlphaPruning.cpp	 	-----------------------
-std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_network);
+std::pair<gene_to_edge_tars, gene_to_gene_to_float> pruneAlpha(gene_to_edge_tars &network, uint32_t& size_of_network);
 
 //--------------------- MaxEntPruning.cpp	 	-----------------------
-reg_web pruneMaxEnt(reg_web &network, map_map tftfNetwork, uint32_t &size_of_network);
+gene_to_edge_tars pruneMaxEnt(gene_to_edge_tars &network, gene_to_gene_to_float tftfNetwork, uint32_t &size_of_network);
 
 //--------------------- RegWebFns.cpp	 		-----------------------
-reg_web sort_edge_tars(reg_web &regweb);	
+gene_to_edge_tars sort_edge_tars(gene_to_edge_tars &regweb);	
 
 /*
  Used for MaxEnt pruning to copy ARACNe-AP; we should probably either overhaul our own data structure or find a way to use our own, as any conversion is essentially a memory and runtime cost.
  */
-std::unordered_map<gene_id, std::unordered_map<gene_id, float>> regweb_to_mapmap(reg_web &network);
+std::unordered_map<gene_id, std::unordered_map<gene_id, float>> regweb_to_mapmap(gene_to_edge_tars &network);
 
 //--------------------- ARACNe3.cpp	 		-----------------------

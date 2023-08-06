@@ -4,14 +4,14 @@ extern uint16_t tot_num_regulators;
 extern bool prune_MaxEnt;
 extern float alpha;
 extern std::string method;
-extern genemap global_gm;
+extern gene_to_floats global_gm;
 extern uint32_t num_null_marginals;
 
 
 /*
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if method = FDR, or FWER if method = FWER..
  */
-std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_network) {
+std::pair<gene_to_edge_tars, gene_to_gene_to_float> pruneAlpha(gene_to_edge_tars &network, uint32_t& size_of_network) {
 
 	/* A vector that describes each regulator-mi-target interaction must be initialized for sorting-based pruning */
 	std::vector<std::pair<gene_id, edge_tar>> reg_edge_tar;
@@ -70,8 +70,8 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 	/*
 	 Rebuild the network.  We also fill out a data structure for the regulator-regulator interactions, so we can quickly identify regulators that regulate each other.  Rebuilding the network is inefficient due to the push_back.
 	 */
-	reg_web pruned_net;
-	map_map tftfNetwork;
+	gene_to_edge_tars pruned_net;
+	gene_to_gene_to_float tftfNetwork;
 	pruned_net.reserve(tot_num_regulators);
 	for (auto &pair : pruned_vec) {
 		pruned_net[pair.first].push_back(pair.second);
