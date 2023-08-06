@@ -46,6 +46,9 @@ if(USE_SANITIZER)
 	  enable_sanitizers("${ENABLED_SANITIZERS}")
 endif(USE_SANITIZER)
 
+## OpenMP
+option(USE_OPENMP "Compile with multithreading support" ON)
+
 if(USE_OPENMP)
 	include(FindOpenMP)
 	if(OpenMP_CXX_FOUND)
@@ -60,11 +63,12 @@ endif()
 
 add_subdirectory(src)
 
+
 ##### TESTING #####
 
-# 'googletest' is the root directory of the Google Test source
-# 'googletest' must be excluded from all build configurations to prevent double linking
-add_subdirectory(deps/googletest EXCLUDE_FROM_ALL)
+# 'gtest' is the root directory of the Google Test source
+# 'gtest' must be excluded from all build configurations to prevent double linking
+add_subdirectory(deps/gtest EXCLUDE_FROM_ALL)
 
 # Enable testing capabilities
 enable_testing()
