@@ -1,4 +1,6 @@
 #include "ARACNe3.hpp"
+#include "cmdline_parser.hpp"
+#include "stopwatch.hpp"
 
 /*
  These variables are tuned according to user preferences.  Some of these the user doesn't choose, such as the cached_dir, which is always the working directory of the ARACNe3 script.
@@ -38,26 +40,10 @@ extern float FPR_estimate;
 extern std::vector<float> FPR_estimates;
 
 /*
- Convenient function for timing parts of ARACNe3.  It's only used to time from the pipeline function, so it's included in ARACNe3.cpp.
- */
-static void sinceLast(decltype(std::chrono::high_resolution_clock::now()) &last, std::ostream &ostream) {
-	auto cur = std::chrono::high_resolution_clock::now();
-	ostream << std::chrono::duration_cast<std::chrono::seconds>(cur-last).count() << "s" << std::endl;
-	last = cur;
-}
-
-/*
  This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
  */
 reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
-	auto last = std::chrono::high_resolution_clock::now();
-	
-	// set the individual subnet log file
 	std::ofstream log_output(log_dir + "log_subnet" + std::to_string(subnet_num) + ".txt");
-	
-	/*
-	 Log file header
-	 */
 	std::time_t t = std::time(nullptr);
 	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl << std::endl;
 	log_output << "Subnetwork #: " + std::to_string(subnet_num) << std::endl;
@@ -71,12 +57,12 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	log_output << "MaxEnt Pruning: " + std::to_string(prune_MaxEnt) << std::endl;
 	log_output << std::endl << "-----------Begin Network Generation-----------" << std::endl;
 	
-	/*
-	 Begin Network computation
-	 */
+  // begin subnet computation
+
 	//-------time module-------
-	log_output << std::endl << "Raw network computation time:" << std::endl;
-	last = std::chrono::high_resolution_clock::now();
+  Watch watch1;
+  log_output << "\nRaw network computation time: ";
+  watch1.reset();
 	//-------------------------
 	
 	uint32_t size_of_network = 0;
@@ -96,15 +82,15 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	std::vector<std::vector<edge_tar>>().swap(network_vec);
 	
 	//-------time module-------
-	sinceLast(last, log_output);
+	log_output << watch1.getSeconds() << std::endl;
 	log_output << "Size of network: " << size_of_network << " edges." << std::endl;
 	//-------------------------
 	
 	if (!prune_alpha) alpha = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
 	
 	//-------time module-------
-	log_output << std::endl << "Alpha/threshold pruning time (" + method + "): " << std::endl;
-	last = std::chrono::high_resolution_clock::now();
+  log_output << "\nThreshold pruning time (" + method + "): ";
+  watch1.reset();
 	//-------------------------
 	
 	auto size_prev = size_of_network;
@@ -118,28 +104,25 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	map_map& tftfNetwork = pair.second;
 	
 	//-------time module-------
-	sinceLast(last, log_output);
+	log_output << watch1.getSeconds() << std::endl;
 	log_output << "Edges removed: " << size_prev - size_of_network << " edges." << std::endl;
 	log_output << "Size of network: " << size_of_network << " edges." << std::endl;
 	//-------------------------
 	
-	/*
-	 Save for binomial theta
-	 */
+  // save for binomial distribution parameter (theta)
 	uint32_t num_edges_after_threshold_pruning = size_of_network; 
 	
 	if (prune_MaxEnt) {
 		//-------time module-------
-		log_output << std::endl << "MaxEnt pruning time:" << std::endl;
-		last = std::chrono::high_resolution_clock::now();
+    log_output << "\nMaxEnt pruning time: ";
+    watch1.reset();
 		//-------------------------
 
 		size_prev = size_of_network;
-		
 		network = pruneMaxEnt(network, tftfNetwork, size_of_network);
 		
 		//-------time module-------
-		sinceLast(last, log_output);
+		log_output << watch1.getSeconds() << std::endl;
 		log_output << "Edges removed: " << size_prev - size_of_network << " edges." << std::endl;
 		log_output << "Size of network: " << size_of_network << " edges." << std::endl;
 		//-------------------------
@@ -161,37 +144,21 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	}
 	
 	//-------time module-------
-	log_output << std::endl << "Printing network in directory \"" + makeUnixDirectoryNameUniversal(output_dir) + "\"....." << std::endl;
-	last = std::chrono::high_resolution_clock::now();
+  log_output << "\nPrinting network in directory \"" + makeUnixDirectoryNameUniversal(output_dir) + "\".....";
+  watch1.reset();
 	//-------------------------
 	
 	// writes the individual subnet output
 	writeNetworkRegTarMI(network, subnets_dir, "subnet" + std::to_string(subnet_num));
 	
 	//-------time module-------
-	sinceLast(last, log_output);
+	log_output << watch1.getSeconds() << std::endl;
 	//-------------------------
 	
 	std::cout << "... subnetwork " + std::to_string(subnet_num) + " completed = " + std::to_string(size_of_network) + " edges returned ..." << std::endl;
 	
 	return network;
 }
-
-//--------------------cmd line parser------------------------
-
-char* getCmdOption(char **begin, char **end, const std::string &option) {
-	char **itr = std::find(begin, end, option);
-	if (itr != end && ++itr != end)
-		return *itr;
-	return 0;
-}
-
-bool cmdOptionExists(char **begin, char **end, const std::string &option) {
-	return std::find(begin, end, option) != end;
-}
-
-//-----------------------------------------------------------
-
 
 /*
  Main function is the command line executable; this primes the global variables and parses the command line.  It will also return usage notes if the user incorrectly calls ./ARACNe3.
@@ -201,13 +168,22 @@ bool cmdOptionExists(char **begin, char **end, const std::string &option) {
  */
 int main(int argc, char *argv[]) {
 	auto last = std::chrono::high_resolution_clock::now();
-	
-	if (cmdOptionExists(argv, argv+argc, "-h") || cmdOptionExists(argv, argv+argc, "--help") || !cmdOptionExists(argv, argv+argc, "-e") || !cmdOptionExists(argv, argv+argc, "-r") || !cmdOptionExists(argv, argv+argc, "-o")) {
-		std::cout << "usage: " + ((std::string) argv[0]) + makeUnixDirectoryNameUniversal(" -e path/to/matrix.txt -r path/to/regulators.txt -o path/to/output/directory") << std::endl;
-		return 1;
-	}
-	
-	//--------------------cmd line parsing------------------------
+
+        if (cmdOptionExists(argv, argv + argc, "-h") ||
+            cmdOptionExists(argv, argv + argc, "--help") ||
+            !cmdOptionExists(argv, argv + argc, "-e") ||
+            !cmdOptionExists(argv, argv + argc, "-r") ||
+            !cmdOptionExists(argv, argv + argc, "-o")) {
+          std::cout
+              << "usage: " + ((std::string)argv[0]) +
+                     makeUnixDirectoryNameUniversal(
+                         " -e path/to/matrix.txt -r path/to/regulators.txt -o "
+                         "path/to/output/directory")
+              << std::endl;
+          return EXIT_FAILURE;
+        }
+
+        //--------------------cmd line parsing------------------------
 	
 	std::string exp_file = (std::string) getCmdOption(argv, argv+argc, "-e");
 	std::string reg_file = (std::string) getCmdOption(argv, argv+argc, "-r");
@@ -286,10 +262,6 @@ int main(int argc, char *argv[]) {
 	subnets_dir = output_dir + "subnets/";
 	makeDir(subnets_dir);
 	
-	//-------time module-------
-	last = std::chrono::high_resolution_clock::now();
-	//-------------------------
-
 	std::ofstream log_output(output_dir + "finalLog.txt");
 	
 	// print the initial command to the log output
@@ -304,31 +276,31 @@ int main(int argc, char *argv[]) {
 	std::cout << "Beginning ARACNe3 instance.  See logs and progress reports in \"" + makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"." << std::endl;
 	log_output << "Beginning ARACNe3 instance..." << std::endl;
 	
+  log_output << "\nGene expression matrix & regulators list read time: ";
+
 	readRegList(reg_file);
-	
 	readExpMatrix(exp_file);
 	
 	//-------time module-------
-	log_output << std::endl << "Gene expression matrix & regulators list read time:" << std::endl;
-	sinceLast(last, log_output);
-	//-------------------------
-	
-	//-------time module-------
-	log_output << std::endl << "Mutual Information null model calculation time:" << std::endl;
-	last = std::chrono::high_resolution_clock::now();
+  Watch watch1;
+	log_output << watch1.getSeconds() << std::endl;
+  log_output << "\nMutual Information null model calculation time: ";
+  watch1.reset();
 	//-------------------------
 	
 	initNullMIs(tot_num_subsample);
 	
 	//-------time module-------
-	sinceLast(last, log_output);
+	log_output << watch1.getSeconds() << std::endl;
 	//-------------------------
 	
 	// Must exist regardless of whether we skip to consolidation
 	std::vector<reg_web> subnets;
 	if(!go_to_consolidate) {
+
 		//-------time module-------
-		log_output << std::endl << "Creating subnetwork(s) time: " << std::endl;
+		log_output << "\nCreating subnetwork(s) time: ";
+    watch1.reset();
 		//-------------------------
 		
 		if (adaptive) {
@@ -368,12 +340,15 @@ int main(int argc, char *argv[]) {
 		}
 		
 		//-------time module-------
-		sinceLast(last, log_output);
+    log_output << watch1.getSeconds() << std::endl;
 		//-------------------------
+    
 		log_output << "Total subnetworks generated: " + std::to_string(num_subnets) << std::endl;
 	} else if (go_to_consolidate) {
+
 		//-------time module-------
-		log_output << std::endl << "Reading subnetwork(s) time: " << std::endl;
+		log_output << "\nReading subnetwork(s) time: ";
+    watch1.reset();
 		//-------------------------
 		
 		for (uint16_t subnet_num = 1; subnet_num <= num_subnets_to_consolidate; ++subnet_num) {
@@ -387,8 +362,9 @@ int main(int argc, char *argv[]) {
 		}
 		
 		//-------time module-------
-		sinceLast(last, log_output);
+		log_output << watch1.getSeconds() << std::endl;
 		//-------------------------
+
 		log_output << "Total subnets read: " + std::to_string(num_subnets) << std::endl;
 	}
 	
@@ -397,40 +373,43 @@ int main(int argc, char *argv[]) {
 	
 	if (!do_not_consolidate) {	
 		//-------time module-------
-		log_output << std::endl << "Consolidating subnetwork(s) time: " << std::endl;
+		log_output << "\nConsolidating subnetwork(s) time: ";
+    watch1.reset();
 		//-------------------------
 		
 		std::vector<consolidated_df> final_df = consolidate_subnets_vec(subnets);
 		
 		//-------time module-------
-		sinceLast(last, log_output);
-		//-------------------------
-		
-		//-------time module-------
-		log_output << std::endl << "Writing final network..." << std::endl;
+    log_output << watch1.getSeconds() << std::endl;
+		log_output << "\nWriting final network..." << std::endl;
 		//-------------------------
 		
 		writeConsolidatedNetwork(final_df, output_dir + "finalNet_" + std::to_string(num_subnets) + "subnets.txt");
 		
 		/* Now that we know how many subnets, we can rename finalLog to include that. */
 		std::string final_log_newname = "finalLog_" + std::to_string(num_subnets) + "subnets-consolidate.txt";
+
 		//-------time module-------
 		log_output << std::endl << "Renaming \"finalLog.txt\" to \"" + final_log_newname + "\"..." << std::endl;
 		std::cout << std::endl << "Renaming \"finalLog.txt\" to \"" + final_log_newname + "\"..." << std::endl;
 		//-------------------------
+    
 		std::filesystem::rename(output_dir + "finalLog.txt", output_dir  + final_log_newname);
 		
 	} else if (do_not_consolidate) {
+
 		//-------time module-------
-		log_output << std::endl << "No consolidation requested." << std::endl;
+		log_output << "\nNo consolidation requested." << std::endl;
 		//-------------------------
 		
 		/* Now that we know how many subnets, we can rename finalLog to include that. */
 		std::string final_log_newname = "finalLog_" + std::to_string(num_subnets) + "subnets-noconsolidate.txt";
+
 		//-------time module-------
 		log_output << std::endl << "Renaming \"finalLog.txt\" to \"" + final_log_newname + "\"..." << std::endl;
 		std::cout << std::endl << "Renaming \"finalLog.txt\" to \"" + final_log_newname + "\"..." << std::endl;
 		//-------------------------
+
 		std::filesystem::rename(output_dir + "finalLog.txt", output_dir  + final_log_newname);
 	}
 	
@@ -456,5 +435,5 @@ SUCCESS!
 		std::cout << success_A3 << std::endl;
 		log_output << success_A3 << std::endl;
 	
-	return 0;
+	return EXIT_SUCCESS;
 }
