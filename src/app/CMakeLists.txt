@@ -13,7 +13,7 @@ set(SOURCES
 	NullModel.cpp
 	AlphaPruning.cpp
 	MaxEntPruning.cpp
-	Consolidator.cpp
+	subnet_operations.cpp
 )
 
 # Name of executable & target, source file list (h files ignored)

@@ -295,7 +295,7 @@ void addToCompressionVecs(const std::string &gene) {
 }
 
 /*
- Reads a subnet file and then updates the FPR_estimates vector defined in "Consolidator.cpp"
+ Reads a subnet file and then updates the FPR_estimates vector defined in "subnet_operations.cpp"
  */
 reg_web readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint16_t subnet_num) {
 	std::string subnet_filename = output_dir + "subnets/output_subnet" + std::to_string(subnet_num) + ".txt";

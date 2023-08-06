@@ -161,7 +161,7 @@ reg_web sort_edge_tars(reg_web &regweb);
  Used for MaxEnt pruning to copy ARACNe-AP; we should probably either overhaul our own data structure or find a way to use our own, as any conversion is essentially a memory and runtime cost.
  */
 std::unordered_map<gene_id, std::unordered_map<gene_id, float>> regweb_to_mapmap(reg_web &network);
-//--------------------- Consolidator.cpp	 	-----------------------
+//--------------------- subnet_operations.cpp	 	-----------------------
 std::vector<consolidated_df> consolidate_subnets_vec(std::vector<reg_web> &subnets);
 
 
