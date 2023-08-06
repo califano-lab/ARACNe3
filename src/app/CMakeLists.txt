@@ -8,7 +8,7 @@ set(SOURCES
 	cmdline_parser.cpp
 	stopwatch.cpp
 	RegWebFns.cpp
-	IO.cpp
+	io.cpp
 	APMI.cpp
 	NullModel.cpp
 	AlphaPruning.cpp
