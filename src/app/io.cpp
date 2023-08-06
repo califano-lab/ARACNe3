@@ -228,7 +228,7 @@ void readExpMatrix(std::string &filename) {
 	}
 	
 	// now we must determine how many regulators are actually defined in the expression profile
-	for (gene_id reg = 0; reg < tot_num_regulators; ++reg)
+	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
 		if (gm.find(reg) != global_gm.end())
 			++defined_regulators;
 		else
