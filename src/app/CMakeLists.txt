@@ -5,6 +5,8 @@ include_directories(${OpenMP_CXX_INCLUDE_DIRS})
 # Set the source files for ARACNe3
 set(SOURCES
 	ARACNe3.cpp 
+	cmdline_parser.cpp
+	stopwatch.cpp
 	RegWebFns.cpp
 	IO.cpp
 	APMI.cpp
