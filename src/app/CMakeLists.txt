@@ -5,9 +5,13 @@ include_directories(${OpenMP_CXX_INCLUDE_DIRS})
 # Set the source files for ARACNe3
 set(SOURCES
 	ARACNe3.cpp 
-	algorithms.cpp 
-	io.cpp
-	apcmi_nullmodel.cpp
+	RegWebFns.cpp
+	IO.cpp
+	APMI.cpp
+	NullModel.cpp
+	AlphaPruning.cpp
+	MaxEntPruning.cpp
+	Consolidator.cpp
 )
 
 # Name of executable & target, source file list (h files ignored)
@@ -37,6 +41,7 @@ if(UNIX AND NOT APPLE)
   target_link_libraries(ARACNe3_app PRIVATE stdc++fs)
 endif()
 
+# For testing suite
 add_library(ARACNe3_lib ${SOURCES})
 
 target_include_directories(ARACNe3_lib
