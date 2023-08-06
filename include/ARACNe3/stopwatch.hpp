@@ -9,8 +9,8 @@
 class Watch {
 public:
   Watch();
-  void setWatch();
-  void printWatch(std::ostream &ofs, const std::string message = "");
+  void reset();
+  std::string getSeconds();
 
 private:
   std::chrono::time_point<std::chrono::high_resolution_clock> zero;

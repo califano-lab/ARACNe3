@@ -2,11 +2,9 @@
 
 Watch::Watch() : zero(std::chrono::high_resolution_clock::now()) {}
 
-void Watch::setWatch() { zero = std::chrono::high_resolution_clock::now(); }
+void Watch::reset() { zero = std::chrono::high_resolution_clock::now(); }
 
-void Watch::printWatch(std::ostream &ofs, const std::string message) {
+std::string Watch::getSeconds() {
   auto cur = std::chrono::high_resolution_clock::now();
-  ofs << message;
-  ofs << std::chrono::duration_cast<std::chrono::seconds>(cur - zero).count()
-      << "s" << std::endl;
+  return std::to_string(std::chrono::duration_cast<std::chrono::seconds>(cur - zero).count()) + "s";
 }
