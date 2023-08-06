@@ -1,6 +1,7 @@
 #include "ARACNe3.hpp"
 #include "cmdline_parser.hpp"
 #include "stopwatch.hpp"
+#include "subnet_operations.hpp"
 
 /*
  These variables are tuned according to user preferences.  Some of these the user doesn't choose, such as the cached_dir, which is always the working directory of the ARACNe3 script.
@@ -377,7 +378,7 @@ int main(int argc, char *argv[]) {
     watch1.reset();
 		//-------------------------
 		
-		std::vector<consolidated_df> final_df = consolidate_subnets_vec(subnets);
+		std::vector<consolidated_df_row> final_df = consolidate_subnets_vec(subnets);
 		
 		//-------time module-------
     log_output << watch1.getSeconds() << std::endl;

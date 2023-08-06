@@ -33,8 +33,8 @@ double right_tail_binomial_p(const uint16_t& num_occurrences) {
 	return p;
 }
 
-std::vector<consolidated_df> consolidate_subnets_vec(std::vector<reg_web> &subnets) {
-	std::vector<consolidated_df> final_df;
+std::vector<consolidated_df_row> consolidate_subnets_vec(std::vector<reg_web> &subnets) {
+	std::vector<consolidated_df_row> final_df;
 	const auto tot_poss_edgs = defined_regulators*(global_gm.size()-1);
 	final_df.reserve(tot_poss_edgs);
 	

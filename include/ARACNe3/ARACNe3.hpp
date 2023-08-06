@@ -65,15 +65,15 @@ typedef struct edge_tar{
 	}
 } edge_tar;
 
-typedef struct consolidated_df {
+typedef struct consolidated_df_row {
 	const gene_id regulator;
 	const gene_id target;
 	const float final_mi;
 	const float final_scc;
 	const uint16_t num_subnets_incident;
 	const double final_p;
-	consolidated_df(const gene_id& r, const gene_id& t, const float& mi, const float& scc, const uint16_t& n, const double& p) : regulator(r), target(t), num_subnets_incident(n), final_mi(mi), final_scc(scc), final_p(p) {};
-} consolidated_df;
+	consolidated_df_row(const gene_id& r, const gene_id& t, const float& mi, const float& scc, const uint16_t& n, const double& p) : regulator(r), target(t), num_subnets_incident(n), final_mi(mi), final_scc(scc), final_p(p) {};
+} consolidated_df_row;
 
 /*
  * The regulator and target list is represented by this data type, an unordered
@@ -115,7 +115,7 @@ genemap sampleFromGlobalGenemap();
 
 void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const std::string &output_suffix);
 
-void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string filename);
+void writeConsolidatedNetwork(const std::vector<consolidated_df_row>& final_df, std::string filename);
 
 class TooManySubnetsRequested : public std::exception {	
 public:
@@ -161,8 +161,5 @@ reg_web sort_edge_tars(reg_web &regweb);
  Used for MaxEnt pruning to copy ARACNe-AP; we should probably either overhaul our own data structure or find a way to use our own, as any conversion is essentially a memory and runtime cost.
  */
 std::unordered_map<gene_id, std::unordered_map<gene_id, float>> regweb_to_mapmap(reg_web &network);
-//--------------------- subnet_operations.cpp	 	-----------------------
-std::vector<consolidated_df> consolidate_subnets_vec(std::vector<reg_web> &subnets);
-
 
 //--------------------- ARACNe3.cpp	 		-----------------------

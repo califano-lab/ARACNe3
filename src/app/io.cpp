@@ -263,7 +263,7 @@ void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const
 	}
 }
 
-void writeConsolidatedNetwork(const std::vector<consolidated_df>& final_df, std::string filename) {
+void writeConsolidatedNetwork(const std::vector<consolidated_df_row>& final_df, std::string filename) {
 	makeUnixDirectoryNameUniversal(filename);
 	std::ofstream ofs{filename};
 	if (!ofs) {
