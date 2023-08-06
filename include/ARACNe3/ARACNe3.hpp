@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <string>
 #include <sstream>
@@ -17,8 +19,6 @@
 #include <regex>
 #include <iomanip>
 #include <omp.h>
-
-#pragma once
 
 #if defined __linux__ || defined __APPLE__
 const std::string hiddenfpre = ".";
@@ -41,7 +41,7 @@ typedef uint16_t gene_id;
  * The "ball on stick" data structure for edges in network.  Will be used with
  * dictionary so that a regulator can have a group of these associated.
  */
-typedef struct edge_tar{
+typedef struct edge_tar {
 	gene_id target;
 	float mi;
 	edge_tar(const gene_id &t, const float &mi) : target(t), mi(mi) {};
