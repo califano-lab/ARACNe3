@@ -14,10 +14,10 @@ extern uint32_t num_null_marginals;
 std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_network) {
 
 	/* A vector that describes each regulator-mi-target interaction must be initialized for sorting-based pruning */
-	std::vector<std::pair<gene_id_t, edge_tar>> reg_edge_tar;
+	std::vector<std::pair<gene_id, edge_tar>> reg_edge_tar;
 	reg_edge_tar.reserve(size_of_network);
 	
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+	for (gene_id reg = 0; reg < tot_num_regulators; ++reg)
 		if (global_gm.find(reg) != global_gm.end()) 
 			for (auto &et : network[reg]) 
 				reg_edge_tar.emplace_back(reg, et);
@@ -25,7 +25,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 	/*
 	 Sort using the Comparator as a Lambda function.  std::sort sends < to sort in ascending order, so we use > for descending order.
 	 */
-	std::sort(reg_edge_tar.begin(), reg_edge_tar.end(), [](const std::pair<gene_id_t, edge_tar> &ret1, const std::pair<gene_id_t, edge_tar> &ret2) -> bool {return ret1.second.mi > ret2.second.mi;});
+	std::sort(reg_edge_tar.begin(), reg_edge_tar.end(), [](const std::pair<gene_id, edge_tar> &ret1, const std::pair<gene_id, edge_tar> &ret2) -> bool {return ret1.second.mi > ret2.second.mi;});
 	
 	uint32_t argmax_k = 0;
 	uint32_t m = size_of_network;
@@ -62,7 +62,7 @@ std::pair<reg_web, map_map> pruneAlpha(reg_web &network, uint32_t& size_of_netwo
 	}
 	
 	// create the new vector that is a pruned version of original
-	std::vector<std::pair<gene_id_t, edge_tar>> pruned_vec(&reg_edge_tar[0], &reg_edge_tar[argmax_k]);
+	std::vector<std::pair<gene_id, edge_tar>> pruned_vec(&reg_edge_tar[0], &reg_edge_tar[argmax_k]);
 	
 	// submit new network size to global variable defined in ARACNe3.cpp
 	size_of_network = static_cast<uint32_t>(pruned_vec.size());

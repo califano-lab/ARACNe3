@@ -90,7 +90,7 @@ reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
 	}
 	reg_web network;
 	network.reserve(tot_num_regulators);
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+	for (gene_id reg = 0; reg < tot_num_regulators; ++reg)
 		if (global_gm.find(reg) != global_gm.end())
 			network[reg] = network_vec[reg];
 	std::vector<std::vector<edge_tar>>().swap(network_vec);
@@ -333,7 +333,7 @@ int main(int argc, char *argv[]) {
 		
 		if (adaptive) {
 			bool stoppingCriteriaMet = false;
-			std::unordered_map<gene_id_t, std::unordered_set<gene_id_t>> regulon_set;
+			std::unordered_map<gene_id, std::unordered_set<gene_id>> regulon_set;
 			for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) regulon_set[reg];
 			uint16_t i = 0U;
 			while (!stoppingCriteriaMet) {

@@ -156,7 +156,7 @@ float APMI(const std::vector<float>& vec_x, const std::vector<float>& vec_y,
  * Returns a vector of 'edge' structs
  * corresponding to each edge and their MI.
  */
-std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id_t& reg,
+std::vector<edge_tar> genemapAPMI(genemap &matrix, const gene_id& reg,
 		    const float& q_thresh,
 		    const uint16_t& size_thresh) {
 	// set file static variables

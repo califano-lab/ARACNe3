@@ -13,10 +13,10 @@ extern bool adaptive;
 reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_network) {
 	/* Since the same weakest edge may be identified multiple times, we use std::set to store the edges we know to remove, so that they are all removed at the end.  However, since the same set is being accessed by multiple threads at once, this creates clashing errors.  Hence, for now, each thread gets its own set in the vector below, which will be 'sifted' through by the master thread.
 	 */
-	std::vector<std::vector<std::set<gene_id_t>>> removedEdgesForThread(nthreads, std::vector<std::set<gene_id_t>>(tot_num_regulators));
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+	std::vector<std::vector<std::set<gene_id>>> removedEdgesForThread(nthreads, std::vector<std::set<gene_id>>(tot_num_regulators));
+	for (gene_id reg = 0; reg < tot_num_regulators; ++reg)
 		for (uint16_t th = 0; th < nthreads; ++th)
-			removedEdgesForThread[th][reg] = std::set<gene_id_t>(); // TODO: Can we remove this initialization entirely?
+			removedEdgesForThread[th][reg] = std::set<gene_id>(); // TODO: Can we remove this initialization entirely?
 	
 	/* Our 'network' is a hash map of vectors that contain the MI and target information.  This is good for several of our uses, but it is better to make a hash map of hashmaps for the MaxEnt pruning, as in ARACNe-AP.  This is because finding whether a pair of regulators share a target is O(1), as we just hash the targets in the regulator hashmap, as opposed to searching for the target which would be necessary in the 'reg_web' type.
 	 
@@ -29,13 +29,13 @@ reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_net
 	// We schedule the parallelization like this because we have a triangular matrix.  reg2 is always reg1+1, so the first block of regulators will have the largest groups to iterate over under standard scheduling.
 	for (int reg1 = 0; reg1 < tot_num_regulators; ++reg1) {
 		if (tftfNetwork.find(reg1) != tftfNetwork.end()) {
-			std::unordered_map<gene_id_t, float> &fin1 = finalNet[reg1];
-			std::unordered_map<gene_id_t, float> &tft1 = tftfNetwork[reg1]; 
-			std::set<gene_id_t> &rem1 = removedEdgesForThread[omp_get_thread_num()][reg1];
-			for (gene_id_t reg2 = reg1 + 1; reg2 < tot_num_regulators; ++reg2) {
+			std::unordered_map<gene_id, float> &fin1 = finalNet[reg1];
+			std::unordered_map<gene_id, float> &tft1 = tftfNetwork[reg1]; 
+			std::set<gene_id> &rem1 = removedEdgesForThread[omp_get_thread_num()][reg1];
+			for (gene_id reg2 = reg1 + 1; reg2 < tot_num_regulators; ++reg2) {
 				if (tft1.find(reg2) != tft1.end()) {
-					std::unordered_map<gene_id_t, float> &fin2 = finalNet[reg2];
-					std::set<gene_id_t> &rem2 = removedEdgesForThread[omp_get_thread_num()][reg2];
+					std::unordered_map<gene_id, float> &fin2 = finalNet[reg2];
+					std::set<gene_id> &rem2 = removedEdgesForThread[omp_get_thread_num()][reg2];
 					const float &tftfMI = tft1[reg2];
 					for(const auto &[target, v2] : fin2) {
 						if (fin1.find(target) != fin1.end()) {
@@ -57,8 +57,8 @@ reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_net
 	
 	/* This is currently how all the vectors of sets are consolidated.  It 'collapses' the thread dimension, though this is an inefficiency.
 	 */
-	std::vector<std::set<gene_id_t>> removedEdges(tot_num_regulators);
-	for (gene_id_t reg = 0; reg < tot_num_regulators; ++reg)
+	std::vector<std::set<gene_id>> removedEdges(tot_num_regulators);
+	for (gene_id reg = 0; reg < tot_num_regulators; ++reg)
 		for (uint16_t th = 0; th < nthreads; ++th)
 			for (const auto &tar : removedEdgesForThread[th][reg])
 				removedEdges[reg].insert(tar);
@@ -70,7 +70,7 @@ reg_web pruneMaxEnt(reg_web& network, map_map tftfNetwork, uint32_t &size_of_net
 	pruned_net.reserve(tot_num_regulators);
 	for (const auto &[reg, tarmap] : finalNet) {
 		pruned_net[reg].reserve(network[reg].size());
-		std::set<gene_id_t> &rem = removedEdges[reg];
+		std::set<gene_id> &rem = removedEdges[reg];
 		for (const auto &[tar, mi] : tarmap)
 			if (rem.find(tar) == rem.end())
 				pruned_net[reg].emplace_back(tar, mi);
