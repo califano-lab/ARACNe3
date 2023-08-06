@@ -2,6 +2,7 @@
 #include "cmdline_parser.hpp"
 #include "stopwatch.hpp"
 #include "subnet_operations.hpp"
+#include "io.hpp"
 
 /*
  These variables are tuned according to user preferences.  Some of these the user doesn't choose, such as the cached_dir, which is always the working directory of the ARACNe3 script.
@@ -39,127 +40,6 @@ extern uint32_t num_null_marginals;
 
 extern float FPR_estimate;
 extern std::vector<float> FPR_estimates;
-
-/*
- This function is the ARACNe3 main pipeline, called from main().  The main function just parses command line arguments and options, and it sets global variables, before calling the ARACNe3 function here.
- */
-reg_web ARACNe3_subnet(genemap subnet_matrix, const uint16_t& subnet_num) {
-	std::ofstream log_output(log_dir + "log_subnet" + std::to_string(subnet_num) + ".txt");
-	std::time_t t = std::time(nullptr);
-	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl << std::endl;
-	log_output << "Subnetwork #: " + std::to_string(subnet_num) << std::endl;
-	log_output << "Total # regulators (with gexp profile defined): " + std::to_string(defined_regulators) << std::endl;
-	log_output << "Total # targets: " + std::to_string(subnet_matrix.size()) << std::endl;
-	log_output << "Total # samples: " + std::to_string(tot_num_samps) << std::endl;
-	log_output << "Subsampled quantity: " + std::to_string(tot_num_subsample) << std::endl;
-	log_output << "Total possible edges: " + std::to_string(defined_regulators*subnet_matrix.size()-defined_regulators) << std::endl;
-	log_output << "Method of first pruning step: " + method << std::endl;
-	log_output << "Alpha: " + std::to_string(alpha) << std::endl;
-	log_output << "MaxEnt Pruning: " + std::to_string(prune_MaxEnt) << std::endl;
-	log_output << std::endl << "-----------Begin Network Generation-----------" << std::endl;
-	
-  // begin subnet computation
-
-	//-------time module-------
-  Watch watch1;
-  log_output << "\nRaw network computation time: ";
-  watch1.reset();
-	//-------------------------
-	
-	uint32_t size_of_network = 0;
-	std::vector<std::vector<edge_tar>> network_vec(tot_num_regulators); 
-#pragma omp parallel for firstprivate(subnet_matrix) num_threads(nthreads)
-	for (int reg = 0; reg < tot_num_regulators; ++reg) {
-		if (global_gm.find(reg) != global_gm.end()) {
-			network_vec[reg] = genemapAPMI(subnet_matrix, reg, 7.815, 4);
-			size_of_network += network_vec[reg].size();
-		}
-	}
-	reg_web network;
-	network.reserve(tot_num_regulators);
-	for (gene_id reg = 0; reg < tot_num_regulators; ++reg)
-		if (global_gm.find(reg) != global_gm.end())
-			network[reg] = network_vec[reg];
-	std::vector<std::vector<edge_tar>>().swap(network_vec);
-	
-	//-------time module-------
-	log_output << watch1.getSeconds() << std::endl;
-	log_output << "Size of network: " << size_of_network << " edges." << std::endl;
-	//-------------------------
-	
-	if (!prune_alpha) alpha = 1.01f; // we must set to 1.01f to preserve all edges; rounding issue.
-	
-	//-------time module-------
-  log_output << "\nThreshold pruning time (" + method + "): ";
-  watch1.reset();
-	//-------------------------
-	
-	auto size_prev = size_of_network;
-	
-	/*
-	 We could prune in-network, but that would require many search operations.  It is better to extract edges and reform the entire network, then free memory, it seems.
-	 */
-	
-	std::pair<reg_web, map_map> pair = pruneAlpha(network, size_of_network);
-	network = pair.first;
-	map_map& tftfNetwork = pair.second;
-	
-	//-------time module-------
-	log_output << watch1.getSeconds() << std::endl;
-	log_output << "Edges removed: " << size_prev - size_of_network << " edges." << std::endl;
-	log_output << "Size of network: " << size_of_network << " edges." << std::endl;
-	//-------------------------
-	
-  // save for binomial distribution parameter (theta)
-	uint32_t num_edges_after_threshold_pruning = size_of_network; 
-	
-	if (prune_MaxEnt) {
-		//-------time module-------
-    log_output << "\nMaxEnt pruning time: ";
-    watch1.reset();
-		//-------------------------
-
-		size_prev = size_of_network;
-		network = pruneMaxEnt(network, tftfNetwork, size_of_network);
-		
-		//-------time module-------
-		log_output << watch1.getSeconds() << std::endl;
-		log_output << "Edges removed: " << size_prev - size_of_network << " edges." << std::endl;
-		log_output << "Size of network: " << size_of_network << " edges." << std::endl;
-		//-------------------------
-		
-		uint32_t num_edges_after_MaxEnt_pruning = size_of_network;
-		if (method == "FDR")
-			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		else if (method == "FWER")
-			FPR_estimates.emplace_back((alpha/(defined_regulators*(global_gm.size()-1)))*(num_edges_after_MaxEnt_pruning)/(num_edges_after_threshold_pruning));
-		else if (method == "FPR")
-			FPR_estimates.emplace_back(alpha*num_edges_after_MaxEnt_pruning/num_edges_after_threshold_pruning);
-	} else {
-		if (method == "FDR")
-			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		else if (method == "FWER")
-			FPR_estimates.emplace_back(alpha/(defined_regulators*(global_gm.size()-1)));
-		else if (method == "FPR")
-			FPR_estimates.emplace_back(alpha);
-	}
-	
-	//-------time module-------
-  log_output << "\nPrinting network in directory \"" + makeUnixDirectoryNameUniversal(output_dir) + "\".....";
-  watch1.reset();
-	//-------------------------
-	
-	// writes the individual subnet output
-	writeNetworkRegTarMI(network, subnets_dir, "subnet" + std::to_string(subnet_num));
-	
-	//-------time module-------
-	log_output << watch1.getSeconds() << std::endl;
-	//-------------------------
-	
-	std::cout << "... subnetwork " + std::to_string(subnet_num) + " completed = " + std::to_string(size_of_network) + " edges returned ..." << std::endl;
-	
-	return network;
-}
 
 /*
  Main function is the command line executable; this primes the global variables and parses the command line.  It will also return usage notes if the user incorrectly calls ./ARACNe3.
@@ -221,6 +101,8 @@ int main(int argc, char *argv[]) {
 
 	if (cmdOptionExists(argv, argv+argc, "--noAlpha"))
 	    	prune_alpha = false;
+        alpha = 1.f;
+	
 	if (cmdOptionExists(argv, argv+argc, "--noMaxEnt"))
 	    	prune_MaxEnt = false;
 	if (cmdOptionExists(argv, argv+argc, "--FDR"))
@@ -311,7 +193,7 @@ int main(int argc, char *argv[]) {
 			uint16_t i = 0U;
 			while (!stoppingCriteriaMet) {
 				genemap subnet_matrix = sampleFromGlobalGenemap();
-				subnets.push_back(ARACNe3_subnet(subnet_matrix, i+1));
+				subnets.push_back(ARACNe3_subnet(subnet_matrix, i+1, prune_alpha, method, alpha, prune_MaxEnt, output_dir, subnets_dir, log_dir, nthreads));
 				
 				// add any new edges to the regulon_set
 				for (const auto &[reg, edge_tars] : subnets[i])
@@ -336,7 +218,8 @@ int main(int argc, char *argv[]) {
 			subnets = std::vector<reg_web>(num_subnets);
 			for (int i = 0; i < num_subnets; ++i) {
 				genemap subnet_matrix = sampleFromGlobalGenemap();
-				subnets[i] = ARACNe3_subnet(subnet_matrix, i+1);
+				subnets[i] = ARACNe3_subnet(subnet_matrix, i+1, prune_alpha, method, alpha, prune_MaxEnt, output_dir, subnets_dir, log_dir, nthreads);
+;
 			}
 		}
 		

@@ -1,4 +1,4 @@
-#include "ARACNe3.hpp"
+#include "io.hpp"
 
 /*
  Compression (gene (string) to uint16_t) and decompression (uint16_t back to gene (string)) mapping.  When doing the matrix/regulator list IO, this application automatically compresses all gene identifiers into unsigned short (2B) 0-65535, as this substantially can decrease the memory load of data structures which must copy the initial values (strings, for the gene identifiers these are anywhere from 5B-25B), or refer to them through pointers (8B).  Reading less memory also can speed up computation.
@@ -245,8 +245,7 @@ void readExpMatrix(std::string &filename) {
 /*
  Function that prints the Regulator, Target, and MI to the output_dir given the output_suffix.  Does not print to the console.  The data structure input is a reg_web, which is defined in "ARACNe3.hpp".
  */
-void writeNetworkRegTarMI(const reg_web &network, std::string &output_dir, const std::string &output_suffix) {
-	makeUnixDirectoryNameUniversal(output_dir);
+void writeNetworkRegTarMI(const reg_web &network, const std::string &output_dir, const std::string &output_suffix) {
 	const std::string filename = output_dir + "output_" + output_suffix + ".txt";
 	std::ofstream ofs{filename};
 	if (!ofs) {
