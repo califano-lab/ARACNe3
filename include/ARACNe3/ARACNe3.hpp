@@ -36,9 +36,10 @@ const std::string hiddenfpre = "";
  Switching to this type alias to reduce confusion in other parts of the program
  */
 typedef uint16_t gene_id;
+typedef std::unordered_set<gene_id> geneset;
 
 // Maps gene to regulon
-typedef std::unordered_map<gene_id, std::unordered_set<gene_id>>
+typedef std::unordered_map<gene_id, geneset>
     gene_to_geneset;
 
 // Used for gexp and ranked gexp matrix storage

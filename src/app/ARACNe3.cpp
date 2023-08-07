@@ -30,9 +30,6 @@ uint32_t seed = 0U;
 /*
  These variables represent the original data and do not change after matrix files are read.
  */
-extern uint16_t tot_num_samps;
-extern uint16_t tot_num_subsample;
-extern std::set<gene_id> regulators, targets, genes;
 extern std::vector<std::string> decompression_map;
 
 extern uint32_t num_null_marginals;
@@ -162,10 +159,16 @@ int main(int argc, char *argv[]) {
 	
   log_output << "\nGene expression matrix & regulators list read time: ";
 
-  std::pair<gene_to_floats, gene_to_shorts> matrices =
-      readExpMatrixAndCopulaTransform(exp_mat_file, rand);
-  gene_to_floats &exp_mat = matrices.first;
-  gene_to_shorts &ranks_mat = matrices.second;
+  const auto [exp_mat, ranks_mat, regulators, tot_num_samps] = readExpMatrixAndCopulaTransform(exp_mat_file, subsampling_percent, rand);
+
+	uint16_t tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
+	if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0) {
+		std::cerr << "Warning: subsample quantity invalid. All samples will be used." << std::endl;
+		tot_num_subsample = tot_num_samps;
+	}
+
+	std::cout << "\nTotal N Samples: " + std::to_string(tot_num_samps) << std::endl;
+	std::cout << "Subsampled N Samples: " + std::to_string(tot_num_subsample) << std::endl;
 
   readRegList(reg_list_file);
 
@@ -192,8 +195,8 @@ int main(int argc, char *argv[]) {
 		
 		if (adaptive) {
 			bool stoppingCriteriaMet = false;
-			std::unordered_map<gene_id, std::unordered_set<gene_id>> regulon_set;
-			for (uint16_t reg = 0; reg < regulators.size(); ++reg) regulon_set[reg];
+			gene_to_geneset regulon_set;
+			for (const uint16_t &reg : regulators) regulon_set[reg];
 			uint16_t i = 0U;
 			while (!stoppingCriteriaMet) {
 				gene_to_floats subnet_matrix = sampleExpMatAndReCopulaTransform(exp_mat, rand);

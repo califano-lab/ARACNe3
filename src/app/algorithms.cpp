@@ -2,6 +2,7 @@
 #include "algorithms.hpp"
 
 extern float DEVELOPER_mi_cutoff;
+
 static float q_thresh;
 static uint16_t size_thresh;
 
@@ -119,4 +120,23 @@ float calcAPMI(const std::vector<float>& x_vec, const std::vector<float>& y_vec,
 	std::copy(y_vec.begin(), y_vec.end(), y_ptr);
 	
 	return calcAPMISplit(x_ptr, y_ptr, init);
+}
+
+float calcSCC(const std::vector<uint16_t>& x_ranked, const std::vector<uint16_t>& y_ranked) {
+	const auto &n = x_ranked.size();
+	int sigma_dxy = 0;
+	for (uint16_t i = 0; i < n; ++i)
+		sigma_dxy += (x_ranked[i] - y_ranked[i]) * (x_ranked[i] - y_ranked[i]);
+	return 1 - 6.0f * sigma_dxy / n / (n * n - 1);
+}
+
+double lchoose(const uint16_t &n, const uint16_t &k) {
+	return std::lgamma(n + 1) - std::lgamma(k + 1) - std::lgamma(n - k + 1);
+}
+
+double right_tail_binomial_p(const uint16_t &n, const uint16_t &k, const double &theta) {
+	double p = 0.0;
+	for (uint16_t i = n; i >= k; --i)
+		p += std::exp(lchoose(n, i) + i * std::log(theta) + (n - i) * std::log(1-theta));
+	return p;
 }

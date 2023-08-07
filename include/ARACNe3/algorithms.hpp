@@ -10,3 +10,10 @@ typedef struct {
 
 float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
                const float &q_thresh = 7.815, const uint16_t &size_thresh = 4);
+
+  
+float calcSCC(const std::vector<uint16_t>& x_ranked, const std::vector<uint16_t>& y_ranked);
+
+double lchoose(const uint16_t &n, const uint16_t &k);
+
+double right_tail_binomial_p(const uint16_t &n, const uint16_t &k, const float &theta);

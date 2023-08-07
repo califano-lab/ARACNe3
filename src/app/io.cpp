@@ -1,22 +1,7 @@
 #include "io.hpp"
 
-uint16_t tot_num_samps = 0U;
-uint16_t tot_num_subsample = 0U;
-std::unordered_set<gene_id> regulators, genes; 
 std::vector<std::string> decompression_map;
-
 static std::unordered_map<std::string, uint16_t> compression_map;
-
-extern uint32_t seed;
-extern uint16_t num_subnets;
-extern double subsampling_percent;
-extern uint16_t nthreads;
-extern bool adaptive;
-
-extern float alpha;
-extern std::string method;
-extern bool prune_MaxEnt;
-extern std::vector<float> FPR_estimates;
 
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name) {
 	std::replace(dir_name.begin(), dir_name.end(), '/', directory_slash);
@@ -84,14 +69,15 @@ std::vector<uint16_t> rankIndices(const std::vector<float>& vec, std::mt19937 &r
 /*
  Create a subsampled gene_to_floats.  Requires that exp_mat and tot_num_subsample are set.
  */
-gene_to_floats sampleExpMatAndReCopulaTransform(gene_to_floats &exp_mat, std::mt19937 &rand) {
-	std::vector<uint16_t> idxs(tot_num_samps);
+gene_to_floats sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat, const uint16_t &tot_num_subsample, std::mt19937 &rand) {
+	std::vector<uint16_t> idxs(exp_mat.cbegin()->second.size());
 	std::iota(idxs.begin(), idxs.end(), 0U);
+
 	std::vector<uint16_t> fold(tot_num_subsample);
 	std::sample(idxs.begin(), idxs.end(), fold.begin(), tot_num_subsample, rand);
 	
 	gene_to_floats subsample_exp_mat;
-	subsample_exp_mat.reserve(genes.size());	
+	subsample_exp_mat.reserve(exp_mat.size());	
 	for (const auto &[gene_id, expr_vec] : exp_mat) {
 		subsample_exp_mat[gene_id] = std::vector<float>(tot_num_subsample, 0.0f);
 		
@@ -107,96 +93,105 @@ gene_to_floats sampleExpMatAndReCopulaTransform(gene_to_floats &exp_mat, std::mt
 
 /* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the gene_to_floats for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
  */
-std::pair<gene_to_floats, gene_to_shorts> readExpMatrixAndCopulaTransform(const std::string &filename, std::mt19937 &rand) {
-	std::ifstream ifs{filename};
-	if (!ifs.is_open()) { std::cerr << "error: file open failed " << filename << "." << std::endl; std::exit(1); }
+std::tuple<const gene_to_floats, const gene_to_shorts, const geneset,
+           const uint16_t>
+readExpMatrixAndCopulaTransform(const std::string &filename,
+                                const float &subsampling_percent,
+                                std::mt19937 &rand) {
+  std::ifstream ifs{filename};
+  if (!ifs.is_open()) {
+    std::cerr << "error: file open failed " << filename << "." << std::endl;
+    std::exit(1);
+  }
 
-	// for the first line, we simply want to count the number of samples
-	std::string line;
+  uint16_t tot_num_samps = 0U;
+  geneset genes;
+
+  // for the first line, we simply want to count the number of samples
+  std::string line;
   std::getline(ifs, line, '\n');
-	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
-		line.pop_back();
-	
+  if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+    line.pop_back();
+
   // count samples from number of columns in first line
-	for (size_t pos = 0; (pos = line.find_first_of("\t, ", pos)) != std::string::npos; ++pos)
-		++tot_num_samps;
-	tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
-	if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0) {
-		std::cerr << "Warning: subsample quantity invalid. All samples will be used." << std::endl;
-		tot_num_subsample = tot_num_samps;
-	}
-	
-	uint32_t linesread = 1U;
+  for (size_t pos = 0;
+       (pos = line.find_first_of("\t, ", pos)) != std::string::npos; ++pos)
+    ++tot_num_samps;
+
+  uint32_t linesread = 1U;
   gene_to_floats exp_mat;
   gene_to_shorts ranks_mat;
-	while(std::getline(ifs, line, '\n')) {
-		++linesread;
-		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
-			line.pop_back();
-		std::vector<float> expr_vec;
+  while (std::getline(ifs, line, '\n')) {
+    ++linesread;
+    if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+      line.pop_back();
+    std::vector<float> expr_vec;
     std::vector<uint16_t> expr_ranks_vec(tot_num_samps, 0U);
 
-		expr_vec.reserve(tot_num_samps);
-		
-		std::size_t prev = 0U, pos = line.find_first_of("\t, ", prev);
-		std::string gene = line.substr(prev, pos-prev);
-		prev = pos + 1;
-		while ((pos = line.find_first_of("\t, ", prev)) != std::string::npos) {
-			if (pos > prev) {
-				expr_vec.emplace_back(stof(line.substr(prev, pos-prev)));
-			}
-			prev = pos + 1;
-		}
-		expr_vec.emplace_back(stof(line.substr(prev, std::string::npos)));
-		
-		if (expr_vec.size() != tot_num_samps) {
-			std::cerr << "Fatal: line " + std::to_string(linesread) + " length is not equal to line 1 length. Rows should have the same number of delimiters. Check that header row contains N+1 columns (N sample names and the empty corner))." << std::endl;
+    expr_vec.reserve(tot_num_samps);
+
+    std::size_t prev = 0U, pos = line.find_first_of("\t, ", prev);
+    std::string gene = line.substr(prev, pos - prev);
+    prev = pos + 1;
+    while ((pos = line.find_first_of("\t, ", prev)) != std::string::npos) {
+      if (pos > prev) {
+        expr_vec.emplace_back(stof(line.substr(prev, pos - prev)));
+      }
+      prev = pos + 1;
+    }
+    expr_vec.emplace_back(stof(line.substr(prev, std::string::npos)));
+
+    if (expr_vec.size() != tot_num_samps) {
+      std::cerr
+          << "Fatal: line " + std::to_string(linesread) +
+                 " length is not equal to line 1 length. Rows should have the "
+                 "same number of delimiters. Check that header row contains "
+                 "N+1 columns (N sample names and the empty corner))."
+          << std::endl;
       std::exit(1);
-		}
-				
-		// copula-transform expr_vec values
+    }
+
+    // copula-transform expr_vec values
     {
       std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec, rand);
       for (uint16_t r = 0; r < tot_num_samps; ++r) {
-        expr_vec[idx_ranks[r]] = (r + 1)/((float)tot_num_samps + 1);  
+        expr_vec[idx_ranks[r]] = (r + 1) / ((float)tot_num_samps + 1);
         expr_ranks_vec[idx_ranks[r]] = r + 1;
       }
     }
-			
-		
+
     // create compression scheme from exp_mat
-		if (compression_map.find(gene) == compression_map.end()) {
-			decompression_map.push_back(gene);
-			compression_map[gene] = decompression_map.size()-1; // str -> #
+    if (compression_map.find(gene) == compression_map.end()) {
+      decompression_map.push_back(gene);
+      compression_map[gene] = decompression_map.size() - 1; // str -> #
       genes.insert(compression_map[gene]);
-			
-			// the last index of decompression_vec is the new uint16_t
-			exp_mat[compression_map[gene]] = expr_vec;
+
+      // the last index of decompression_vec is the new uint16_t
+      exp_mat[compression_map[gene]] = expr_vec;
       // ranks of exp are stored for SCC later
-			ranks_mat[compression_map[gene]] = expr_ranks_vec; 
-		} else {
-			std::cerr << "Fatal: 2 rows corresponding to " + gene + " detected." << std::endl;
+      ranks_mat[compression_map[gene]] = expr_ranks_vec;
+    } else {
+      std::cerr << "Fatal: 2 rows corresponding to " + gene + " detected."
+                << std::endl;
       std::exit(1);
-		}
+    }
+  }
 
-	}
-	
-	std::cout << "\nTotal N Samples: " + std::to_string(tot_num_samps) << std::endl;
-	std::cout << "Subsampled N Samples: " + std::to_string(tot_num_subsample) << std::endl;
-
-	return std::make_pair(exp_mat, ranks_mat);
+  return std::make_tuple(exp_mat, ranks_mat, genes, tot_num_samps);
 }
 
 /*
- Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
+ Reads a newline-separated regulator list and sets the decompression mapping, as
+ well as the compression mapping, as file static variables hidden to the rest of
+ the app.
  */
-std::unordered_set<gene_id> readRegList(const std::string &filename) {
+const geneset readRegList(const std::string &filename) {
   std::ifstream ifs{filename};
-
   if (!ifs.is_open()) {
     std::cerr << "error: file open failed \"" << filename << "\"." << std::endl;
     std::exit(1);
   }
+  geneset regulators;
 
   std::string reg;
   while (std::getline(ifs, reg, '\n')) {
@@ -204,7 +199,8 @@ std::unordered_set<gene_id> readRegList(const std::string &filename) {
       reg.pop_back();
     if (compression_map.find(reg) == compression_map.end())
       std::cerr << "Warning: " + reg +
-                       " found in reg list, but no entry in exp mat. Ignoring."
+                       " found in regulators list, but no entry in expression "
+                       "matrix. Ignoring."
                 << std::endl;
     else
       regulators.insert(compression_map[reg]);
