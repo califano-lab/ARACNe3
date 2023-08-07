@@ -25,16 +25,15 @@ uint16_t num_subnets_to_consolidate = 0U;
 uint16_t targets_per_regulator = 30U;
 uint16_t nthreads = 1U;
 
-uint32_t global_seed = 0U;
+uint32_t seed = 0U;
 
 /*
  These variables represent the original data and do not change after matrix files are read.
  */
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_subsample;
-extern uint16_t tot_num_regulators;
-extern uint16_t ;
-extern gene_to_floats global_gm;
+extern std::set<gene_id> regulators, targets, modulators, genes;
+extern std::vector<std::string> decompression_map;
 
 extern uint32_t num_null_marginals;
 
@@ -64,8 +63,8 @@ int main(int argc, char *argv[]) {
 
         //--------------------cmd line parsing------------------------
 	
-	std::string exp_file = (std::string) getCmdOption(argv, argv+argc, "-e");
-	std::string reg_file = (std::string) getCmdOption(argv, argv+argc, "-r");
+	const std::string exp_mat_file = makeUnixDirectoryNameUniversal((std::string) getCmdOption(argv, argv+argc, "-e"));
+	const std::string reg_list_file = makeUnixDirectoryNameUniversal((std::string) getCmdOption(argv, argv+argc, "-r"));
 	
 	output_dir = (std::string) getCmdOption(argv, argv+argc, "-o");
 	
@@ -81,7 +80,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	if (cmdOptionExists(argv, argv+argc, "--seed"))
-		global_seed = std::stoi(getCmdOption(argv, argv+argc, "--seed"));
+		seed = std::stoi(getCmdOption(argv, argv+argc, "--seed"));
 	
 	if (cmdOptionExists(argv, argv+argc, "--subsample"))
 		subsampling_percent = std::stod(getCmdOption(argv, argv+argc, "--subsample"));
@@ -156,14 +155,21 @@ int main(int argc, char *argv[]) {
 	
 	std::cout << "Beginning ARACNe3 instance.  See logs and progress reports in \"" + makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"." << std::endl;
 	log_output << "Beginning ARACNe3 instance..." << std::endl;
+
+	std::mt19937 rand{seed};
+  Watch watch1;
+  watch1.reset();
 	
   log_output << "\nGene expression matrix & regulators list read time: ";
 
-	readRegList(reg_file);
-	readExpMatrix(exp_file);
-	
-	//-------time module-------
-  Watch watch1;
+  std::pair<gene_to_floats, gene_to_shorts> matrices =
+      readExpMatrixAndCopulaTransform(exp_mat_file, rand);
+  gene_to_floats &exp_mat = matrices.first;
+  gene_to_shorts &ranks_mat = matrices.second;
+
+  readRegList(reg_list_file);
+
+  //-------time module-------
 	log_output << watch1.getSeconds() << std::endl;
   log_output << "\nMutual Information null model calculation time: ";
   watch1.reset();
@@ -187,10 +193,10 @@ int main(int argc, char *argv[]) {
 		if (adaptive) {
 			bool stoppingCriteriaMet = false;
 			std::unordered_map<gene_id, std::unordered_set<gene_id>> regulon_set;
-			for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) regulon_set[reg];
+			for (uint16_t reg = 0; reg < regulators.size(); ++reg) regulon_set[reg];
 			uint16_t i = 0U;
 			while (!stoppingCriteriaMet) {
-				gene_to_floats subnet_matrix = sampleFromGlobalGenemap();
+				gene_to_floats subnet_matrix = sampleExpMatAndReCopulaTransform(exp_mat, rand);
 				subnets.push_back(ARACNe3_subnet(subnet_matrix, i+1, prune_alpha, method, alpha, prune_MaxEnt, output_dir, subnets_dir, log_dir, nthreads));
 				
 				// add any new edges to the regulon_set
@@ -201,7 +207,7 @@ int main(int argc, char *argv[]) {
 				// check stoping criteria
 				uint16_t min = 65535U;
 				for (const auto &[reg, regulon] : regulon_set)
-					if (global_gm.find(reg) != global_gm.end())
+					if (exp_mat.find(reg) != exp_mat.end())
 						if (regulon.size() < min)
 							min = regulon.size();
 				if (min >= targets_per_regulator) 
@@ -215,7 +221,7 @@ int main(int argc, char *argv[]) {
 				std::cout << "Note: Because more than one thread is used to compute a fixed number of subnetworks (--adaptive not specified), completion times may not be in order.  This is not an error.\n" << std::endl;
 			subnets = std::vector<gene_to_edge_tars>(num_subnets);
 			for (int i = 0; i < num_subnets; ++i) {
-				gene_to_floats subnet_matrix = sampleFromGlobalGenemap();
+				gene_to_floats subnet_matrix = sampleExpMatAndReCopulaTransform(exp_mat, rand);
 				subnets[i] = ARACNe3_subnet(subnet_matrix, i+1, prune_alpha, method, alpha, prune_MaxEnt, output_dir, subnets_dir, log_dir, nthreads);
 ;
 			}

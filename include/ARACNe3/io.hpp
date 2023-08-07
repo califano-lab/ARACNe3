@@ -17,19 +17,12 @@ typedef struct consolidated_df_row {
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name);
 std::string makeUnixDirectoryNameUniversal(std::string &&dir_name);
 void makeDir(std::string &dir_name);
-std::vector<uint16_t> rank_indexes(const std::vector<float>& vec);
+std::vector<uint16_t> rank_indexes(const std::vector<float>& vec, std::mt19937 &rand);
 
-/*
- Does not return a list of regulators as a string vector, as we are using compression
- */
-void readRegList(std::string &filename);
+std::set<gene_id> readRegList(const std::string &filename);
+std::pair<gene_to_floats, gene_to_shorts> readExpMatrixAndCopulaTransform(const std::string &filename, std::mt19937 &rand);
 
-/*
- Returns a map of gene identifier -> gene expression.
- */
-void readExpMatrix(std::string &filename);
-
-gene_to_floats sampleFromGlobalGenemap();
+gene_to_floats sampleExpMatAndReCopulaTransform(gene_to_floats &exp_mat, std::mt19937 &rand);
 
 void writeNetworkRegTarMI(const gene_to_edge_tars &network, const std::string &output_dir, const std::string &output_suffix);
 

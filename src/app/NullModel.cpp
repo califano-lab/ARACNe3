@@ -14,7 +14,7 @@ static float m, b; // parameters for OLS regression p-val estimation
 extern bool verbose;
 extern std::string cached_dir;
 extern std::string output_dir;
-extern uint32_t global_seed;
+extern uint32_t seed;
 extern uint16_t nthreads;
 
 /*
@@ -87,7 +87,7 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		m = *OLS_iterator++;
 		b = *OLS_iterator;
 		
-		global_seed++; //global_seed is incremented when calculating null
+		seed++; //seed is incremented when calculating null
 		null_mis = mi_vec;
 	} else {
 		// make the permute vector, the ref vector, send to permuteAPMI
@@ -99,7 +99,7 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		// vector of vectors, 1mil rows
 		std::vector<std::vector<float>> target_vec(num_null_marginals, ref_vec);
 
-		static std::mt19937 rand{global_seed++};
+		static std::mt19937 rand{seed++};
 		
 		// Cannot be parallelized because access to random generator
 		for (unsigned int i = 0; i < num_null_marginals; ++i)

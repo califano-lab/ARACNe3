@@ -1,21 +1,13 @@
 #include "io.hpp"
 
-/*
- Compression (gene (string) to uint16_t) and decompression (uint16_t back to gene (string)) mapping.  When doing the matrix/regulator list IO, this application automatically compresses all gene identifiers into unsigned short (2B) 0-65535, as this substantially can decrease the memory load of data structures which must copy the initial values (strings, for the gene identifiers these are anywhere from 5B-25B), or refer to them through pointers (8B).  Reading less memory also can speed up computation.
- */
-static std::unordered_map<std::string, uint16_t> compression_map;
-static std::vector<std::string> decompression_map;
-
-/*
- Global variables are passed from ARACNe3.cpp, which are the user-defined parameters.
- */
 uint16_t tot_num_samps = 0U;
 uint16_t tot_num_subsample = 0U;
-uint16_t tot_num_regulators, defined_regulators = 0U;
-gene_to_floats global_gm;
-gene_to_shorts global_gm_r;
+std::set<gene_id> regulators, targets, genes; 
+std::vector<std::string> decompression_map;
 
-extern uint32_t global_seed;
+static std::unordered_map<std::string, uint16_t> compression_map;
+
+extern uint32_t seed;
 extern uint16_t num_subnets;
 extern double subsampling_percent;
 extern uint16_t nthreads;
@@ -52,16 +44,29 @@ void makeDir(std::string &dir_name) {
 	return;
 }
 
-/*
- A ranking is formed in the following way.  Indices index = [1,size) are sorted based on the ranking of vec[index-1], so that we get some new sorted set of indexes (5, 2, 9, ... ) that is the rank of each element in vec.  Rank is 1 for smallest, size for largest.
- 
- For a lambda function, brackets indicate the scope of the function.
+/** @brief Ranks indices based on the values in vec. 
+ * 
+ * This function sorts the indices in the range [1, size) based on the values
+ * of vec[index-1]. The returned vector represents the rank of each element in
+ * vec with the smallest element ranked as 1 and the largest as size. If two
+ * elements in vec have the same value, their corresponding indices in the
+ * ranking are randomly shuffled.
+ *
+ * @param vec The input vector for which the ranking should be formed.
+ * @param rand A Mersenne Twister pseudo-random generator of 32-bit numbers
+ * with a state size of 19937 bits. Used to shuffle indices corresponding to
+ * equal values in vec.
+ * 
+ * @return A vector representing the rank of indices in the input vector vec.
+ *
+ * @example vec = {9.2, 3.5, 7.4, 3.5} The function returns {4, 1, 3, 2}. Note
+ * that the ranks for the elements with the same value 3.5 (indices 1 and 3)
+ * may be shuffled differently in different runs.
  */
-std::vector<uint16_t> rank_indexes(const std::vector<float>& vec) {
-	static std::mt19937 rand{global_seed++};
+std::vector<uint16_t> rankIndices(const std::vector<float>& vec, std::mt19937 &rand) {
 	std::vector<uint16_t> idx_ranks(vec.size());
 	std::iota(idx_ranks.begin(), idx_ranks.end(), 0U); /* 0, 1, ..., size-1 */
-	std::sort(idx_ranks.begin(), idx_ranks.end(), [&vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1] < vec[num2];}); /* sort ascending */
+	std::sort(idx_ranks.begin(), idx_ranks.end(), [&vec](const uint16_t &num1, const uint16_t &num2) -> bool { return vec[num1] < vec[num2]; }); /* sort ascending */
 	for (uint16_t r = 0U; r < idx_ranks.size();) {
 		uint16_t same_range = 1U;
 		while (r + same_range < idx_ranks.size() && vec[idx_ranks[r]] == vec[idx_ranks[r+same_range]])
@@ -76,105 +81,85 @@ std::vector<uint16_t> rank_indexes(const std::vector<float>& vec) {
 	return idx_ranks;
 }
 
-
 /*
  Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
  */
-void readRegList(std::string &filename) {
-	makeUnixDirectoryNameUniversal(filename);
-	std::fstream f {filename};
-	std::vector<std::string> regs;
+std::set<gene_id> readRegList(const std::string &filename) {
+	std::ifstream ifs{filename};
 	
-	if (!f.is_open()) {
+	if (!ifs.is_open()) {
 		std::cerr << "error: file open failed \"" << filename << "\"." << std::endl;
-		std::exit(2);
+		std::exit(1);
 	}
 	
 	std::string reg;
-	
-	while (std::getline(f, reg, '\n')) {
+	while (std::getline(ifs, reg, '\n')) {
 		if (reg.back() == '\r') /* Alert! We have a Windows dweeb! */
 			reg.pop_back();
-		regs.push_back(reg);
+    if (compression_map.find(reg) == compression_map.end())
+      std::cerr << "Warning: " + reg + " found in reg list, but no entry in exp mat. Ignoring." << std::endl;
+    else
+     regulators.insert(compression_map[reg]);
 	}
 	
-	compression_map.reserve(regs.size());
-	/* NOTE** This map starts from values i+1 because we are only using it to make the compression step below faster.  The compression map is redundant for every uint16_t greater than the number of regulators (i.e., contents are emptied after readExpMatrix
-	*/
-	for (uint16_t i = 0; i < regs.size(); ++i)
-		compression_map[regs[i]] = i+1; //NOTE** it's "regulator" -> i+1
-	
-	/* The original regs string vector is also the decompression map.  We index this vector with uint16_t -> "gene", and hence this is how we decompress.
-	 */
-	tot_num_regulators = regs.size();
-	decompression_map = regs;
-	return;
+	return regulators;
 }
 
 /*
- Create a subsampled gene_to_floats.  Requires that global_gm and tot_num_subsample are set by readExpMat(), which must occur on program launch anyway
+ Create a subsampled gene_to_floats.  Requires that exp_mat and tot_num_subsample are set.
  */
-gene_to_floats sampleFromGlobalGenemap() {
-	static std::mt19937 rand{global_seed++};
+gene_to_floats sampleExpMatAndReCopulaTransform(gene_to_floats &exp_mat, std::mt19937 &rand) {
 	std::vector<uint16_t> idxs(tot_num_samps);
 	std::iota(idxs.begin(), idxs.end(), 0U);
 	std::vector<uint16_t> fold(tot_num_subsample);
 	std::sample(idxs.begin(), idxs.end(), fold.begin(), tot_num_subsample, rand);
 	
-	gene_to_floats subsample_gm;
-	subsample_gm.reserve(global_gm.size());	
-	for (const auto &[gene, expr_vec] : global_gm) {
-		subsample_gm[gene] = std::vector<float>(tot_num_subsample, 0.0f);
+	gene_to_floats subsample_exp_mat;
+	subsample_exp_mat.reserve(genes.size());	
+	for (const auto &[gene_id, expr_vec] : exp_mat) {
+		subsample_exp_mat[gene_id] = std::vector<float>(tot_num_subsample, 0.0f);
 		
 		for (uint16_t i = 0U; i < tot_num_subsample; ++i)
-			subsample_gm[gene][i] = expr_vec[fold[i]];
+			subsample_exp_mat[gene_id][i] = expr_vec[fold[i]];
 		
-		std::vector<uint16_t> idx_ranks = rank_indexes(subsample_gm[gene]);
+		std::vector<uint16_t> idx_ranks = rank_indexes(subsample_exp_mat[gene_id], rand);
 		for (uint16_t r = 0; r < tot_num_subsample; ++r)
-			subsample_gm[gene][idx_ranks[r]] = (r + 1)/((float)tot_num_subsample + 1); 
+			subsample_exp_mat[gene_id][idx_ranks[r]] = (r + 1)/((float)tot_num_subsample + 1); 
 	}
-	
-	return subsample_gm;
+	return subsample_exp_mat;
 }
 
 /* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression matrix and outputs a pair containing the gene_to_floats for the entire expression matrix (non-subsampled) as well as a subsampled version for every subnetwork. 
  */
-void readExpMatrix(std::string &filename) {
-	makeUnixDirectoryNameUniversal(filename);
-	std::fstream f{filename};
-	gene_to_floats gm;
-	gene_to_shorts gm_r; //to store ranks of gexp values
-	if (!f.is_open()) {
-		std::cerr << "error: file open failed " << filename << "." << std::endl;
-		std::exit(2);
-	}
+std::pair<gene_to_floats, gene_to_shorts> readExpMatrixAndCopulaTransform(const std::string &filename, std::mt19937 &rand) {
+	std::ifstream ifs{filename};
+	if (!ifs.is_open()) { std::cerr << "error: file open failed " << filename << "." << std::endl; std::exit(1); }
 
 	// for the first line, we simply want to count the number of samples
 	std::string line;
-	getline(f, line, '\n');
+  std::getline(ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
 	
-	/*
-	 Count number of samples from the number of columns in the first line
-	 */ 
+  // count samples from number of columns in first line
 	for (size_t pos = 0; (pos = line.find_first_of("\t, ", pos)) != std::string::npos; ++pos)
 		++tot_num_samps;
-	
-	// find subsample number
 	tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
 	if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0) {
-		std::cerr << std::endl << "WARNING: SUBSAMPLE QUANTITY INVALID.  ALL SAMPLES WILL BE USED." << std::endl;
+		std::cerr << "Warning: subsample quantity invalid. All samples will be used." << std::endl;
 		tot_num_subsample = tot_num_samps;
 	}
 	
-	// now, we can more efficiently load
 	uint32_t linesread = 1U;
-	while(std::getline(f, line, '\n')) {
+  gene_to_floats exp_mat;
+  gene_to_shorts ranks_mat;
+	while(std::getline(ifs, line, '\n')) {
 		++linesread;
 		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 			line.pop_back();
 		std::vector<float> expr_vec;
+    std::vector<uint16_t> expr_ranks_vec(tot_num_samps, 0U);
+
 		expr_vec.reserve(tot_num_samps);
 		
 		std::size_t prev = 0U, pos = line.find_first_of("\t, ", prev);
@@ -188,58 +173,42 @@ void readExpMatrix(std::string &filename) {
 		}
 		expr_vec.emplace_back(stof(line.substr(prev, std::string::npos)));
 		
-		/* This means that a user has inputted a matrix with unequal row 1 vs row 2 length
-		 */
 		if (expr_vec.size() != tot_num_samps) {
-			std::cerr << std::endl << "WARNING: ROW " + std::to_string(linesread) + " LENGTH DOES NOT EQUAL ROW 1 LENGTH.  ROWS MUST SHARE THE SAME NUMBER OF DELIMITERS.  SEGMENTATION FAULT MAY OCCUR.  CHECK THAT HEADER ROW CONTAINS G+1 COLUMNS." << std::endl;
-			tot_num_samps = expr_vec.size();
-			tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
-			if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0)
-				tot_num_subsample = tot_num_samps;
+			std::cerr << "Fatal: line " + std::to_string(linesread) + " length is not equal to line 1 length. Rows should have the same number of delimiters. Check that header row contains N+1 columns (N sample names and the empty corner))." << std::endl;
+      std::exit(1);
 		}
 				
 		// copula-transform expr_vec values
-		std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec);
-		
-		std::vector<uint16_t> expr_vec_ranked(tot_num_samps);
-		for (uint16_t r = 0; r < tot_num_samps; ++r) {
-			expr_vec_ranked[idx_ranks[r]] = r + 1; // ranks the values of expr_vec
-			expr_vec[idx_ranks[r]] = (r + 1)/((float)tot_num_samps + 1); // switches out expr_vec with copula-transformed values
-		}
+    {
+      std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec, rand);
+      for (uint16_t r = 0; r < tot_num_samps; ++r) {
+        expr_vec[idx_ranks[r]] = (r + 1)/((float)tot_num_samps + 1);  
+        expr_ranks_vec[idx_ranks[r]] = r + 1;
+      }
+    }
 			
 		
-		/*
-		 This compression works as follows.  When you input a key (gene) not in the table, it is immediately value initialized to uint16_t = 0.  However, no values are 0 in the table, as we added 1 to the index (see NOTE** above).  Note that *as soon as* we try to check if there exists 'gene' as a KEY, it is instantaneously made into a "key" with its own bin.
-		 */
-		if (compression_map[gene] == 0) {
-			// we must have a target
+    // create compression scheme from exp_mat
+		if (compression_map.find(gene) == compression_map.end()) {
 			decompression_map.push_back(gene);
-			compression_map[gene] = decompression_map.size(); // note: it's i+1
+			compression_map[gene] = decompression_map.size()-1; // str -> #
+      genes.insert(compression_map[gene]);
 			
 			// the last index of decompression_vec is the new uint16_t
-			gm[decompression_map.size()-1] = expr_vec;
-			gm_r[decompression_map.size()-1] = expr_vec_ranked; //store ranks of idx's for SCC later
+			exp_mat[compression_map[gene]] = expr_vec;
+      // ranks of exp are stored for SCC later
+			ranks_mat[compression_map[gene]] = expr_ranks_vec; 
 		} else {
-			/* we already mapped this regulator, so we must use the std::string map to find its compression value.  We do -1 because of NOTE** above */
-			gm[compression_map[gene]-1] = expr_vec;
-			gm_r[compression_map[gene]-1] = expr_vec_ranked; //store ranks of idx's for SCC later
+			std::cerr << "Fatal: 2 rows corresponding to " + gene + " detected." << std::endl;
+      std::exit(1);
 		}
 
 	}
 	
-	// now we must determine how many regulators are actually defined in the expression profile
-	for (gene_id reg = 0; reg < tot_num_regulators; ++reg)
-		if (gm.find(reg) != global_gm.end())
-			++defined_regulators;
-		else
-			std::cout << "WARNING: REGULATOR " + decompression_map[reg] + " DOES NOT HAVE A DEFINED GENE EXPRESSION PROFILE." << std::endl;
-	
-	std::cout << std::endl << "Initial Num Samples: " + std::to_string(tot_num_samps) << std::endl;
-	std::cout << "Sampled Num Samples: " + std::to_string(tot_num_subsample) << std::endl << std::endl;
-	
-	global_gm = gm;
-	global_gm_r = gm_r;
-	return;
+	std::cout << "\nTotal N Samples: " + std::to_string(tot_num_samps) << std::endl;
+	std::cout << "Subsampled N Samples: " + std::to_string(tot_num_subsample) << std::endl;
+
+	return std::make_pair(exp_mat, ranks_mat);
 }
 
 /*
@@ -285,11 +254,10 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df_row>& final_df, 
  This function will add genes to the compression scheme in any order.  It's use is currently only when reading subnets.
  */
 void addToCompressionVecs(const std::string &gene) {
-	if (compression_map[gene] == 0) {
-		// we must have a new gene
+  // If we have a new gene, put it in compression scheme
+	if (compression_map.find(gene) == compression_map.end()) {
 		decompression_map.push_back(gene);
-		// the last index of decompression_vec is the new uint16_t
-		compression_map[gene] = decompression_map.size();
+		compression_map[gene] = decompression_map.size()-1;
 	}
 }
 
@@ -393,16 +361,16 @@ gene_to_edge_tars readSubNetAndUpdateFPRFromLog(const std::string &output_dir, c
 	
 	if(prune_MaxEnt) {
 		if (method == "FDR")
-			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(regulators.size()*genes.size()-(1-alpha)*num_edges_after_threshold_pruning));
 		else if (method == "FWER")
-			FPR_estimates.emplace_back((alpha/(defined_regulators*(global_gm.size()-1)))*(num_edges_after_MaxEnt_pruning)/(num_edges_after_threshold_pruning));
+			FPR_estimates.emplace_back((alpha/(regulators.size()*(genes.size()-1)))*(num_edges_after_MaxEnt_pruning)/(num_edges_after_threshold_pruning));
 		else if (method == "FPR")
 			FPR_estimates.emplace_back(alpha*num_edges_after_MaxEnt_pruning/num_edges_after_threshold_pruning);
 	} else {
 		if (method == "FDR")
-			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(defined_regulators*global_gm.size()-(1-alpha)*num_edges_after_threshold_pruning));
+			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(regulators.size()*genes.size()-(1-alpha)*num_edges_after_threshold_pruning));
 		else if (method == "FWER")
-			FPR_estimates.emplace_back(alpha/(defined_regulators*(global_gm.size()-1)));
+			FPR_estimates.emplace_back(alpha/(regulators.size()*(genes.size()-1)));
 		else if (method == "FPR")
 			FPR_estimates.emplace_back(alpha);
 	}
