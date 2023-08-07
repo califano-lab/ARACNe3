@@ -7,12 +7,9 @@ set(SOURCES
 	ARACNe3.cpp 
 	cmdline_parser.cpp
 	stopwatch.cpp
-	RegWebFns.cpp
 	io.cpp
-	APMI.cpp
+	algorithms.cpp
 	NullModel.cpp
-	AlphaPruning.cpp
-	MaxEntPruning.cpp
 	subnet_operations.cpp
 )
 

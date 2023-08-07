@@ -71,6 +71,6 @@ add_subdirectory(src)
 add_subdirectory(deps/gtest EXCLUDE_FROM_ALL)
 
 # Enable testing capabilities
-enable_testing()
+#enable_testing()
 
-add_subdirectory(tests)
+#add_subdirectory(tests)

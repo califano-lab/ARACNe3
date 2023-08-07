@@ -19,7 +19,7 @@ std::string makeUnixDirectoryNameUniversal(std::string &&dir_name);
 void makeDir(std::string &dir_name);
 std::vector<uint16_t> rank_indexes(const std::vector<float>& vec, std::mt19937 &rand);
 
-std::set<gene_id> readRegList(const std::string &filename);
+std::unordered_set<gene_id> readRegList(const std::string &filename);
 std::pair<gene_to_floats, gene_to_shorts> readExpMatrixAndCopulaTransform(const std::string &filename, std::mt19937 &rand);
 
 gene_to_floats sampleExpMatAndReCopulaTransform(gene_to_floats &exp_mat, std::mt19937 &rand);

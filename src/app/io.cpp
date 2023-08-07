@@ -2,7 +2,7 @@
 
 uint16_t tot_num_samps = 0U;
 uint16_t tot_num_subsample = 0U;
-std::set<gene_id> regulators, targets, genes; 
+std::unordered_set<gene_id> regulators, genes; 
 std::vector<std::string> decompression_map;
 
 static std::unordered_map<std::string, uint16_t> compression_map;
@@ -79,30 +79,6 @@ std::vector<uint16_t> rankIndices(const std::vector<float>& vec, std::mt19937 &r
 		}
 	}
 	return idx_ranks;
-}
-
-/*
- Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
- */
-std::set<gene_id> readRegList(const std::string &filename) {
-	std::ifstream ifs{filename};
-	
-	if (!ifs.is_open()) {
-		std::cerr << "error: file open failed \"" << filename << "\"." << std::endl;
-		std::exit(1);
-	}
-	
-	std::string reg;
-	while (std::getline(ifs, reg, '\n')) {
-		if (reg.back() == '\r') /* Alert! We have a Windows dweeb! */
-			reg.pop_back();
-    if (compression_map.find(reg) == compression_map.end())
-      std::cerr << "Warning: " + reg + " found in reg list, but no entry in exp mat. Ignoring." << std::endl;
-    else
-     regulators.insert(compression_map[reg]);
-	}
-	
-	return regulators;
 }
 
 /*
@@ -209,6 +185,32 @@ std::pair<gene_to_floats, gene_to_shorts> readExpMatrixAndCopulaTransform(const 
 	std::cout << "Subsampled N Samples: " + std::to_string(tot_num_subsample) << std::endl;
 
 	return std::make_pair(exp_mat, ranks_mat);
+}
+
+/*
+ Reads a newline-separated regulator list and sets the decompression mapping, as well as the compression mapping, as file static variables hidden to the rest of the app.
+ */
+std::unordered_set<gene_id> readRegList(const std::string &filename) {
+  std::ifstream ifs{filename};
+
+  if (!ifs.is_open()) {
+    std::cerr << "error: file open failed \"" << filename << "\"." << std::endl;
+    std::exit(1);
+  }
+
+  std::string reg;
+  while (std::getline(ifs, reg, '\n')) {
+    if (reg.back() == '\r') /* Alert! We have a Windows dweeb! */
+      reg.pop_back();
+    if (compression_map.find(reg) == compression_map.end())
+      std::cerr << "Warning: " + reg +
+                       " found in reg list, but no entry in exp mat. Ignoring."
+                << std::endl;
+    else
+      regulators.insert(compression_map[reg]);
+  }
+
+  return regulators;
 }
 
 /*

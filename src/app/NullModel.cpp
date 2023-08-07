@@ -118,7 +118,6 @@ const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample) {
 		// we will be doing a linear regression of the log(mi_ps)
 		std::vector<float> mis(mi_vec.begin(), mi_vec.begin() + p_99th_percentile_idx), mi_ps(p_99th_percentile_idx);
 
-#pragma omp parallel for num_threads(nthreads)
 		for (int i = 0; i < p_99th_percentile_idx; ++i)
 			mi_ps[i] = ((i+1)/(float)num_null_marginals);
 		

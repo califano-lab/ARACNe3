@@ -32,7 +32,7 @@ uint32_t seed = 0U;
  */
 extern uint16_t tot_num_samps;
 extern uint16_t tot_num_subsample;
-extern std::set<gene_id> regulators, targets, modulators, genes;
+extern std::set<gene_id> regulators, targets, genes;
 extern std::vector<std::string> decompression_map;
 
 extern uint32_t num_null_marginals;
@@ -223,7 +223,6 @@ int main(int argc, char *argv[]) {
 			for (int i = 0; i < num_subnets; ++i) {
 				gene_to_floats subnet_matrix = sampleExpMatAndReCopulaTransform(exp_mat, rand);
 				subnets[i] = ARACNe3_subnet(subnet_matrix, i+1, prune_alpha, method, alpha, prune_MaxEnt, output_dir, subnets_dir, log_dir, nthreads);
-;
 			}
 		}
 		
