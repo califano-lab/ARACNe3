@@ -24,7 +24,7 @@ std::pair<gene_to_floats, gene_to_shorts> readExpMatrixAndCopulaTransform(const 
 
 gene_to_floats sampleExpMatAndReCopulaTransform(gene_to_floats &exp_mat, std::mt19937 &rand);
 
-void writeNetworkRegTarMI(const gene_to_edge_tars &network, const std::string &output_dir, const std::string &output_suffix);
+void writeNetworkRegTarMI(gene_to_gene_to_float &network, const std::string &output_dir, const std::string &output_suffix);
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df_row>& final_df, std::string filename);
 

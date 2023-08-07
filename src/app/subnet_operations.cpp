@@ -38,7 +38,7 @@ double right_tail_binomial_p(const uint16_t &num_occurrences, const uint16_t &nu
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if method = FDR, or FWER if method = FWER.
  */
 std::tuple<gene_to_gene_to_float, uint32_t, gene_to_gene_to_float>
-pruneAlpha(gene_to_gene_to_float &network, uint32_t size_of_network,
+pruneAlpha(const gene_to_gene_to_float &network, uint32_t size_of_network,
            const std::string &method, const float &alpha) {
 
   /* A vector that describes each regulator-mi-target interaction must be
@@ -47,7 +47,7 @@ pruneAlpha(gene_to_gene_to_float &network, uint32_t size_of_network,
   reg_tar_mi.reserve(size_of_network);
 
   for (gene_id reg : regulators)
-    for (const auto &[tar, mi] : network[reg])
+    for (const auto &[tar, mi] : network.at(reg))
       reg_tar_mi.emplace_back(reg, tar, mi);
 
   // sort descending
@@ -149,7 +149,7 @@ gene_to_gene_to_float pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_o
 /*
  Generates an ARACNe3 subnet (called from main).
 */
-gene_to_gene_to_float ARACNe3_subnet(gene_to_floats subsample_exp_mat, const uint16_t subnet_num, const bool prune_alpha, const std::string& method, const float alpha, const bool prune_MaxEnt, const std::string& output_dir, const std::string& subnets_dir, const std::string& subnet_log_dir, const uint16_t nthreads) {
+gene_to_gene_to_float ARACNe3_subnet(const gene_to_floats &subsample_exp_mat, const uint16_t subnet_num, const bool prune_alpha, const std::string& method, const float alpha, const bool prune_MaxEnt, const std::string& output_dir, const std::string& subnets_dir, const std::string& subnet_log_dir, const uint16_t nthreads) {
 	std::ofstream log_output(subnet_log_dir + "log_subnet" + std::to_string(subnet_num) + ".txt");
 	std::time_t t = std::time(nullptr);
 	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl << std::endl;
@@ -180,7 +180,7 @@ gene_to_gene_to_float ARACNe3_subnet(gene_to_floats subsample_exp_mat, const uin
     network[reg].reserve(regulators.size()*(genes.size()-1));
     for (uint16_t tar : genes)
       if (reg != tar) {
-        network[reg][tar] = calcAPMI(subsample_exp_mat[reg], subsample_exp_mat[tar]);
+        network[reg][tar] = calcAPMI(subsample_exp_mat.at(reg), subsample_exp_mat.at(tar));
         size_of_network += 1;
       }
   }
@@ -259,26 +259,21 @@ gene_to_gene_to_float ARACNe3_subnet(gene_to_floats subsample_exp_mat, const uin
 }
 
 
-std::vector<consolidated_df_row> consolidate_subnets_vec(std::vector<gene_to_edge_tars> &subnets) {
+const std::vector<consolidated_df_row> consolidate_subnets_vec(const std::vector<gene_to_gene_to_float> &subnets, const gene_to_floats &exp_mat, const gene_to_shorts &ranks_mat) {
 	std::vector<consolidated_df_row> final_df;
-	const auto tot_poss_edgs = defined_regulators*(global_gm.size()-1);
-	final_df.reserve(tot_poss_edgs);
+	const uint32_t tot_poss_edgs = regulators.size()*(genes.size()-1);
 	
-	std::vector<gene_to_gene_to_float> subnets_mpmp;
-	for (uint16_t i = 0; i < subnets.size(); ++i)
-		subnets_mpmp.emplace_back(regweb_to_mapmap(subnets[i]));
-	
-	for (uint16_t reg = 0; reg < tot_num_regulators; ++reg) {
-		for (const auto &[tar, tar_vec] : global_gm) {
+	for (const gene_id &reg : regulators) {
+		for (const gene_id &tar : genes) {
 			uint16_t num_occurrences = 0;
-			for (uint16_t sn = 0; sn < subnets.size(); ++sn) {
-				if (subnets_mpmp[sn][reg].find(tar) != subnets_mpmp[sn][reg].end())
+			for (uint16_t sn = 0U; sn < subnets.size(); ++sn) {
+				if (subnets[sn].at(reg).find(tar) != subnets[sn].at(reg).end())
 					++num_occurrences;
 			}
 			if (num_occurrences > 0) {
-				const float final_mi = APMI(global_gm[reg], global_gm[tar]);
-				const float final_scc = consolidate_scc(global_gm_r[reg], global_gm_r[tar]);
-				const double final_p = right_tail_binomial_p(num_occurrences);
+				const float final_mi = calcAPMI(exp_mat.at(reg), exp_mat.at(tar));
+				const float final_scc = consolidate_scc(ranks_mat.at(reg), ranks_mat.at(tar));
+				const double final_p = right_tail_binomial_p(num_occurrences, subnets.size());
 				final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences, final_p);
 			}
 		}

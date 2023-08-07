@@ -216,21 +216,26 @@ std::unordered_set<gene_id> readRegList(const std::string &filename) {
 /*
  Function that prints the Regulator, Target, and MI to the output_dir given the output_suffix.  Does not print to the console.  The data structure input is a gene_to_edge_tars, which is defined in "ARACNe3.hpp".
  */
-void writeNetworkRegTarMI(const gene_to_edge_tars &network, const std::string &output_dir, const std::string &output_suffix) {
-	const std::string filename = output_dir + "output_" + output_suffix + ".txt";
-	std::ofstream ofs{filename};
-	if (!ofs) {
-		std::cerr << "error: could not write to file: " << filename << "." << std::endl;
-		std::cerr << "Try making the output directory subdirectory of the working directory. Example \"-o " + makeUnixDirectoryNameUniversal("./runs") + "\"." << std::endl;
-		std::exit(2);
-	}
-	
-	ofs << "regulator.values\ttarget.values\tmi.values" << std::endl;
-	for (auto it = network.begin(); it != network.end(); ++it) {
-		for (auto &edge_tar : it->second) {
-				ofs << decompression_map[it->first] << '\t' << decompression_map[edge_tar.target] << '\t' << edge_tar.mi << '\n'; // using '\n' over std::endl, better for performance
-		}
-	}
+void writeNetworkRegTarMI(gene_to_gene_to_float &network,
+                          const std::string &output_dir,
+                          const std::string &output_suffix) {
+  const std::string filename = output_dir + "output_" + output_suffix + ".tsv";
+  std::ofstream ofs{filename};
+  if (!ofs) {
+    std::cerr << "error: could not write to file: " << filename << "."
+              << std::endl;
+    std::cerr << "Try making the output directory subdirectory of the working "
+                 "directory. Example \"-o " +
+                     makeUnixDirectoryNameUniversal("./runs") + "\"."
+              << std::endl;
+    std::exit(2);
+  }
+
+  ofs << "regulator.values\ttarget.values\tmi.values" << std::endl;
+  for (const auto &[reg, tar_mi] : network)
+    for (const auto &[tar, mi] : tar_mi)
+      ofs << decompression_map[reg] << '\t' << decompression_map[tar] << '\t'
+          << mi << '\n';
 }
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df_row>& final_df, std::string filename) {
