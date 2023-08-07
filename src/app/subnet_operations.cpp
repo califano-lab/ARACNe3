@@ -1,11 +1,14 @@
 /*
- subnet_operations for ARACNe3.  Contains various functions only needed in the consolidation step, such as calculation of the p-value for an edge based on the number of subnetworks it appeared in, the calculation of the SCC for an edge, etc.
+ subnet_operations for ARACNe3.  Contains various functions only needed in the
+ consolidation step, such as calculation of the p-value for an edge based on the
+ number of subnetworks it appeared in, the calculation of the SCC for an edge,
+ etc.
  */
 
 #include "subnet_operations.hpp"
-#include "stopwatch.hpp"
-#include "io.hpp"
 #include "algorithms.hpp"
+#include "io.hpp"
+#include "stopwatch.hpp"
 
 std::vector<float> FPR_estimates;
 float FPR_estimate = 1.5E-4f;
@@ -13,11 +16,13 @@ float FPR_estimate = 1.5E-4f;
 extern uint32_t num_null_marginals;
 
 /*
- Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if method = FDR, or FWER if method = FWER.
+ Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if
+ method = FDR, or FWER if method = FWER.
  */
 std::tuple<gene_to_gene_to_float, uint32_t, gene_to_gene_to_float>
-pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators, uint32_t size_of_network,
-           const std::string& method, const float alpha) {
+pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
+           uint32_t size_of_network, const std::string &method,
+           const float alpha) {
 
   /* A vector that describes each regulator-mi-target interaction must be
    * initialized for sorting-based pruning */
@@ -86,13 +91,16 @@ pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators, uint
 /*
  Prune the network according to the MaxEnt weakest-edge reduction.
  */
-const gene_to_gene_to_float pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network, const geneset &regulators, gene_to_gene_to_float network_reg_reg_only) {
+const gene_to_gene_to_float
+pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
+            const geneset &regulators,
+            gene_to_gene_to_float network_reg_reg_only) {
 
   gene_to_geneset edges_to_remove;
   edges_to_remove.reserve(regulators.size());
 
   // triangular matrix (reg and reg+1)
-	for (const auto [reg1, reg2_mi] : network_reg_reg_only) {
+  for (const auto [reg1, reg2_mi] : network_reg_reg_only) {
     const std::unordered_map<gene_id, float> &reg1_regulon = network.at(reg1);
     std::unordered_set<gene_id> &remove_from_reg1 = edges_to_remove[reg1];
     for (const auto [reg2, mi_regs] : reg2_mi) {
@@ -114,148 +122,193 @@ const gene_to_gene_to_float pruneMaxEnt(gene_to_gene_to_float network, uint32_t 
       }
     }
   }
-	
-	for (const auto &[reg, remove_from_reg] : edges_to_remove) {
+
+  for (const auto &[reg, remove_from_reg] : edges_to_remove) {
     for (const gene_id tar : remove_from_reg)
       network[reg].erase(tar);
-		 size_of_network -= remove_from_reg.size();
+    size_of_network -= remove_from_reg.size();
   }
-	
-	return network;
+
+  return network;
 }
 
 /*
  Generates an ARACNe3 subnet (called from main).
 */
-gene_to_gene_to_float ARACNe3_subnet(const gene_to_floats &subsample_exp_mat, const geneset &regulators, const geneset &genes, const uint16_t tot_num_samps, const uint16_t tot_num_subsample, const uint16_t subnet_num, const bool prune_alpha, const std::string& method, const float alpha, const bool prune_MaxEnt, const std::string& output_dir, const std::string& subnets_dir, const std::string& subnet_log_dir, const uint16_t nthreads) {
-	std::ofstream log_output(subnet_log_dir + "log_subnet" + std::to_string(subnet_num) + ".txt");
-	std::time_t t = std::time(nullptr);
-	log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z") << "---------" << std::endl << std::endl;
-	log_output << "Subnetwork #: " + std::to_string(subnet_num) << std::endl;
-	log_output << "Total # regulators (defined in gexp mat): " + std::to_string(regulators.size()) << std::endl;
-	log_output << "Total # targets: " + std::to_string(genes.size()) << std::endl;
-	log_output << "Total # samples: " + std::to_string(tot_num_samps) << std::endl;
-	log_output << "Subsampled quantity: " + std::to_string(tot_num_subsample) << std::endl;
-	log_output << "Total possible edges: " + std::to_string(regulators.size()*(genes.size()-1)) << std::endl;
-	log_output << "Method of first pruning step: " + method << std::endl;
-	log_output << "Alpha: " + std::to_string(alpha) << std::endl;
-	log_output << "MaxEnt Pruning: " + std::to_string(prune_MaxEnt) << std::endl;
-	log_output << "\n-----------Begin Network Generation-----------" << std::endl;
-	
+gene_to_gene_to_float
+ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
+               const geneset &regulators, const geneset &genes,
+               const uint16_t tot_num_samps, const uint16_t tot_num_subsample,
+               const uint16_t subnet_num, const bool prune_alpha,
+               const std::string &method, const float alpha,
+               const bool prune_MaxEnt, const std::string &output_dir,
+               const std::string &subnets_dir,
+               const std::string &subnet_log_dir, const uint16_t nthreads) {
+  std::ofstream log_output(subnet_log_dir + "log_subnet" +
+                           std::to_string(subnet_num) + ".txt");
+  std::time_t t = std::time(nullptr);
+  log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z")
+             << "---------" << std::endl
+             << std::endl;
+  log_output << "Subnetwork #: " + std::to_string(subnet_num) << std::endl;
+  log_output << "Total # regulators (defined in gexp mat): " +
+                    std::to_string(regulators.size())
+             << std::endl;
+  log_output << "Total # targets: " + std::to_string(genes.size()) << std::endl;
+  log_output << "Total # samples: " + std::to_string(tot_num_samps)
+             << std::endl;
+  log_output << "Subsampled quantity: " + std::to_string(tot_num_subsample)
+             << std::endl;
+  log_output << "Total possible edges: " +
+                    std::to_string(regulators.size() * (genes.size() - 1))
+             << std::endl;
+  log_output << "Method of first pruning step: " + method << std::endl;
+  log_output << "Alpha: " + std::to_string(alpha) << std::endl;
+  log_output << "MaxEnt Pruning: " + std::to_string(prune_MaxEnt) << std::endl;
+  log_output << "\n-----------Begin Network Generation-----------" << std::endl;
+
   // begin subnet computation
 
-	//-------time module-------
+  //-------time module-------
   Watch watch1;
   log_output << "\nRaw network computation time: ";
   watch1.reset();
-	//-------------------------
-	
-	uint32_t size_of_network = 0U;
+  //-------------------------
+
+  uint32_t size_of_network = 0U;
 
   gene_to_gene_to_float network;
   network.reserve(regulators.size());
   for (uint16_t reg : regulators) {
-    network[reg].reserve(regulators.size()*(genes.size()-1));
+    network[reg].reserve(regulators.size() * (genes.size() - 1));
     for (uint16_t tar : genes)
       if (reg != tar) {
-        network[reg][tar] = calcAPMI(subsample_exp_mat.at(reg), subsample_exp_mat.at(tar));
+        network[reg][tar] =
+            calcAPMI(subsample_exp_mat.at(reg), subsample_exp_mat.at(tar));
         size_of_network += 1;
       }
   }
 
-	//-------time module-------
-	log_output << watch1.getSeconds() << std::endl;
-	log_output << "Size of network: " << size_of_network << " edges." << std::endl;
-	//-------------------------
-	
-	//-------time module-------
+  //-------time module-------
+  log_output << watch1.getSeconds() << std::endl;
+  log_output << "Size of network: " << size_of_network << " edges."
+             << std::endl;
+  //-------------------------
+
+  //-------time module-------
   log_output << "\nThreshold pruning time (" + method + "): ";
   watch1.reset();
-	//-------------------------
-	
-	uint32_t size_prev = size_of_network;
-	
+  //-------------------------
+
+  uint32_t size_prev = size_of_network;
+
   // unpack tuple into objects
-	gene_to_gene_to_float network_reg_reg_only;
-  std::tie(network, size_of_network, network_reg_reg_only) = pruneAlpha(network, regulators, size_of_network, method, alpha);
-	
-	//-------time module-------
-	log_output << watch1.getSeconds() << std::endl;
-	log_output << "Edges removed: " << size_prev - size_of_network << " edges." << std::endl;
-	log_output << "Size of network: " << size_of_network << " edges." << std::endl;
-	//-------------------------
-	
+  gene_to_gene_to_float network_reg_reg_only;
+  std::tie(network, size_of_network, network_reg_reg_only) =
+      pruneAlpha(network, regulators, size_of_network, method, alpha);
+
+  //-------time module-------
+  log_output << watch1.getSeconds() << std::endl;
+  log_output << "Edges removed: " << size_prev - size_of_network << " edges."
+             << std::endl;
+  log_output << "Size of network: " << size_of_network << " edges."
+             << std::endl;
+  //-------------------------
+
   // save for binomial distribution parameter (theta)
-	uint32_t num_edges_after_threshold_pruning = size_of_network; 
-	
-	if (prune_MaxEnt) {
-		//-------time module-------
+  uint32_t num_edges_after_threshold_pruning = size_of_network;
+
+  if (prune_MaxEnt) {
+    //-------time module-------
     log_output << "\nMaxEnt pruning time: ";
     watch1.reset();
-		//-------------------------
+    //-------------------------
 
-		size_prev = size_of_network;
-		network = pruneMaxEnt(network, size_of_network, regulators, network_reg_reg_only);
-		
-		//-------time module-------
-		log_output << watch1.getSeconds() << std::endl;
-		log_output << "Edges removed: " << size_prev - size_of_network << " edges." << std::endl;
-		log_output << "Size of network: " << size_of_network << " edges." << std::endl;
-		//-------------------------
-		
-		uint32_t num_edges_after_MaxEnt_pruning = size_of_network;
-		if (method == "FDR")
-			FPR_estimates.emplace_back((alpha*num_edges_after_MaxEnt_pruning)/(regulators.size()*genes.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		else if (method == "FWER")
-			FPR_estimates.emplace_back((alpha/(regulators.size()*(genes.size()-1)))*(num_edges_after_MaxEnt_pruning)/(num_edges_after_threshold_pruning));
-		else if (method == "FPR")
-			FPR_estimates.emplace_back(alpha*num_edges_after_MaxEnt_pruning/num_edges_after_threshold_pruning);
-	} else {
-		if (method == "FDR")
-			FPR_estimates.emplace_back((alpha*num_edges_after_threshold_pruning)/(regulators.size()*genes.size()-(1-alpha)*num_edges_after_threshold_pruning));
-		else if (method == "FWER")
-			FPR_estimates.emplace_back(alpha/(regulators.size()*(genes.size()-1)));
-		else if (method == "FPR")
-			FPR_estimates.emplace_back(alpha);
-	}
-	
-	//-------time module-------
+    size_prev = size_of_network;
+    network =
+        pruneMaxEnt(network, size_of_network, regulators, network_reg_reg_only);
+
+    //-------time module-------
+    log_output << watch1.getSeconds() << std::endl;
+    log_output << "Edges removed: " << size_prev - size_of_network << " edges."
+               << std::endl;
+    log_output << "Size of network: " << size_of_network << " edges."
+               << std::endl;
+    //-------------------------
+
+    uint32_t num_edges_after_MaxEnt_pruning = size_of_network;
+    if (method == "FDR")
+      FPR_estimates.emplace_back(
+          (alpha * num_edges_after_MaxEnt_pruning) /
+          (regulators.size() * genes.size() -
+           (1 - alpha) * num_edges_after_threshold_pruning));
+    else if (method == "FWER")
+      FPR_estimates.emplace_back(
+          (alpha / (regulators.size() * (genes.size() - 1))) *
+          (num_edges_after_MaxEnt_pruning) /
+          (num_edges_after_threshold_pruning));
+    else if (method == "FPR")
+      FPR_estimates.emplace_back(alpha * num_edges_after_MaxEnt_pruning /
+                                 num_edges_after_threshold_pruning);
+  } else {
+    if (method == "FDR")
+      FPR_estimates.emplace_back(
+          (alpha * num_edges_after_threshold_pruning) /
+          (regulators.size() * genes.size() -
+           (1 - alpha) * num_edges_after_threshold_pruning));
+    else if (method == "FWER")
+      FPR_estimates.emplace_back(alpha /
+                                 (regulators.size() * (genes.size() - 1)));
+    else if (method == "FPR")
+      FPR_estimates.emplace_back(alpha);
+  }
+
+  //-------time module-------
   log_output << "\nPrinting network in directory \"" + output_dir + "\".....";
   watch1.reset();
-	//-------------------------
-	
-	// writes the individual subnet output
-	writeNetworkRegTarMI(network, subnets_dir, "subnet" + std::to_string(subnet_num));
-	
-	//-------time module-------
-	log_output << watch1.getSeconds() << std::endl;
-	//-------------------------
-	
-	std::cout << "... subnetwork " + std::to_string(subnet_num) + " completed = " + std::to_string(size_of_network) + " edges returned ..." << std::endl;
-	
-	return network;
+  //-------------------------
+
+  // writes the individual subnet output
+  writeNetworkRegTarMI(network, subnets_dir,
+                       "subnet" + std::to_string(subnet_num));
+
+  //-------time module-------
+  log_output << watch1.getSeconds() << std::endl;
+  //-------------------------
+
+  std::cout << "... subnetwork " + std::to_string(subnet_num) +
+                   " completed = " + std::to_string(size_of_network) +
+                   " edges returned ..."
+            << std::endl;
+
+  return network;
 }
 
+const std::vector<consolidated_df_row>
+consolidate_subnets_vec(const std::vector<gene_to_gene_to_float> &subnets,
+                        const gene_to_floats &exp_mat,
+                        const geneset &regulators, const geneset &genes,
+                        const gene_to_shorts &ranks_mat) {
+  std::vector<consolidated_df_row> final_df;
+  const uint32_t tot_poss_edgs = regulators.size() * (genes.size() - 1);
 
-const std::vector<consolidated_df_row> consolidate_subnets_vec(const std::vector<gene_to_gene_to_float> &subnets, const gene_to_floats &exp_mat, const gene_to_shorts &ranks_mat) {
-	std::vector<consolidated_df_row> final_df;
-	const uint32_t tot_poss_edgs = regulators.size()*(genes.size()-1);
-	
-	for (const gene_id &reg : regulators) {
-		for (const gene_id &tar : genes) {
-			uint16_t num_occurrences = 0;
-			for (uint16_t sn = 0U; sn < subnets.size(); ++sn) {
-				if (subnets[sn].at(reg).find(tar) != subnets[sn].at(reg).end())
-					++num_occurrences;
-			}
-			if (num_occurrences > 0) {
-				const float final_mi = calcAPMI(exp_mat.at(reg), exp_mat.at(tar));
-				const float final_scc = calcSCC(ranks_mat.at(reg), ranks_mat.at(tar));
-				const double final_p = right_tail_binomial_p(subnets.size(), num_occurrences, FPR_estimate);
-				final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences, final_p);
-			}
-		}
-	}
-	
-	return final_df;
+  for (const gene_id &reg : regulators) {
+    for (const gene_id &tar : genes) {
+      uint16_t num_occurrences = 0;
+      for (uint16_t sn = 0U; sn < subnets.size(); ++sn) {
+        if (subnets[sn].at(reg).find(tar) != subnets[sn].at(reg).end())
+          ++num_occurrences;
+      }
+      if (num_occurrences > 0) {
+        const float final_mi = calcAPMI(exp_mat.at(reg), exp_mat.at(tar));
+        const float final_scc = calcSCC(ranks_mat.at(reg), ranks_mat.at(tar));
+        const double final_p = right_tail_binomial_p(
+            subnets.size(), num_occurrences, FPR_estimate);
+        final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences,
+                              final_p);
+      }
+    }
+  }
+
+  return final_df;
 }
