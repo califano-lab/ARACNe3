@@ -18,9 +18,9 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()
 
-# #ifdef IS_RELEASE used for conditional compilation
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_definitions(-DIS_RELEASE)
+# #ifdef _DEBUG used for conditional compilation
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_definitions(-D_DEBUG)
 endif()
 
 # Set compiler flags for Debug and Release builds
