@@ -10,9 +10,6 @@
 #include "io.hpp"
 #include "stopwatch.hpp"
 
-std::vector<float> FPR_estimates;
-float FPR_estimate = 1.5E-4f;
-
 extern uint32_t num_null_marginals;
 
 /*
@@ -143,7 +140,7 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
                const std::string &method, const float alpha,
                const bool prune_MaxEnt, const std::string &output_dir,
                const std::string &subnets_dir,
-               const std::string &subnet_log_dir, const uint16_t nthreads) {
+               const std::string &subnet_log_dir) {
   std::ofstream log_output(subnet_log_dir + "log_subnet" +
                            std::to_string(subnet_num) + ".txt");
   std::time_t t = std::time(nullptr);

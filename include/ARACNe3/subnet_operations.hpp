@@ -12,7 +12,7 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
                const std::string &method, const float alpha,
                const bool prune_MaxEnt, const std::string &output_dir,
                const std::string &subnets_dir,
-               const std::string &subnet_log_dir, const uint16_t nthreads);
+               const std::string &subnet_log_dir);
 
 const std::vector<consolidated_df_row>
 consolidate_subnets_vec(const std::vector<gene_to_gene_to_float> &subnets,

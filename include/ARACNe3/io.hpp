@@ -17,19 +17,21 @@ typedef struct consolidated_df_row {
 } consolidated_df_row;
 
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name);
+std::string makeUnixDirectoryNameUniversal(std::string &&dir_name);
 void makeDir(std::string &dir_name);
 std::vector<uint16_t> rank_indexes(const std::vector<float> &vec,
                                    std::mt19937 &rand);
 
-const geneset readRegList(const std::string &filename);
 std::tuple<const gene_to_floats, const gene_to_shorts, const geneset,
            const uint16_t>
 readExpMatrixAndCopulaTransform(const std::string &filename,
                                 const float &subsampling_percent,
                                 std::mt19937 &rand);
-
-gene_to_floats sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat,
-                                                std::mt19937 &rand);
+const geneset readRegList(const std::string &filename);
+gene_to_floats
+sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat,
+                                 const uint16_t &tot_num_subsample,
+                                 std::mt19937 &rand);
 
 void writeNetworkRegTarMI(const gene_to_gene_to_float &network,
                           const std::string &output_dir,
