@@ -159,7 +159,7 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
              << std::endl;
   log_output << "Method of first pruning step: " + method << std::endl;
   log_output << "Alpha: " + std::to_string(alpha) << std::endl;
-  log_output << "MaxEnt Pruning: " + std::to_string(prune_MaxEnt) << std::endl;
+  log_output << "MaxEnt Pruning: " + std::string(prune_MaxEnt ? "true" : "false") << std::endl;
   log_output << "\n-----------Begin Network Generation-----------" << std::endl;
 
   // begin subnet computation
