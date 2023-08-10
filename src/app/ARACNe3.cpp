@@ -141,10 +141,6 @@ int main(int argc, char *argv[]) {
 
   //--------------------------------------------------------------
 
-  std::string log_filename = "log_" + runid + ".txt";
-  std::string log_file_path = output_dir + log_filename;
-
-  std::ofstream log_output(log_file_path);
   const std::string subnets_dir =
       makeUnixDirectoryNameUniversal(output_dir + "subnets_" + runid + "/");
   const std::string subnets_log_dir =
@@ -155,6 +151,11 @@ int main(int argc, char *argv[]) {
   makeDir(subnets_dir);
   makeDir(subnets_log_dir);
   std::mt19937 rand{seed};
+
+  std::string log_filename = "log_" + runid + ".txt";
+  std::string log_file_path = output_dir + log_filename;
+
+  std::ofstream log_output(log_file_path);
 
   // print the initial command to the log output
   for (uint16_t i = 0; i < argc; ++i)
