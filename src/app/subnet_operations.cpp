@@ -1,7 +1,11 @@
-#include "stopwatch.hpp"
+#include "subnet_operations.hpp"
+#include "ARACNe3.hpp"
 #include "algorithms.hpp"
 #include "apmi_nullmodel.hpp"
-#include "subnet_operations.hpp"
+#include "io.hpp"
+#include "stopwatch.hpp"
+#include <fstream>
+#include <iostream>
 
 /*
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if
@@ -123,14 +127,14 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
 /*
  Generates an ARACNe3 subnet (called from main).
 */
-gene_to_gene_to_float
+std::pair<gene_to_gene_to_float, float>
 ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
                const geneset &regulators, const geneset &genes,
                const uint16_t tot_num_samps, const uint16_t tot_num_subsample,
                const uint16_t subnet_num, const bool prune_alpha,
-               const std::string &method, const float alpha,
-               const bool prune_MaxEnt, const std::string &output_dir,
-               const std::string &subnets_dir,
+               const APMINullModel &nullmodel, const std::string &method,
+               const float alpha, const bool prune_MaxEnt,
+               const std::string &output_dir, const std::string &subnets_dir,
                const std::string &subnet_log_dir) {
 
   float FPR_estimate_subnet;
@@ -161,7 +165,7 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
   // begin subnet computation
 
   //-------time module-------
-  Watch watch1 ;
+  Watch watch1;
   log_output << "\nRaw subnetwork computation time: ";
   watch1.reset();
   //-------------------------
@@ -195,8 +199,10 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
 
   // unpack tuple into objects
   gene_to_gene_to_float subnetwork_reg_reg_only;
+
   std::tie(subnetwork, size_of_subnetwork, subnetwork_reg_reg_only) =
-      pruneAlpha(subnetwork, regulators, size_of_subnetwork, method, alpha);
+      pruneAlpha(subnetwork, regulators, size_of_subnetwork, method, alpha,
+                 nullmodel);
 
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
@@ -216,37 +222,34 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
     //-------------------------
 
     size_prev = size_of_subnetwork;
-    subnetwork =
-        pruneMaxEnt(subnetwork, size_of_subnetwork, regulators, subnetwork_reg_reg_only);
+    subnetwork = pruneMaxEnt(subnetwork, size_of_subnetwork, regulators,
+                             subnetwork_reg_reg_only);
 
     //-------time module-------
     log_output << watch1.getSeconds() << std::endl;
-    log_output << "Edges removed: " << size_prev - size_of_subnetwork << " edges."
-               << std::endl;
+    log_output << "Edges removed: " << size_prev - size_of_subnetwork
+               << " edges." << std::endl;
     log_output << "Size of subnetwork: " << size_of_subnetwork << " edges."
                << std::endl;
     //-------------------------
 
     uint32_t num_edges_after_MaxEnt_pruning = size_of_subnetwork;
     if (method == "FDR")
-      FPR_estimate_subnet = 
-          (alpha * num_edges_after_MaxEnt_pruning) /
-          (regulators.size() * genes.size() -
-           (1 - alpha) * num_edges_after_threshold_pruning);
+      FPR_estimate_subnet = (alpha * num_edges_after_MaxEnt_pruning) /
+                            (regulators.size() * genes.size() -
+                             (1 - alpha) * num_edges_after_threshold_pruning);
     else if (method == "FWER")
-      FPR_estimate_subnet = 
-          (alpha / (regulators.size() * (genes.size() - 1))) *
-          (num_edges_after_MaxEnt_pruning) /
-          (num_edges_after_threshold_pruning);
+      FPR_estimate_subnet = (alpha / (regulators.size() * (genes.size() - 1))) *
+                            (num_edges_after_MaxEnt_pruning) /
+                            (num_edges_after_threshold_pruning);
     else if (method == "FPR")
       FPR_estimate_subnet = alpha * num_edges_after_MaxEnt_pruning /
-                                 num_edges_after_threshold_pruning;
+                            num_edges_after_threshold_pruning;
   } else {
     if (method == "FDR")
-      FPR_estimate_subnet = 
-          (alpha * num_edges_after_threshold_pruning) /
-          (regulators.size() * genes.size() -
-           (1 - alpha) * num_edges_after_threshold_pruning);
+      FPR_estimate_subnet = (alpha * num_edges_after_threshold_pruning) /
+                            (regulators.size() * genes.size() -
+                             (1 - alpha) * num_edges_after_threshold_pruning);
     else if (method == "FWER")
       FPR_estimate_subnet = alpha / (regulators.size() * (genes.size() - 1));
     else if (method == "FPR")
@@ -254,7 +257,7 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
   }
 
   //-------time module-------
-  log_output << "\nPrinting subnetwork in directory \"" + output_dir + "subnets\"...";
+  log_output << "\nPrinting subnetwork in directory \"" + subnets_dir + "\"...";
   watch1.reset();
   //-------------------------
 
@@ -266,9 +269,9 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
   log_output << watch1.getSeconds() << std::endl;
   //-------------------------
 
-  std::cout << "... subnetwork " + std::to_string(subnet_num) +
+  std::cout << "...subnetwork " + std::to_string(subnet_num) +
                    " completed = " + std::to_string(size_of_subnetwork) +
-                   " edges returned ..."
+                   " edges returned..."
             << std::endl;
 
   return std::make_pair(subnetwork, FPR_estimate_subnet);
@@ -276,7 +279,7 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
 
 const std::vector<consolidated_df_row>
 consolidate_subnets_vec(const std::vector<gene_to_gene_to_float> &subnets,
-                        const gene_to_floats &exp_mat,
+                        const float FPR_estimate, const gene_to_floats &exp_mat,
                         const geneset &regulators, const geneset &genes,
                         const gene_to_shorts &ranks_mat) {
   std::vector<consolidated_df_row> final_df;

@@ -41,5 +41,5 @@ void writeNetworkRegTarMI(const gene_to_gene_to_float &network,
 void writeConsolidatedNetwork(const std::vector<consolidated_df_row> &final_df,
                               std::string filename);
 
-gene_to_edge_tars readSubNetAndUpdateFPRFromLog(const std::string &output_dir,
-                                                const uint16_t subnet_num);
+//gene_to_edge_tars readSubNetAndUpdateFPRFromLog(const std::string &output_dir,
+ //                                               const uint16_t subnet_num);

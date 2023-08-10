@@ -68,9 +68,6 @@ int main(int argc, char *argv[]) {
     output_dir += directory_slash;
 
   const std::string cached_dir = makeUnixDirectoryNameUniversal("./" + hiddenfpre + "ARACNe3_cached/");
-  const std::string subnets_dir = makeUnixDirectoryNameUniversal(output_dir + "subnets/");
-  const std::string subnets_log_dir = makeUnixDirectoryNameUniversal(output_dir + "subnets_log/");
-
   //--------------------parsing parameters------------------------
 
   if (cmdOptionExists(argv, argv + argc, "--alpha"))
@@ -139,13 +136,18 @@ int main(int argc, char *argv[]) {
 
   //--------------------------------------------------------------
 
+  std::string log_filename = "log_" + runid + ".txt";
+  std::string log_file_path = output_dir + log_filename;
+
+  std::ofstream log_output(log_file_path);
+  const std::string subnets_dir = makeUnixDirectoryNameUniversal(output_dir + "subnets_" + runid + "/");
+  const std::string subnets_log_dir = makeUnixDirectoryNameUniversal(output_dir + "subnets_log_" + runid + "/");
+
   makeDir(output_dir);
   makeDir(cached_dir);
-  makeDir(subnets_log_dir);
   makeDir(subnets_dir);
-
-  std::string log_file_name = output_dir + "log_" + runid + ".txt";
-  std::ofstream log_output(log_file_name);
+  makeDir(subnets_log_dir);
+  std::mt19937 rand{seed};
 
   // print the initial command to the log output
   for (uint16_t i = 0; i < argc; ++i)
@@ -159,22 +161,20 @@ int main(int argc, char *argv[]) {
              << "---------" << std::endl;
 
   std::cout
-      << "Beginning ARACNe3 instance.  See logs and progress reports in \"" +
-             makeUnixDirectoryNameUniversal(output_dir) + "finalLog.txt\"."
+      << "Beginning ARACNe3 instance.  See logs and progress reports in \"" + log_file_path + "\"."
       << std::endl;
   log_output << "Beginning ARACNe3 instance..." << std::endl;
 
-  std::mt19937 rand{seed};
   Watch watch1;
   watch1.reset();
 
   log_output << "\nGene expression matrix & regulators list read time: ";
 
-  auto tuple = readExpMatrixAndCopulaTransform(exp_mat_file, subsampling_percent, rand);
-  const gene_to_floats& exp_mat = std::get<0>(tuple);
-  const gene_to_shorts& ranks_mat = std::get<1>(tuple);
-  const geneset& genes = std::get<2>(tuple);
-  const uint16_t tot_num_samps = std::get<3>(tuple);
+  auto data = readExpMatrixAndCopulaTransform(exp_mat_file, subsampling_percent, rand);
+  const gene_to_floats& exp_mat = std::get<0>(data);
+  const gene_to_shorts& ranks_mat = std::get<1>(data);
+  const geneset& genes = std::get<2>(data);
+  const uint16_t tot_num_samps = std::get<3>(data);
 
   uint16_t tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
   if (tot_num_subsample >= tot_num_samps || tot_num_subsample < 0) {
@@ -287,7 +287,8 @@ int main(int argc, char *argv[]) {
   } else if (go_to_consolidate) {
 
     //-------time module-------
-    log_output << "\nReading subnetwork(s) time: ";
+    log_output << "\nConsolidation requested." << std::endl
+    log_output << "Reading subnetwork(s) time: ";
     watch1.reset();
     //-------------------------
 
@@ -295,7 +296,7 @@ int main(int argc, char *argv[]) {
          ++subnet_num) {
       try {
         subnets.push_back(
-            readSubNetAndUpdateFPRFromLog(output_dir, subnet_num));
+            readARACNe3Output(output_dir, subnet_num));
         num_subnets = subnet_num;
       } catch (TooManySubnetsRequested e) {
         std::cout << "Warning: " + std::string(e.what()) << std::endl;
@@ -323,34 +324,15 @@ int main(int argc, char *argv[]) {
     watch1.reset();
     //-------------------------
 
-    std::vector<consolidated_df_row> final_df = consolidate_subnets_vec(subnets);
+    std::vector<consolidated_df_row> final_df = consolidate_subnets_vec(subnets, exp_mat, regulators, genes, ranks_mat);
 
     //-------time module-------
     log_output << watch1.getSeconds() << std::endl;
+    log_output << "Subnetworks consolidated: " << std::to_string(num_subnets) << std::endl;
     log_output << "\nWriting final network..." << std::endl;
     //-------------------------
 
-    writeConsolidatedNetwork(final_df, output_dir + "finalNet_" +
-                                           std::to_string(num_subnets) +
-                                           "subnets.txt");
-
-    /* Now that we know how many subnets, we can rename finalLog to include
-     * that. */
-    std::string final_log_newname =
-        "finalLog_" + std::to_string(num_subnets) + "subnets-consolidate.txt";
-
-    //-------time module-------
-    log_output << std::endl
-               << "Renaming \"finalLog.txt\" to \"" + final_log_newname +
-                      "\"..."
-               << std::endl;
-    std::cout << std::endl
-              << "Renaming \"finalLog.txt\" to \"" + final_log_newname + "\"..."
-              << std::endl;
-    //-------------------------
-
-    std::filesystem::rename(output_dir + "finalLog.txt",
-                            output_dir + final_log_newname);
+    writeConsolidatedNetwork(final_df, output_dir + "consolidated-net_" + runid + ".txt");
 
   } else if (do_not_consolidate) {
 
@@ -358,23 +340,6 @@ int main(int argc, char *argv[]) {
     log_output << "\nNo consolidation requested." << std::endl;
     //-------------------------
 
-    /* Now that we know how many subnets, we can rename finalLog to include
-     * that. */
-    std::string final_log_newname =
-        "finalLog_" + std::to_string(num_subnets) + "subnets-noconsolidate.txt";
-
-    //-------time module-------
-    log_output << std::endl
-               << "Renaming \"finalLog.txt\" to \"" + final_log_newname +
-                      "\"..."
-               << std::endl;
-    std::cout << std::endl
-              << "Renaming \"finalLog.txt\" to \"" + final_log_newname + "\"..."
-              << std::endl;
-    //-------------------------
-
-    std::filesystem::rename(output_dir + "finalLog.txt",
-                            output_dir + final_log_newname);
   }
 
   using namespace std::string_literals;

@@ -268,7 +268,7 @@ void addToCompressionVecs(const std::string &gene) {
 /*
  Reads a subnet file and then updates the FPR_estimates vector defined in "subnet_operations.cpp"
  */
-gene_to_edge_tars readSubNetAndUpdateFPRFromLog(const std::string &output_dir, const uint16_t subnet_num) {
+gene_to_gene_to_float readARACNe3Subnet(const std::string output_dir, const uint16_t subnet_num) {
 	std::string subnet_filename = output_dir + "subnets/output_subnet" + std::to_string(subnet_num) + ".txt";
 	std::string log_filename = output_dir + "log/log_subnet" + std::to_string(subnet_num) + ".txt";
 	
