@@ -9,7 +9,7 @@ set(SOURCES
 	stopwatch.cpp
 	io.cpp
 	algorithms.cpp
-	NullModel.cpp
+	apmi_nullmodel.cpp
 	subnet_operations.cpp
 )
 
