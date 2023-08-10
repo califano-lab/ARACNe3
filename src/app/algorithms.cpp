@@ -1,3 +1,5 @@
+#include <iostream>
+#include <numeric>
 #include "ARACNe3.hpp"
 #include "algorithms.hpp"
 
