@@ -3,7 +3,6 @@
 #include <vector>
 #include <string> 
 #include <random>
-#include <algorithm>
 
 class APMINullModel {
 private:
@@ -17,5 +16,5 @@ public:
 	APMINullModel(const uint32_t n_nulls, const uint16_t tot_num_subsample, const std::string& cached_dir, std::mt19937 &rand); // ctor for cached APMINullModel
 	~APMINullModel(); // dtor
 	void cacheNullModel(const std::string cached_dir); // cache vec, m, and b
-	const float getMIPVal(const float& mi, const float& p_precise = 0.001f); // return p value
+	const float getMIPVal(const float& mi, const float& p_precise = 0.001f) const; // return p value
 };

@@ -140,3 +140,42 @@ double right_tail_binomial_p(const uint16_t &n, const uint16_t &k, const double 
 		p += std::exp(lchoose(n, i) + i * std::log(theta) + (n - i) * std::log(1-theta));
 	return p;
 }
+
+/**
+ * @brief Calculate linear regression to find the slope and y-intercept.
+ * 
+ * This function takes two float vector parameters, x and y, representing data
+ * points on a two-dimensional plane. It returns a pair of floats where the
+ * first float is the slope (m) and the second float is the y-intercept (b)
+ * from the line equation y = mx + b.
+ * 
+ * @param x A vector of x floats.
+ * @param y A vector of y floats.
+ *
+ * @return A pair of floats (m,b).
+ */
+std::pair<float, float> linearRegress(const std::vector<float>& x, const std::vector<float>& y){
+	std::vector<float>::size_type N = x.size();
+	
+	float sumx = 0.0f, sumx2 = 0.0f, sumxy = 0.0f, sumy = 0.0f, sumy2 = 0.0f;
+	
+	for (uint32_t i = 0; i < N; ++i) { 
+		sumx  += x[i];       
+		sumx2 += x[i]*x[i];  
+		sumxy += x[i] * y[i];
+		sumy  += y[i];      
+		sumy2 += y[i]*y[i]; 
+	}
+
+	float denom = (N * sumx2 - sumx*sumx);
+	float m = 0.0f, b = 0.0f;
+	if (denom == 0) {
+		std::cerr << "Could not fit piecewise null model to log(p) for p < 0.01. Aborting." << std::endl;
+    std::exit(1);
+	}
+	
+	m = (N * sumxy  -  sumx * sumy) / denom;
+	b = (sumy * sumx2  -  sumx * sumxy) / denom;
+	
+	return std::make_pair(m, b); 
+}

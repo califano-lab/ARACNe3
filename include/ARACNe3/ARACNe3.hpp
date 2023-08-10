@@ -1,24 +1,8 @@
 #pragma once
 
 #include <vector>
-#include <string>
-#include <sstream>
-#include <tuple>
-#include <set>
 #include <unordered_set>
-#include <unordered_map>
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <random>
-#include <thread>
-#include <numeric>
-#include <math.h>
-#include <filesystem>
-#include <chrono>
-#include <regex>
-#include <iomanip>
-#include <omp.h>
+#include <string>
 
 #if defined __linux__ || defined __APPLE__
 const std::string hiddenfpre = ".";
@@ -27,6 +11,7 @@ const char directory_slash = '/';
 const char directory_slash = '\\';
 const std::string hiddenfpre = "";
 #else
+const char directory_slash = '/';
 const std::string hiddenfpre = "";
 #endif /* __linux__ || __APPLE__ */
 
@@ -51,14 +36,3 @@ typedef std::unordered_map<gene_id, std::unordered_map<gene_id, float>>
     gene_to_gene_to_float;
 typedef std::unordered_map<gene_id, std::unordered_map<gene_id, float>>
     gene_to_gene_to_float;
-
-//--------------------- NullModel.cpp	 		-----------------------
-// sets a file static variable of an ordered null distribution
-const std::vector<float> initNullMIs(const uint16_t& tot_num_subsample);
-
-// the function below requires that initNullMIs has been called
-const float getMIPVal(const float& mi, const float& p_precise = 0.001f);
-
-// the function below requires that initNullMIs has been called
-const std::vector<float> getMIPVals(const std::vector<float>& mis, const float& p_precise = 0.001f);
-

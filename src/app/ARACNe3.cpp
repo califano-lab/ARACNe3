@@ -1,19 +1,16 @@
+#include <omp.h>
+#include <iostream>
+#include <fstream>
 #include "ARACNe3.hpp"
 #include "cmdline_parser.hpp"
 #include "stopwatch.hpp"
+#include "apmi_nullmodel.hpp"
 #include "subnet_operations.hpp"
 #include "io.hpp"
 
-/*
- These variables are tuned according to user preferences.  Some of these the user doesn't choose, such as the cached_dir, which is always the working directory of the ARACNe3 script.
- */
+uint16_t nthreads = 1U;
 
-/*
- These variables represent the original data and do not change after matrix files are read.
- */
 extern std::vector<std::string> decompression_map;
-
-extern uint32_t num_null_marginals;
 
 /*
  Main function is the command line executable; this primes the global variables and parses the command line.  It will also return usage notes if the user incorrectly calls ./ARACNe3.
@@ -22,6 +19,9 @@ extern uint32_t num_null_marginals;
  ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noAlpha -a 0.05 --alpha 0.05 --noMaxEnt --subsample 0.6321 --seed 1 --mithresh 0.2 --numnulls 1000000
  */
 int main(int argc, char *argv[]) {
+
+  //--------------------check requirements------------------------
+
   if (cmdOptionExists(argv, argv + argc, "-h") ||
       cmdOptionExists(argv, argv + argc, "--help") ||
       !cmdOptionExists(argv, argv + argc, "-e") ||
@@ -34,49 +34,50 @@ int main(int argc, char *argv[]) {
               << std::endl;
     return EXIT_FAILURE;
   }
-  std::string cached_dir;
-  std::string output_dir;
-  std::string subnets_log_dir;
-  std::string subnets_dir;
-  std::string method = "FDR";
-  bool prune_alpha = true;
-  bool adaptive = false;
-  bool do_not_consolidate = false;
-  bool go_to_consolidate = false;
-  float alpha = 0.05f;
-  double subsampling_percent = 1 - std::exp(-1);
-  bool prune_MaxEnt = true;
-
-  std::vector<float> FPR_estimates;
-  float FPR_estimate = 1.5E-4f;
+  
+  //--------------------initialize parameters---------------------
 
   uint16_t num_subnets = 1U;
+  double subsampling_percent = 1 - std::exp(-1);
+  bool do_not_consolidate = false;
+  bool go_to_consolidate = false;
+  bool adaptive = false;
+  float alpha = 0.05f;
+  bool prune_alpha = true;
+  bool prune_MaxEnt = true;
+  uint32_t seed = 0U;
   uint16_t num_subnets_to_consolidate = 0U;
   uint16_t targets_per_regulator = 30U;
-  uint16_t nthreads = 1U;
-
-  uint32_t seed = 0U;
+  std::string runid = "defaultid";
+  std::string method = "FDR";
 
   float DEVELOPER_mi_cutoff = 0.0f;
+  uint32_t DEVELOPER_num_null_marginals = 1000000U;
 
-  //--------------------cmd line parsing------------------------
-
+  //--------------------parsing filesystem------------------------
+  
   const std::string exp_mat_file = makeUnixDirectoryNameUniversal(
       (std::string)getCmdOption(argv, argv + argc, "-e"));
   const std::string reg_list_file = makeUnixDirectoryNameUniversal(
       (std::string)getCmdOption(argv, argv + argc, "-r"));
-
-  output_dir = (std::string)getCmdOption(argv, argv + argc, "-o");
+  std::string output_dir = makeUnixDirectoryNameUniversal(
+      (std::string)getCmdOption(argv, argv + argc, "-o"));
 
   // make sure output_dir has a trailing slash
   if (output_dir.back() != directory_slash)
     output_dir += directory_slash;
 
+  const std::string cached_dir = makeUnixDirectoryNameUniversal("./" + hiddenfpre + "ARACNe3_cached/");
+  const std::string subnets_dir = makeUnixDirectoryNameUniversal(output_dir + "subnets/");
+  const std::string subnets_log_dir = makeUnixDirectoryNameUniversal(output_dir + "subnets_log/");
+
+  //--------------------parsing parameters------------------------
+
   if (cmdOptionExists(argv, argv + argc, "--alpha"))
     alpha = std::stof(getCmdOption(argv, argv + argc, "--alpha"));
-  if (alpha >= 1.00f || alpha <= 0) {
-    std::cout << "alpha not on range [0,1], setting to 1.00" << std::endl;
-    alpha = 1.01f;
+  if (alpha > 1.f || alpha <= 0) {
+    std::cout << "alpha not on range [0,1], setting to 1." << std::endl;
+    alpha = 1.f;
   }
 
   if (cmdOptionExists(argv, argv + argc, "--seed"))
@@ -86,10 +87,10 @@ int main(int argc, char *argv[]) {
     subsampling_percent =
         std::stod(getCmdOption(argv, argv + argc, "--subsample"));
 
-  if (subsampling_percent > 1.0000001 || subsampling_percent <= 0) {
-    std::cout << "Subsampling percent not on range (0,1]; setting to 1.00."
+  if (subsampling_percent > 1.f || subsampling_percent <= 0) {
+    std::cout << "Subsampling percent not on range (0,1]; setting to 1."
               << std::endl;
-    subsampling_percent = 1.00;
+    subsampling_percent = 1.f;
   }
 
   if (cmdOptionExists(argv, argv + argc, "-x"))
@@ -99,10 +100,8 @@ int main(int argc, char *argv[]) {
   if (cmdOptionExists(argv, argv + argc, "--threads"))
     nthreads = std::stoi(getCmdOption(argv, argv + argc, "--threads"));
 
-  if (cmdOptionExists(argv, argv + argc, "--noAlpha"))
+  if (cmdOptionExists(argv, argv + argc, "--noalpha"))
     prune_alpha = false;
-  alpha = 1.f;
-
   if (cmdOptionExists(argv, argv + argc, "--noMaxEnt"))
     prune_MaxEnt = false;
   if (cmdOptionExists(argv, argv + argc, "--FDR"))
@@ -113,12 +112,14 @@ int main(int argc, char *argv[]) {
     method = "FPR";
   if (cmdOptionExists(argv, argv + argc, "--adaptive"))
     adaptive = true;
-  if (cmdOptionExists(argv, argv + argc, "--noconsolidate"))
+  if (cmdOptionExists(argv, argv + argc, "--noConsolidate"))
     do_not_consolidate = true;
   if (cmdOptionExists(argv, argv + argc, "--consolidate"))
     go_to_consolidate = true;
+  if (cmdOptionExists(argv, argv + argc, "--runid"))
+    runid = getCmdOption(argv, argv + argc, "--runid");
 
-  //----------------------DEVELOPER--------------------------
+  //--------------------developer parameters----------------------
 
   if (cmdOptionExists(argv, argv + argc, "--mithresh"))
     DEVELOPER_mi_cutoff =
@@ -127,29 +128,24 @@ int main(int argc, char *argv[]) {
     DEVELOPER_mi_cutoff = 0.0f;
 
   if (cmdOptionExists(argv, argv + argc, "--numnulls"))
-    num_null_marginals =
+    DEVELOPER_num_null_marginals =
         std::stoi(getCmdOption(argv, argv + argc, "--numnulls"));
-  if (num_null_marginals < 0) {
+  if (DEVELOPER_num_null_marginals < 0) {
     std::cout
         << "Number of null marginals not on range (0,inf); setting to 1000000."
         << std::endl;
-    num_null_marginals = 1000000;
+    DEVELOPER_num_null_marginals = 1000000;
   }
 
-  //------------------------------------------------------------
-
-  cached_dir = "./" + hiddenfpre + "ARACNe3_cached/";
+  //--------------------------------------------------------------
 
   makeDir(output_dir);
   makeDir(cached_dir);
-
-  subnets_log_dir = output_dir + "subnets_log/";
   makeDir(subnets_log_dir);
-
-  subnets_dir = output_dir + "subnets/";
   makeDir(subnets_dir);
 
-  std::ofstream log_output(output_dir + "finalLog.txt");
+  std::string log_file_name = output_dir + "log_" + runid + ".txt";
+  std::ofstream log_output(log_file_name);
 
   // print the initial command to the log output
   for (uint16_t i = 0; i < argc; ++i)
@@ -201,7 +197,8 @@ int main(int argc, char *argv[]) {
   watch1.reset();
   //-------------------------
 
-  initNullMIs(tot_num_subsample);
+  APMINullModel nullmodel = APMINullModel(DEVELOPER_num_null_marginals, tot_num_subsample, cached_dir, rand);
+  nullmodel.cacheNullModel(cached_dir);
 
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
@@ -209,6 +206,8 @@ int main(int argc, char *argv[]) {
 
   // Must exist regardless of whether we skip to consolidation
   std::vector<gene_to_gene_to_float> subnets;
+  std::vector<float> FPR_estimates;
+  float FPR_estimate = 1.5E-4f;
 
   if (!go_to_consolidate) {
 
@@ -226,7 +225,7 @@ int main(int argc, char *argv[]) {
       bool stoppingCriteriaMet = false;
       uint16_t subnet_num = 0U;
 
-#pragma omp parallel for
+#pragma omp parallel for num_threads(nthreads)
       for (int subnet_num = 0; subnet_num < max_subnets; ++subnet_num) {
         if (stoppingCriteriaMet)
           continue; // skip loop iteration if stopping condition is met
@@ -237,7 +236,7 @@ int main(int argc, char *argv[]) {
               exp_mat, tot_num_subsample, rand);
         }
 
-        gene_to_gene_to_float subnet = ARACNe3_subnet(
+        const auto &[subnet, FPR_estimate_subnet] = ARACNe3_subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
             tot_num_subsample, subnet_num, prune_alpha, method, alpha,
             prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir);
@@ -245,6 +244,7 @@ int main(int argc, char *argv[]) {
 #pragma omp critical(stopConditionCheck)
         {
           subnets.push_back(subnet);
+          FPR_estimates.push_back(FPR_estimate_subnet);
           uint16_t min = 65535U;
           // add any new edges to the regulon_set
           for (const auto [reg, tar_mi] : subnet) {
@@ -260,7 +260,8 @@ int main(int argc, char *argv[]) {
       num_subnets = subnets.size();
     } else if (!adaptive) {
       subnets = std::vector<gene_to_gene_to_float>(num_subnets);
-#pragma omp parallel for
+      FPR_estimates = std::vector<float>(num_subnets);
+#pragma omp parallel for num_threads(nthreads)
       for (int i = 0; i < num_subnets; ++i) {
         gene_to_floats subsample_exp_mat;
 #pragma omp critical(randObjectAccess)
@@ -268,10 +269,12 @@ int main(int argc, char *argv[]) {
           subsample_exp_mat = sampleExpMatAndReCopulaTransform(
               exp_mat, tot_num_subsample, rand);
         }
-        subnets[i] = ARACNe3_subnet(subsample_exp_mat, regulators, genes,
-                                    tot_num_samps, tot_num_subsample, i,
-                                    prune_alpha, method, alpha, prune_MaxEnt,
-                                    output_dir, subnets_dir, subnets_log_dir);
+        const auto &[subnet, FPR_estimate_subnet] = ARACNe3_subnet(
+            subsample_exp_mat, regulators, genes, tot_num_samps,
+            tot_num_subsample, i, prune_alpha, method, alpha, prune_MaxEnt,
+            output_dir, subnets_dir, subnets_log_dir);
+        subnets[i] = subnet;
+        FPR_estimates[i] = FPR_estimate_subnet;
       }
     }
 
@@ -295,7 +298,7 @@ int main(int argc, char *argv[]) {
             readSubNetAndUpdateFPRFromLog(output_dir, subnet_num));
         num_subnets = subnet_num;
       } catch (TooManySubnetsRequested e) {
-        std::cout << "WARNING: " + std::string(e.what()) << std::endl;
+        std::cout << "Warning: " + std::string(e.what()) << std::endl;
         break;
       }
     }
@@ -314,6 +317,7 @@ int main(int argc, char *argv[]) {
       FPR_estimates.size();
 
   if (!do_not_consolidate) {
+
     //-------time module-------
     log_output << "\nConsolidating subnetwork(s) time: ";
     watch1.reset();

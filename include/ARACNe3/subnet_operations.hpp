@@ -4,7 +4,7 @@
 #include "ARACNe3.hpp"
 #include "io.hpp"
 
-gene_to_gene_to_float
+std::pair<gene_to_gene_to_float, float> 
 ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
                const geneset &regulators, const geneset &genes,
                const uint16_t tot_num_samps, const uint16_t tot_num_subsample,
@@ -19,3 +19,13 @@ consolidate_subnets_vec(const std::vector<gene_to_gene_to_float> &subnets,
                         const gene_to_floats &exp_mat,
                         const geneset &regulators, const geneset &genes,
                         const gene_to_shorts &ranks_mat);
+
+class TooManySubnetsRequested : public std::exception {
+public:
+  const char *what() {
+    return "You tried to consolidate too many subnetworks. Subnet files and "
+           "subnet log files must exist to all subnetworks specified, and "
+           "must be organized exactly according to ARACNe3 output.";
+  }
+};
+

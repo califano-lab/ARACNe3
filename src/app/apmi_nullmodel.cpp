@@ -1,6 +1,10 @@
+#include <omp.h>
+#include <sstream>
 #include "apmi_nullmodel.hpp"
 #include "ARACNe3.hpp"
 #include "algorithms.hpp"
+
+extern uint16_t nthreads;
 
 APMINullModel::APMINullModel(const APMINullModel &copied) {
   null_mis = copied.null_mis;
@@ -61,7 +65,7 @@ APMINullModel::APMINullModel(const uint32_t n_nulls,
 
     this->null_mis = std::vector<float>(n_nulls);
 
-#pragma omp parallel for
+#pragma omp parallel for num_threads(nthreads)
     for (uint32_t i = 0U; i < n_nulls; ++i) {
 #pragma omp critical
       { std::shuffle(shuffle_vec.begin(), shuffle_vec.end(), rand); }
@@ -112,7 +116,7 @@ void APMINullModel::cacheNullModel(const std::string cached_dir) {
   return;
 }
 
-const float APMINullModel::getMIPVal(const float &mi, const float &p_precise) {
+const float APMINullModel::getMIPVal(const float &mi, const float &p_precise) const {
   // points to first index for which mi > the rest.
   auto it = std::upper_bound(null_mis.cbegin(), null_mis.cend(), mi,
                              std::greater<float>());

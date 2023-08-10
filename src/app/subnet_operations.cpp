@@ -1,16 +1,7 @@
-/*
- subnet_operations for ARACNe3.  Contains various functions only needed in the
- consolidation step, such as calculation of the p-value for an edge based on the
- number of subnetworks it appeared in, the calculation of the SCC for an edge,
- etc.
- */
-
-#include "subnet_operations.hpp"
-#include "algorithms.hpp"
-#include "io.hpp"
 #include "stopwatch.hpp"
-
-extern uint32_t num_null_marginals;
+#include "algorithms.hpp"
+#include "apmi_nullmodel.hpp"
+#include "subnet_operations.hpp"
 
 /*
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if
@@ -19,7 +10,7 @@ extern uint32_t num_null_marginals;
 std::tuple<gene_to_gene_to_float, uint32_t, gene_to_gene_to_float>
 pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
            uint32_t size_of_network, const std::string &method,
-           const float alpha) {
+           const float alpha, const APMINullModel &nullmodel) {
 
   /* A vector that describes each regulator-mi-target interaction must be
    * initialized for sorting-based pruning */
@@ -43,14 +34,14 @@ pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
     // Benjamini-Hochberg
     for (auto it = reg_tar_mi.begin(); it != reg_tar_mi.end(); ++it) {
       const auto k = it - reg_tar_mi.begin();
-      const float p_k = getMIPVal(std::get<2>(*it), 100.0 / num_null_marginals);
+      const float p_k = nullmodel.getMIPVal(std::get<2>(*it));
       if (p_k < k * alpha / m)
         argmax_k = static_cast<uint32_t>(k) + 1;
     }
   } else if (method == "FWER") {
     for (auto it = reg_tar_mi.begin(); it != reg_tar_mi.end(); ++it) {
       const auto k = it - reg_tar_mi.begin();
-      const float p_k = getMIPVal(std::get<2>(*it), 100.0 / num_null_marginals);
+      const float p_k = nullmodel.getMIPVal(std::get<2>(*it));
       if (p_k < alpha / m)
         argmax_k = static_cast<uint32_t>(k) + 1;
     }
@@ -58,7 +49,7 @@ pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
     // Only for benchmarking
     for (auto it = reg_tar_mi.begin(); it != reg_tar_mi.end(); ++it) {
       const auto k = it - reg_tar_mi.begin();
-      const float p_k = getMIPVal(std::get<2>(*it), 100.0 / num_null_marginals);
+      const float p_k = nullmodel.getMIPVal(std::get<2>(*it));
       if (p_k < alpha)
         argmax_k = static_cast<uint32_t>(k) + 1;
     }
@@ -141,9 +132,12 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
                const bool prune_MaxEnt, const std::string &output_dir,
                const std::string &subnets_dir,
                const std::string &subnet_log_dir) {
+
+  float FPR_estimate_subnet;
   std::ofstream log_output(subnet_log_dir + "log_subnet" +
                            std::to_string(subnet_num) + ".txt");
   std::time_t t = std::time(nullptr);
+
   log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z")
              << "---------" << std::endl
              << std::endl;
@@ -167,28 +161,28 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
   // begin subnet computation
 
   //-------time module-------
-  Watch watch1;
-  log_output << "\nRaw network computation time: ";
+  Watch watch1 ;
+  log_output << "\nRaw subnetwork computation time: ";
   watch1.reset();
   //-------------------------
 
-  uint32_t size_of_network = 0U;
+  uint32_t size_of_subnetwork = 0U;
 
-  gene_to_gene_to_float network;
-  network.reserve(regulators.size());
+  gene_to_gene_to_float subnetwork;
+  subnetwork.reserve(regulators.size());
   for (uint16_t reg : regulators) {
-    network[reg].reserve(regulators.size() * (genes.size() - 1));
+    subnetwork[reg].reserve(regulators.size() * (genes.size() - 1));
     for (uint16_t tar : genes)
       if (reg != tar) {
-        network[reg][tar] =
+        subnetwork[reg][tar] =
             calcAPMI(subsample_exp_mat.at(reg), subsample_exp_mat.at(tar));
-        size_of_network += 1;
+        size_of_subnetwork += 1;
       }
   }
 
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
-  log_output << "Size of network: " << size_of_network << " edges."
+  log_output << "Size of subnetwork: " << size_of_subnetwork << " edges."
              << std::endl;
   //-------------------------
 
@@ -197,23 +191,23 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
   watch1.reset();
   //-------------------------
 
-  uint32_t size_prev = size_of_network;
+  uint32_t size_prev = size_of_subnetwork;
 
   // unpack tuple into objects
-  gene_to_gene_to_float network_reg_reg_only;
-  std::tie(network, size_of_network, network_reg_reg_only) =
-      pruneAlpha(network, regulators, size_of_network, method, alpha);
+  gene_to_gene_to_float subnetwork_reg_reg_only;
+  std::tie(subnetwork, size_of_subnetwork, subnetwork_reg_reg_only) =
+      pruneAlpha(subnetwork, regulators, size_of_subnetwork, method, alpha);
 
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
-  log_output << "Edges removed: " << size_prev - size_of_network << " edges."
+  log_output << "Edges removed: " << size_prev - size_of_subnetwork << " edges."
              << std::endl;
-  log_output << "Size of network: " << size_of_network << " edges."
+  log_output << "Size of subnetwork: " << size_of_subnetwork << " edges."
              << std::endl;
   //-------------------------
 
   // save for binomial distribution parameter (theta)
-  uint32_t num_edges_after_threshold_pruning = size_of_network;
+  uint32_t num_edges_after_threshold_pruning = size_of_subnetwork;
 
   if (prune_MaxEnt) {
     //-------time module-------
@@ -221,52 +215,51 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
     watch1.reset();
     //-------------------------
 
-    size_prev = size_of_network;
-    network =
-        pruneMaxEnt(network, size_of_network, regulators, network_reg_reg_only);
+    size_prev = size_of_subnetwork;
+    subnetwork =
+        pruneMaxEnt(subnetwork, size_of_subnetwork, regulators, subnetwork_reg_reg_only);
 
     //-------time module-------
     log_output << watch1.getSeconds() << std::endl;
-    log_output << "Edges removed: " << size_prev - size_of_network << " edges."
+    log_output << "Edges removed: " << size_prev - size_of_subnetwork << " edges."
                << std::endl;
-    log_output << "Size of network: " << size_of_network << " edges."
+    log_output << "Size of subnetwork: " << size_of_subnetwork << " edges."
                << std::endl;
     //-------------------------
 
-    uint32_t num_edges_after_MaxEnt_pruning = size_of_network;
+    uint32_t num_edges_after_MaxEnt_pruning = size_of_subnetwork;
     if (method == "FDR")
-      FPR_estimates.emplace_back(
+      FPR_estimate_subnet = 
           (alpha * num_edges_after_MaxEnt_pruning) /
           (regulators.size() * genes.size() -
-           (1 - alpha) * num_edges_after_threshold_pruning));
+           (1 - alpha) * num_edges_after_threshold_pruning);
     else if (method == "FWER")
-      FPR_estimates.emplace_back(
+      FPR_estimate_subnet = 
           (alpha / (regulators.size() * (genes.size() - 1))) *
           (num_edges_after_MaxEnt_pruning) /
-          (num_edges_after_threshold_pruning));
+          (num_edges_after_threshold_pruning);
     else if (method == "FPR")
-      FPR_estimates.emplace_back(alpha * num_edges_after_MaxEnt_pruning /
-                                 num_edges_after_threshold_pruning);
+      FPR_estimate_subnet = alpha * num_edges_after_MaxEnt_pruning /
+                                 num_edges_after_threshold_pruning;
   } else {
     if (method == "FDR")
-      FPR_estimates.emplace_back(
+      FPR_estimate_subnet = 
           (alpha * num_edges_after_threshold_pruning) /
           (regulators.size() * genes.size() -
-           (1 - alpha) * num_edges_after_threshold_pruning));
+           (1 - alpha) * num_edges_after_threshold_pruning);
     else if (method == "FWER")
-      FPR_estimates.emplace_back(alpha /
-                                 (regulators.size() * (genes.size() - 1)));
+      FPR_estimate_subnet = alpha / (regulators.size() * (genes.size() - 1));
     else if (method == "FPR")
-      FPR_estimates.emplace_back(alpha);
+      FPR_estimate_subnet = alpha;
   }
 
   //-------time module-------
-  log_output << "\nPrinting network in directory \"" + output_dir + "\".....";
+  log_output << "\nPrinting subnetwork in directory \"" + output_dir + "subnets\"...";
   watch1.reset();
   //-------------------------
 
   // writes the individual subnet output
-  writeNetworkRegTarMI(network, subnets_dir,
+  writeNetworkRegTarMI(subnetwork, subnets_dir,
                        "subnet" + std::to_string(subnet_num));
 
   //-------time module-------
@@ -274,11 +267,11 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
   //-------------------------
 
   std::cout << "... subnetwork " + std::to_string(subnet_num) +
-                   " completed = " + std::to_string(size_of_network) +
+                   " completed = " + std::to_string(size_of_subnetwork) +
                    " edges returned ..."
             << std::endl;
 
-  return network;
+  return std::make_pair(subnetwork, FPR_estimate_subnet);
 }
 
 const std::vector<consolidated_df_row>

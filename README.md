@@ -109,9 +109,11 @@ g_10011_	0.055	0.73	4.64
 
 ``--seed`` sets the seed for all programmatic pseudorandom behavior (default: `--seed 0`).
 
-``--noconsolidate`` tells ARACNe3 to skip the consolidation step and instead only preserve the null model, the final log, the `log/` subdirectory, and all subnetworks generated in `subnets/`.
+``--noConsolidate`` tells ARACNe3 to skip the consolidation step and instead only preserve the null model, the final log, the `log/` subdirectory, and all subnetworks generated in `subnets/`.
 
 ``--consolidate`` tells ARACNe3 to run in consolidate mode.  An expression file and a list of regulators still must be provided with `-e` and `-r`, respectively.  `-o` specifies the directory location.  Finally, `-x` specifies how many subnetwork files to use (default: `-x 1`). Note that output directory structure `-o` **must** contain subdirectories `subnets/` and `log/` that follow the exact conventions as an ARACNe3 output.
+
+`--runid` allows you to pass an identifier to replace `defaultid` in `log_defaultid.txt`. Does not affect each modulator's log, only the instance log (default: `--runid defaultid`).
 
 ## Examples
 Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators).  Due to the limited capacity of the repository, you may need to decompress the expression matrix before usage.

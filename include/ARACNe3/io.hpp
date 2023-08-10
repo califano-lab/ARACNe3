@@ -2,6 +2,7 @@
 
 #include "ARACNe3.hpp"
 #include <string>
+#include <random>
 
 typedef struct consolidated_df_row {
   const gene_id regulator;
@@ -18,7 +19,7 @@ typedef struct consolidated_df_row {
 
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name);
 std::string makeUnixDirectoryNameUniversal(std::string &&dir_name);
-void makeDir(std::string &dir_name);
+void makeDir(const std::string &dir_name);
 std::vector<uint16_t> rank_indexes(const std::vector<float> &vec,
                                    std::mt19937 &rand);
 
@@ -39,15 +40,6 @@ void writeNetworkRegTarMI(const gene_to_gene_to_float &network,
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df_row> &final_df,
                               std::string filename);
-
-class TooManySubnetsRequested : public std::exception {
-public:
-  const char *what() {
-    return "You tried to consolidate too many subnetworks. Subnet files and "
-           "subnet log files must exist to all subnetworks specified, and "
-           "must be organized exactly according to ARACNe3 output.";
-  }
-};
 
 gene_to_edge_tars readSubNetAndUpdateFPRFromLog(const std::string &output_dir,
                                                 const uint16_t subnet_num);

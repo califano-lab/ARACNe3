@@ -1,5 +1,7 @@
 #include "io.hpp"
-
+#include <filesystem>
+#include <iostream>
+#include <fstream>
 std::vector<std::string> decompression_map;
 static std::unordered_map<std::string, uint16_t> compression_map;
 
@@ -16,13 +18,12 @@ std::string makeUnixDirectoryNameUniversal(std::string &&dir_name) {
 /*
  Will automatically checked if there already is a directory.  Then creates the output directory.
  */
-void makeDir(std::string &dir_name) {
-	makeUnixDirectoryNameUniversal(dir_name);
+void makeDir(const std::string &dir_name) {
 	if (!std::filesystem::exists(dir_name)) {
 		if (std::filesystem::create_directory(dir_name)) {
 			std::cout << "Directory Created: \"" + dir_name + "\"." << std::endl;
 		} else {
-			std::cerr << "failed to create directory: \"" + dir_name + "\"." << std::endl;
+			std::cerr << "Failed to create directory: \"" + dir_name + "\". Make sure you have permissions over the output directory." << std::endl;
 			std::exit(2);
 		}
 	}
@@ -215,21 +216,21 @@ const geneset readRegList(const std::string &filename) {
 void writeNetworkRegTarMI(gene_to_gene_to_float &network,
                           const std::string &output_dir,
                           const std::string &output_suffix) {
-  const std::string filename = output_dir + "output_" + output_suffix + ".tsv";
+  const std::string filename = output_dir + output_suffix + ".tsv";
   std::ofstream ofs{filename};
   if (!ofs) {
     std::cerr << "error: could not write to file: " << filename << "."
               << std::endl;
     std::cerr << "Try making the output directory subdirectory of the working "
                  "directory. Example \"-o " +
-                     makeUnixDirectoryNameUniversal("./runs") + "\"."
+                     makeUnixDirectoryNameUniversal("./run1") + "\"."
               << std::endl;
     std::exit(2);
   }
 
   ofs << "regulator.values\ttarget.values\tmi.values" << std::endl;
   for (const auto &[reg, tar_mi] : network)
-    for (const auto &[tar, mi] : tar_mi)
+    for (const auto [tar, mi] : tar_mi)
       ofs << decompression_map[reg] << '\t' << decompression_map[tar] << '\t'
           << mi << '\n';
 }
