@@ -118,7 +118,7 @@ const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
  * @return float The APMI value between the two input vectors.
  */
 float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
-               const float &q_thresh, const uint16_t &size_thresh) {
+               const float q_thresh, const uint16_t size_thresh) {
   // Set file static variables
   ::size_thresh = size_thresh;
   ::q_thresh = q_thresh;
