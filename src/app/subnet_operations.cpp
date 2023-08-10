@@ -83,7 +83,7 @@ pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
 /*
  Prune the network according to the MaxEnt weakest-edge reduction.
  */
-const gene_to_gene_to_float
+std::pair<gene_to_gene_to_float, uint32_t> 
 pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
             const geneset &regulators,
             gene_to_gene_to_float network_reg_reg_only) {
@@ -121,7 +121,7 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
     size_of_network -= remove_from_reg.size();
   }
 
-  return network;
+  return std::make_pair(network, size_of_network);
 }
 
 /*
@@ -177,7 +177,7 @@ createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
   gene_to_gene_to_float subnetwork;
   subnetwork.reserve(regulators.size());
   for (uint16_t reg : regulators) {
-    subnetwork[reg].reserve(regulators.size() * (genes.size() - 1));
+    subnetwork[reg].reserve(genes.size() - 1);
     for (uint16_t tar : genes)
       if (reg != tar) {
         subnetwork[reg][tar] =
@@ -194,6 +194,7 @@ createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
 
   //-------time module-------
   log_output << "\nThreshold pruning time (" + method + "): ";
+  log_output.flush();
   watch1.reset();
   //-------------------------
 
@@ -224,8 +225,8 @@ createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
     //-------------------------
 
     size_prev = size_of_subnetwork;
-    subnetwork = pruneMaxEnt(subnetwork, size_of_subnetwork, regulators,
-                             subnetwork_reg_reg_only);
+    std::tie(subnetwork, size_of_subnetwork) = pruneMaxEnt(
+        subnetwork, size_of_subnetwork, regulators, subnetwork_reg_reg_only);
 
     //-------time module-------
     log_output << watch1.getSeconds() << std::endl;

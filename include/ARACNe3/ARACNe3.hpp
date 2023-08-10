@@ -25,8 +25,8 @@ typedef std::unordered_set<gene_id> geneset;
 typedef std::unordered_map<gene_id, geneset> gene_to_geneset;
 
 // Used for gexp and ranked gexp matrix storage
-typedef std::unordered_map<gene_id, std::vector<float>> gene_to_floats;
-typedef std::unordered_map<gene_id, std::vector<uint16_t>> gene_to_shorts;
+typedef std::vector<std::vector<float>> gene_to_floats;
+typedef std::vector<std::vector<uint16_t>> gene_to_shorts;
 
 // used for edge strength
 typedef std::unordered_map<gene_id, std::unordered_map<gene_id, float>>

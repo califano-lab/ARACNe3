@@ -46,24 +46,22 @@ gene_to_floats
 sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat,
                                  const uint16_t &tot_num_subsample,
                                  std::mt19937 &rand) {
-  std::vector<uint16_t> idxs(exp_mat.cbegin()->second.size());
+  std::vector<uint16_t> idxs(exp_mat.cbegin()->size());
   std::iota(idxs.begin(), idxs.end(), 0U);
 
   std::vector<uint16_t> fold(tot_num_subsample);
   std::sample(idxs.begin(), idxs.end(), fold.begin(), tot_num_subsample, rand);
 
-  gene_to_floats subsample_exp_mat;
-  subsample_exp_mat.reserve(exp_mat.size());
-  for (const auto &[gene_id, expr_vec] : exp_mat) {
-    subsample_exp_mat[gene_id] = std::vector<float>(tot_num_subsample, 0.0f);
-
+  gene_to_floats subsample_exp_mat(exp_mat.size(),
+                                   std::vector<float>(tot_num_subsample, 0.f));
+  for (gene_id gene = 0U; gene < exp_mat.size(); ++gene) {
     for (uint16_t i = 0U; i < tot_num_subsample; ++i)
-      subsample_exp_mat[gene_id][i] = expr_vec[fold[i]];
+      subsample_exp_mat[gene][i] = exp_mat[gene][fold[i]];
 
     std::vector<uint16_t> idx_ranks =
-        rankIndices(subsample_exp_mat[gene_id], rand);
-    for (uint16_t r = 0; r < tot_num_subsample; ++r)
-      subsample_exp_mat[gene_id][idx_ranks[r]] =
+        rankIndices(subsample_exp_mat[gene], rand);
+    for (uint16_t r = 0U; r < tot_num_subsample; ++r)
+      subsample_exp_mat[gene][idx_ranks[r]] =
           (r + 1) / ((float)tot_num_subsample + 1);
   }
   return subsample_exp_mat;
@@ -95,7 +93,7 @@ readExpMatrixAndCopulaTransform(const std::string &filename,
     line.pop_back();
 
   // count samples from number of columns in first line
-  for (size_t pos = 0;
+  for (size_t pos = 0U;
        (pos = line.find_first_of("\t, ", pos)) != std::string::npos; ++pos)
     ++tot_num_samps;
 
@@ -107,9 +105,8 @@ readExpMatrixAndCopulaTransform(const std::string &filename,
     if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
       line.pop_back();
     std::vector<float> expr_vec;
-    std::vector<uint16_t> expr_ranks_vec(tot_num_samps, 0U);
-
     expr_vec.reserve(tot_num_samps);
+    std::vector<uint16_t> expr_ranks_vec(tot_num_samps, 0U);
 
     std::size_t prev = 0U, pos = line.find_first_of("\t, ", prev);
     std::string gene = line.substr(prev, pos - prev);
@@ -127,7 +124,7 @@ readExpMatrixAndCopulaTransform(const std::string &filename,
           << "Fatal: line " + std::to_string(linesread) +
                  " length is not equal to line 1 length. Rows should have the "
                  "same number of delimiters. Check that header row contains "
-                 "N+1 columns (N sample names and the empty corner))."
+                 "N+1 columns (empty corner + N sample names))."
           << std::endl;
       std::exit(1);
     }
@@ -147,10 +144,9 @@ readExpMatrixAndCopulaTransform(const std::string &filename,
       decompression_map.push_back(gene);                // idx -> str
       genes.insert(compression_map[gene]);
 
-      // the last index of decompression_vec is the new uint16_t
-      exp_mat[compression_map[gene]] = expr_vec;
-      // ranks of exp are stored for SCC later
-      ranks_mat[compression_map[gene]] = expr_ranks_vec;
+      // assumes index is same as the compression_map[gene]
+      exp_mat.emplace_back(expr_vec);
+      ranks_mat.emplace_back(expr_ranks_vec);
     } else {
       std::cerr << "Fatal: 2 rows corresponding to " + gene + " detected."
                 << std::endl;
