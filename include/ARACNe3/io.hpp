@@ -20,8 +20,6 @@ typedef struct consolidated_df_row {
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name);
 std::string makeUnixDirectoryNameUniversal(std::string &&dir_name);
 void makeDir(const std::string &dir_name);
-std::vector<uint16_t> rank_indexes(const std::vector<float> &vec,
-                                   std::mt19937 &rand);
 
 std::tuple<const gene_to_floats, const gene_to_shorts, const geneset,
            const uint16_t>

@@ -1,5 +1,6 @@
 #include "io.hpp"
 #include "ARACNe3.hpp"
+#include "algorithms.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>

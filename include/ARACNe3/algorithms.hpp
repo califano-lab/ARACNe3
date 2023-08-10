@@ -1,12 +1,16 @@
 #pragma once
 
 #include "ARACNe3.hpp"
+#include <random>
 #include <vector>
 
 typedef struct {
   const float &x_bound1, &y_bound1, &width;
   uint16_t *const pts, &num_pts, &tot_num_pts;
 } square;
+
+std::vector<uint16_t> rank_indexes(const std::vector<float> &vec,
+                                   std::mt19937 &rand);
 
 float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
                const float q_thresh = 7.815, const uint16_t size_thresh = 4);
