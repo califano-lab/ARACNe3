@@ -18,7 +18,7 @@ pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
 
   /* A vector that describes each regulator-mi-target interaction must be
    * initialized for sorting-based pruning */
-  std::vector<const std::tuple<gene_id, gene_id, float>> reg_tar_mi;
+  std::vector<std::tuple<gene_id, gene_id, float>> reg_tar_mi;
   reg_tar_mi.reserve(size_of_network);
 
   for (gene_id reg : regulators)
