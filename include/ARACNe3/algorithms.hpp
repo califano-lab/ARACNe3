@@ -9,7 +9,7 @@ typedef struct {
   uint16_t *const pts, &num_pts, &tot_num_pts;
 } square;
 
-std::vector<uint16_t> rank_indexes(const std::vector<float> &vec,
+std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
                                    std::mt19937 &rand);
 
 float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
@@ -23,5 +23,5 @@ std::pair<float, float> linearRegress(const std::vector<float> &x,
 
 double lchoose(const uint16_t &n, const uint16_t &k);
 
-double right_tail_binomial_p(const uint16_t &n, const uint16_t &k,
+double rightTailBinomialP(const uint16_t &n, const uint16_t &k,
                              const float &theta);

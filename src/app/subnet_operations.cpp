@@ -128,7 +128,7 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
  Generates an ARACNe3 subnet (called from main).
 */
 std::pair<gene_to_gene_to_float, float>
-ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
+createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
                const geneset &regulators, const geneset &genes,
                const uint16_t tot_num_samps, const uint16_t tot_num_subsample,
                const uint16_t subnet_num, const bool prune_alpha,
@@ -280,7 +280,7 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
 }
 
 const std::vector<consolidated_df_row>
-consolidate_subnets_vec(const std::vector<gene_to_gene_to_float> &subnets,
+consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
                         const float FPR_estimate, const gene_to_floats &exp_mat,
                         const geneset &regulators, const geneset &genes,
                         const gene_to_shorts &ranks_mat) {
@@ -297,7 +297,7 @@ consolidate_subnets_vec(const std::vector<gene_to_gene_to_float> &subnets,
       if (num_occurrences > 0) {
         const float final_mi = calcAPMI(exp_mat.at(reg), exp_mat.at(tar));
         const float final_scc = calcSCC(ranks_mat.at(reg), ranks_mat.at(tar));
-        const double final_p = right_tail_binomial_p(
+        const double final_p = rightTailBinomialP(
             subnets.size(), num_occurrences, FPR_estimate);
         final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences,
                               final_p);

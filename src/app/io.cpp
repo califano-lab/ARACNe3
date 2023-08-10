@@ -104,7 +104,7 @@ sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat,
       subsample_exp_mat[gene_id][i] = expr_vec[fold[i]];
 
     std::vector<uint16_t> idx_ranks =
-        rank_indexes(subsample_exp_mat[gene_id], rand);
+        rankIndices(subsample_exp_mat[gene_id], rand);
     for (uint16_t r = 0; r < tot_num_subsample; ++r)
       subsample_exp_mat[gene_id][idx_ranks[r]] =
           (r + 1) / ((float)tot_num_subsample + 1);
@@ -177,7 +177,7 @@ readExpMatrixAndCopulaTransform(const std::string &filename,
 
     // copula-transform expr_vec values
     {
-      std::vector<uint16_t> idx_ranks = rank_indexes(expr_vec, rand);
+      std::vector<uint16_t> idx_ranks = rankIndices(expr_vec, rand);
       for (uint16_t r = 0; r < tot_num_samps; ++r) {
         expr_vec[idx_ranks[r]] = (r + 1) / ((float)tot_num_samps + 1);
         expr_ranks_vec[idx_ranks[r]] = r + 1;

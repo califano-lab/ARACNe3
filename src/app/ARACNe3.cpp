@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
               exp_mat, tot_num_subsample, rand);
         }
 
-        const auto &[subnet, FPR_estimate_subnet] = ARACNe3_subnet(
+        const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
             tot_num_subsample, subnet_num, prune_alpha, method, alpha,
             prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir);
@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
           subsample_exp_mat = sampleExpMatAndReCopulaTransform(
               exp_mat, tot_num_subsample, rand);
         }
-        const auto &[subnet, FPR_estimate_subnet] = ARACNe3_subnet(
+        const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
             tot_num_subsample, i, prune_alpha, method, alpha, prune_MaxEnt,
             output_dir, subnets_dir, subnets_log_dir);
@@ -350,7 +350,7 @@ int main(int argc, char *argv[]) {
     //-------------------------
 
     std::vector<consolidated_df_row> final_df =
-        consolidate_subnets_vec(subnets, exp_mat, regulators, genes, ranks_mat);
+        consolidateSubnetsVec(subnets, exp_mat, regulators, genes, ranks_mat);
 
     //-------time module-------
     log_output << watch1.getSeconds() << std::endl;
