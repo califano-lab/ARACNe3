@@ -349,8 +349,8 @@ int main(int argc, char *argv[]) {
     watch1.reset();
     //-------------------------
 
-    std::vector<consolidated_df_row> final_df =
-        consolidateSubnetsVec(subnets, exp_mat, regulators, genes, ranks_mat);
+    std::vector<consolidated_df_row> final_df = consolidateSubnetsVec(
+        subnets, FPR_estimate, exp_mat, regulators, genes, ranks_mat);
 
     //-------time module-------
     log_output << watch1.getSeconds() << std::endl;
