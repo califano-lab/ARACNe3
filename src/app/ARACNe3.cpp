@@ -249,8 +249,8 @@ int main(int argc, char *argv[]) {
 
         const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
-            tot_num_subsample, subnet_num, prune_alpha, method, alpha,
-            prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir);
+            tot_num_subsample, subnet_num, prune_alpha, nullmodel, method,
+            alpha, prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir);
 
 #pragma omp critical(stopConditionCheck)
         {
@@ -287,8 +287,8 @@ int main(int argc, char *argv[]) {
         }
         const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
-            tot_num_subsample, i, prune_alpha, method, alpha, prune_MaxEnt,
-            output_dir, subnets_dir, subnets_log_dir);
+            tot_num_subsample, i, prune_alpha, nullmodel, method, alpha,
+            prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir);
         subnets[i] = subnet;
         FPR_estimates[i] = FPR_estimate_subnet;
       }
