@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
       int max_subnets_when_criteria_filled = 0; // needed since multithreading
       bool stoppingCriteriaMet = false;
 
-#pragma omp parallel for num_threads(nthreads)
+#pragma omp parallel for num_threads(nthreads) schedule(static,1)
       for (int subnet_num = 0; subnet_num < max_subnets; ++subnet_num) {
         if (stoppingCriteriaMet &&
             subnet_num >= max_subnets_when_criteria_filled)
@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
     } else if (!adaptive) {
       subnets = std::vector<gene_to_gene_to_float>(num_subnets);
       FPR_estimates = std::vector<float>(num_subnets);
-#pragma omp parallel for num_threads(nthreads)
+#pragma omp parallel for num_threads(nthreads) schedule(static,1)
       for (int i = 0; i < num_subnets; ++i) {
         gene_to_floats subsample_exp_mat;
 #pragma omp critical(randObjectAccess)
