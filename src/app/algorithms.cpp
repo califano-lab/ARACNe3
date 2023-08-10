@@ -47,16 +47,14 @@ float calcMI(const square &s) {
  */
 const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
                           const square s) {
-  const float &x_bound1 = s.x_bound1, &y_bound1 = s.y_bound1, &width = s.width;
-
   // if we have less points in the square than size_thresh, calc MI
   if (s.num_pts < size_thresh) {
     return calcMI(s);
   }
 
   // thresholds for potential partition of XY plane
-  const float x_thresh = x_bound1 + width * 0.5f,
-              y_thresh = y_bound1 + width * 0.5f;
+  const float x_thresh = s.x_bound1 + s.width * 0.5f,
+              y_thresh = s.y_bound1 + s.width * 0.5f;
 
   // indices for quadrants, to test chi-square, with num_pts for each
   uint16_t *tr_pts, *br_pts, *bl_pts, *tl_pts, tr_num_pts = 0U, br_num_pts = 0U,
@@ -93,11 +91,10 @@ const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
 
   // partition if chi-square or if initial square
   if (chisq > q_thresh || s.num_pts == s.tot_num_pts) {
-    const square tr{x_thresh, y_thresh,   width * 0.5f,
-                    tr_pts,   tr_num_pts, s.tot_num_pts},
-        br{x_thresh, y_bound1, width * 0.5f, br_pts, br_num_pts, s.tot_num_pts},
-        bl{x_bound1, y_bound1, width * 0.5f, bl_pts, bl_num_pts, s.tot_num_pts},
-        tl{x_bound1, y_thresh, width * 0.5f, tl_pts, tl_num_pts, s.tot_num_pts};
+    const square tr{x_thresh, y_thresh,   s.width * 0.5f, tr_pts,   tr_num_pts, s.tot_num_pts},
+        br{x_thresh, s.y_bound1, s.width * 0.5f, br_pts, br_num_pts, s.tot_num_pts},
+        bl{s.x_bound1, s.y_bound1, s.width * 0.5f, bl_pts, bl_num_pts, s.tot_num_pts},
+        tl{s.x_bound1, y_thresh, s.width * 0.5f, tl_pts, tl_num_pts, s.tot_num_pts};
 
     return calcAPMISplit(x_ptr, y_ptr, tr) + calcAPMISplit(x_ptr, y_ptr, br) +
            calcAPMISplit(x_ptr, y_ptr, bl) + calcAPMISplit(x_ptr, y_ptr, tl);
