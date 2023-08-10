@@ -46,7 +46,7 @@ float calcMI(const square &s) {
  * recursion, depending on the condition.
  */
 const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
-                          const square &s) {
+                          const square s) {
   const float &x_bound1 = s.x_bound1, &y_bound1 = s.y_bound1, &width = s.width;
 
   // if we have less points in the square than size_thresh, calc MI
