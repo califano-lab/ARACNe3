@@ -5,8 +5,8 @@
 #include <vector>
 
 typedef struct {
-  const float &x_bound1, &y_bound1, &width;
-  uint16_t *const pts, &num_pts, &tot_num_pts;
+  const float x_bound1, y_bound1, width;
+  uint16_t *const pts, num_pts, tot_num_pts;
 } square;
 
 std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
