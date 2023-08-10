@@ -23,5 +23,5 @@ std::pair<float, float> linearRegress(const std::vector<float> &x,
 
 double lchoose(const uint16_t &n, const uint16_t &k);
 
-double rightTailBinomialP(const uint16_t &n, const uint16_t &k,
-                             const float &theta);
+double rightTailBinomialP(const uint16_t n, const uint16_t k,
+                          const float theta);

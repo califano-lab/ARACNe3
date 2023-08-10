@@ -195,8 +195,8 @@ double lchoose(const uint16_t &n, const uint16_t &k) {
   return std::lgamma(n + 1) - std::lgamma(k + 1) - std::lgamma(n - k + 1);
 }
 
-double rightTailBinomialP(const uint16_t &n, const uint16_t &k,
-                             const double &theta) {
+double rightTailBinomialP(const uint16_t n, const uint16_t k,
+                             const float theta) {
   double p = 0.0;
   for (uint16_t i = n; i >= k; --i)
     p += std::exp(lchoose(n, i) + i * std::log(theta) +
