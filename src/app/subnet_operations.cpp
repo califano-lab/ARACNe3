@@ -135,17 +135,17 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
                const APMINullModel &nullmodel, const std::string &method,
                const float alpha, const bool prune_MaxEnt,
                const std::string &output_dir, const std::string &subnets_dir,
-               const std::string &subnet_log_dir) {
+               const std::string &subnets_log_dir) {
 
   float FPR_estimate_subnet;
-  std::ofstream log_output(subnet_log_dir + "log_subnet" +
-                           std::to_string(subnet_num) + ".txt");
+  std::ofstream log_output(subnets_log_dir + "log_subnet" +
+                           std::to_string(subnet_num+1) + ".txt");
   std::time_t t = std::time(nullptr);
 
   log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z")
              << "---------" << std::endl
              << std::endl;
-  log_output << "Subnetwork #: " + std::to_string(subnet_num) << std::endl;
+  log_output << "Subnetwork #: " + std::to_string(subnet_num+1) << std::endl;
   log_output << "Total # regulators (defined in gexp mat): " +
                     std::to_string(regulators.size())
              << std::endl;
@@ -262,14 +262,13 @@ ARACNe3_subnet(const gene_to_floats &subsample_exp_mat,
   //-------------------------
 
   // writes the individual subnet output
-  writeNetworkRegTarMI(subnetwork, subnets_dir,
-                       "subnet" + std::to_string(subnet_num));
+  writeNetworkRegTarMI(subnetwork, subnets_dir + "subnet" + std::to_string(subnet_num+1) + ".tsv");
 
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
   //-------------------------
 
-  std::cout << "...subnetwork " + std::to_string(subnet_num) +
+  std::cout << "...subnetwork " + std::to_string(subnet_num+1) +
                    " completed = " + std::to_string(size_of_subnetwork) +
                    " edges returned..."
             << std::endl;

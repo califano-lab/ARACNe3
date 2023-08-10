@@ -1,7 +1,10 @@
 #include "io.hpp"
+#include "ARACNe3.hpp"
 #include <filesystem>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+
 std::vector<std::string> decompression_map;
 static std::unordered_map<std::string, uint16_t> compression_map;
 
@@ -163,8 +166,8 @@ readExpMatrixAndCopulaTransform(const std::string &filename,
 
     // create compression scheme from exp_mat
     if (compression_map.find(gene) == compression_map.end()) {
-      decompression_map.push_back(gene);
-      compression_map[gene] = decompression_map.size() - 1; // str -> #
+      compression_map[gene] = decompression_map.size();  // str -> idx
+      decompression_map.push_back(gene);  // idx -> str
       genes.insert(compression_map[gene]);
 
       // the last index of decompression_vec is the new uint16_t
@@ -201,7 +204,7 @@ const geneset readRegList(const std::string &filename) {
     if (compression_map.find(reg) == compression_map.end())
       std::cerr << "Warning: " + reg +
                        " found in regulators list, but no entry in expression "
-                       "matrix. Ignoring."
+                       "matrix. Ignoring in network generation."
                 << std::endl;
     else
       regulators.insert(compression_map[reg]);
@@ -213,13 +216,10 @@ const geneset readRegList(const std::string &filename) {
 /*
  Function that prints the Regulator, Target, and MI to the output_dir given the output_suffix.  Does not print to the console.  The data structure input is a gene_to_edge_tars, which is defined in "ARACNe3.hpp".
  */
-void writeNetworkRegTarMI(gene_to_gene_to_float &network,
-                          const std::string &output_dir,
-                          const std::string &output_suffix) {
-  const std::string filename = output_dir + output_suffix + ".tsv";
-  std::ofstream ofs{filename};
+void writeNetworkRegTarMI(gene_to_gene_to_float &network, const std::string& file_path) {
+  std::ofstream ofs{file_path};
   if (!ofs) {
-    std::cerr << "error: could not write to file: " << filename << "."
+    std::cerr << "error: could not write to file: " << file_path << "."
               << std::endl;
     std::cerr << "Try making the output directory subdirectory of the working "
                  "directory. Example \"-o " +
@@ -235,11 +235,10 @@ void writeNetworkRegTarMI(gene_to_gene_to_float &network,
           << mi << '\n';
 }
 
-void writeConsolidatedNetwork(const std::vector<consolidated_df_row>& final_df, std::string filename) {
-	makeUnixDirectoryNameUniversal(filename);
-	std::ofstream ofs{filename};
+void writeConsolidatedNetwork(const std::vector<consolidated_df_row>& final_df, const std::string& file_path) {
+	std::ofstream ofs{file_path};
 	if (!ofs) {
-		std::cerr << "error: could not write to file: " << filename << "." << std::endl;
+		std::cerr << "error: could not write to file: " << file_path << "." << std::endl;
 		std::cerr << "Try making the output directory subdirectory of the working directory. Example \"-o " + makeUnixDirectoryNameUniversal("./runs") + "\"." << std::endl;
 		std::exit(2);
 	}
@@ -260,36 +259,30 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df_row>& final_df, 
 void addToCompressionVecs(const std::string &gene) {
   // If we have a new gene, put it in compression scheme
 	if (compression_map.find(gene) == compression_map.end()) {
-		decompression_map.push_back(gene);
-		compression_map[gene] = decompression_map.size()-1;
+		compression_map[gene] = decompression_map.size();  // str -> idx (hashmap)
+		decompression_map.push_back(gene);  // idx -> str (vector)
 	}
 }
 
 /*
  Reads a subnet file and then updates the FPR_estimates vector defined in "subnet_operations.cpp"
  */
-gene_to_gene_to_float readARACNe3Subnet(const std::string output_dir, const uint16_t subnet_num) {
-	std::string subnet_filename = output_dir + "subnets/output_subnet" + std::to_string(subnet_num) + ".txt";
-	std::string log_filename = output_dir + "log/log_subnet" + std::to_string(subnet_num) + ".txt";
-	
-	makeUnixDirectoryNameUniversal(subnet_filename);
-	makeUnixDirectoryNameUniversal(log_filename);
-	
+std::pair<gene_to_gene_to_float, float> loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string& subnet_file_path, const std::string& subnet_log_file_path) {
 	/*
 	 Read in the subnet file
 	 */
-	std::ifstream subnet_ifs{subnet_filename};
+	std::ifstream subnet_ifs{subnet_file_path};
 	if (!subnet_ifs) {
-		std::cerr << "error: could read from implied subnet file: " << subnet_filename << "." << std::endl;
-		std::cerr << "Try verifying that subnet files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("subnets/") + "\", which has subnet files formatted exactly how ARACNe3 outputs subnet files." << std::endl;
-		throw TooManySubnetsRequested();
+		std::cerr << "error: could read from subnet file: " << subnet_file_path << "." << std::endl;
+		std::cerr << "Subnet files must follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("subnets_<runid>/") + "\", which has subnet files formatted *and named* exactly how ARACNe3 outputs subnet files." << std::endl;
 	}
+
 	// discard the first line (header)
 	std::string line;
 	getline(subnet_ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
-	gene_to_edge_tars subnet;
+	gene_to_gene_to_float subnet;
 	while(std::getline(subnet_ifs, line, '\n')) {
 		if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 			line.pop_back();
@@ -303,24 +296,29 @@ gene_to_gene_to_float readARACNe3Subnet(const std::string output_dir, const uint
 		prev = pos + 1;
 		
 		const float mi = std::stof(line.substr(prev, std::string::npos));
+
+    addToCompressionVecs(reg);
+    addToCompressionVecs(tar);
 		
-		subnet[compression_map[reg]-1].emplace_back(compression_map[tar]-1, mi);
+    subnet[compression_map[reg]][compression_map[tar]] = mi;
 	}
 	
 	/* 
 	 Read in the log file
 	 */
-	std::ifstream log_ifs{log_filename};
+	std::ifstream log_ifs{subnet_log_file_path};
 	if (!log_ifs) {
-		std::cerr << "error: could read from implied subnet log file: " << log_filename << "." << std::endl;
-		std::cerr << "Try verifying that subnet log files follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("log/") + "\", which has subnet log files formatted exactly how ARACNe3 outputs subnet log files." << std::endl;
-		throw TooManySubnetsRequested();
+		std::cerr << "error: could read from subnet log file: " << subnet_log_file_path << "." << std::endl;
+		std::cerr << "Subnet log files must follow the output structure of ARACNe3. Example \"-o " + makeUnixDirectoryNameUniversal("./output") + "\" will contain a subdirectory \"" + makeUnixDirectoryNameUniversal("subnets_log_<runid>/") + "\", which has subnet log files formatted *and named* exactly how ARACNe3 outputs subnet log files." << std::endl;
 	}
+
 	// discard 8 lines
 	std::string discard;
 	for (uint8_t l = 0; l < 8; ++l)
 		getline(log_ifs, discard, '\n');
+
 	// next line contains the method 
+  std::string method;
 	getline(log_ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
@@ -330,18 +328,23 @@ gene_to_gene_to_float readARACNe3Subnet(const std::string output_dir, const uint
 		method = "FWER";
 	else if (line.find("FPR") != std::string::npos)
 		method = "FPR";
+
 	// next line contains alpha
+  float alpha;
 	getline(log_ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
 	std::stringstream line_stream(line);
 	line_stream >> discard >> alpha;
+
 	// next line contains whether we have MaxEnt pruning
+  bool prune_MaxEnt;
 	getline(log_ifs, line, '\n');
 	if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
 		line.pop_back();
 	line_stream = std::stringstream(line);
 	line_stream >> discard >> discard >> prune_MaxEnt;
+
 	// skip 10 lines, the 11th contains edges after threshold pruning
 	uint32_t num_edges_after_threshold_pruning = 0U;
 	for (uint8_t l = 0; l < 10; ++l)

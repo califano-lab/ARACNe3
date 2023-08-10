@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ARACNe3.hpp"
-#include <string>
 #include <random>
+#include <string>
 
 typedef struct consolidated_df_row {
   const gene_id regulator;
@@ -34,12 +34,12 @@ sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat,
                                  const uint16_t &tot_num_subsample,
                                  std::mt19937 &rand);
 
-void writeNetworkRegTarMI(const gene_to_gene_to_float &network,
-                          const std::string &output_dir,
-                          const std::string &output_suffix);
+void writeNetworkRegTarMI(gene_to_gene_to_float &network,
+                          const std::string &file_path);
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df_row> &final_df,
-                              std::string filename);
+                              const std::string &file_path);
 
-//gene_to_edge_tars readSubNetAndUpdateFPRFromLog(const std::string &output_dir,
- //                                               const uint16_t subnet_num);
+std::pair<gene_to_gene_to_float, float>
+loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
+                                      const std::string &subnet_log_file_path);

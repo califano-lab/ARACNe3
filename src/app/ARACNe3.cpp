@@ -222,12 +222,12 @@ int main(int argc, char *argv[]) {
         regulons[reg];
 
       int max_subnets = 65536; // arbitrary
+      int max_subnets_when_criteria_filled = 0; // needed since multithreading
       bool stoppingCriteriaMet = false;
-      uint16_t subnet_num = 0U;
 
 #pragma omp parallel for num_threads(nthreads)
       for (int subnet_num = 0; subnet_num < max_subnets; ++subnet_num) {
-        if (stoppingCriteriaMet)
+        if (stoppingCriteriaMet && subnet_num >= max_subnets_when_criteria_filled)
           continue; // skip loop iteration if stopping condition is met
         gene_to_floats subsample_exp_mat;
 #pragma omp critical(randObjectAccess)
@@ -245,18 +245,23 @@ int main(int argc, char *argv[]) {
         {
           subnets.push_back(subnet);
           FPR_estimates.push_back(FPR_estimate_subnet);
-          uint16_t min = 65535U;
+          uint16_t min_regulon_size = 65535U;
           // add any new edges to the regulon_set
           for (const auto [reg, tar_mi] : subnet) {
             for (const auto [tar, mi] : tar_mi)
               regulons[reg].insert(tar);
-            if (regulons[reg].size() < min)
-              min = regulons[reg].size();
+            if (regulons[reg].size() < min_regulon_size)
+              min_regulon_size = regulons[reg].size();
           }
-          if (min >= targets_per_regulator && !stoppingCriteriaMet)
+          if (min_regulon_size >= targets_per_regulator) {
             stoppingCriteriaMet = true;
+            // adaptive + race conditions can cause overestimation of subnets
+            if (subnet_num > max_subnets_when_criteria_filled)
+              max_subnets_when_criteria_filled = subnet_num; 
+          }
         }
       }
+      subnets.resize(max_subnets_when_criteria_filled);
       num_subnets = subnets.size();
     } else if (!adaptive) {
       subnets = std::vector<gene_to_gene_to_float>(num_subnets);
@@ -287,22 +292,26 @@ int main(int argc, char *argv[]) {
   } else if (go_to_consolidate) {
 
     //-------time module-------
-    log_output << "\nConsolidation requested." << std::endl
+    log_output << "\nConsolidation requested." << std::endl;
     log_output << "Reading subnetwork(s) time: ";
     watch1.reset();
     //-------------------------
 
-    for (uint16_t subnet_num = 1; subnet_num <= num_subnets_to_consolidate;
+    for (uint16_t subnet_num = 0; subnet_num < num_subnets_to_consolidate;
          ++subnet_num) {
+      const std::string subnets_file_path = subnets_dir + "subnet" + std::to_string(subnet_num+1) + ".tsv";
+      const std::string subnets_log_file_path = subnets_log_dir + "log_subnet" + std::to_string(subnet_num+1) + ".txt";
+
       try {
-        subnets.push_back(
-            readARACNe3Output(output_dir, subnet_num));
-        num_subnets = subnet_num;
+        const auto &[subnet, FPR_estimate_subnet] = loadARACNe3SubnetsAndUpdateFPRFromLog(subnets_file_path, subnets_log_file_path);
+        subnets.push_back(subnet);
+        FPR_estimates.push_back(FPR_estimate_subnet);
       } catch (TooManySubnetsRequested e) {
         std::cout << "Warning: " + std::string(e.what()) << std::endl;
         break;
       }
     }
+    num_subnets = subnets.size();
 
     //-------time module-------
     log_output << watch1.getSeconds() << std::endl;
@@ -332,7 +341,7 @@ int main(int argc, char *argv[]) {
     log_output << "\nWriting final network..." << std::endl;
     //-------------------------
 
-    writeConsolidatedNetwork(final_df, output_dir + "consolidated-net_" + runid + ".txt");
+    writeConsolidatedNetwork(final_df, output_dir + "consolidated-net_" + runid + ".tsv");
 
   } else if (do_not_consolidate) {
 
