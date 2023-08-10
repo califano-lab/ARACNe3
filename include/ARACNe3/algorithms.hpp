@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include "ARACNe3.hpp"
+#include <vector>
 
 typedef struct {
   const float &x_bound1, &y_bound1, &width;
@@ -11,11 +11,13 @@ typedef struct {
 float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
                const float q_thresh = 7.815, const uint16_t size_thresh = 4);
 
-  
-float calcSCC(const std::vector<uint16_t>& x_ranked, const std::vector<uint16_t>& y_ranked);
+float calcSCC(const std::vector<uint16_t> &x_ranked,
+              const std::vector<uint16_t> &y_ranked);
 
-std::pair<float, float> linearRegress(const std::vector<float>& x, const std::vector<float>& y);
+std::pair<float, float> linearRegress(const std::vector<float> &x,
+                                      const std::vector<float> &y);
 
 double lchoose(const uint16_t &n, const uint16_t &k);
 
-double right_tail_binomial_p(const uint16_t &n, const uint16_t &k, const float &theta);
+double right_tail_binomial_p(const uint16_t &n, const uint16_t &k,
+                             const float &theta);

@@ -2,8 +2,8 @@
 #define WATCH_H
 
 #include <chrono>
-#include <string>
 #include <ostream>
+#include <string>
 
 // TODO: Add Documentation
 class Watch {

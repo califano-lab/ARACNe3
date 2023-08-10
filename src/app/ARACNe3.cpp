@@ -1,22 +1,26 @@
-#include <omp.h>
-#include <iostream>
-#include <fstream>
 #include "ARACNe3.hpp"
-#include "cmdline_parser.hpp"
-#include "stopwatch.hpp"
 #include "apmi_nullmodel.hpp"
-#include "subnet_operations.hpp"
+#include "cmdline_parser.hpp"
 #include "io.hpp"
+#include "stopwatch.hpp"
+#include "subnet_operations.hpp"
+#include <fstream>
+#include <iostream>
+#include <omp.h>
 
 uint16_t nthreads = 1U;
 
 extern std::vector<std::string> decompression_map;
 
 /*
- Main function is the command line executable; this primes the global variables and parses the command line.  It will also return usage notes if the user incorrectly calls ./ARACNe3.
- 
+ Main function is the command line executable; this primes the global variables
+ and parses the command line.  It will also return usage notes if the user
+ incorrectly calls ./ARACNe3.
+
  Example:
- ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noAlpha -a 0.05 --alpha 0.05 --noMaxEnt --subsample 0.6321 --seed 1 --mithresh 0.2 --numnulls 1000000
+ ./ARACNe3 -e test/matrix.txt -r test/regulators.txt -o test/output --noAlpha -a
+ 0.05 --alpha 0.05 --noMaxEnt --subsample 0.6321 --seed 1 --mithresh 0.2
+ --numnulls 1000000
  */
 int main(int argc, char *argv[]) {
 
@@ -34,7 +38,7 @@ int main(int argc, char *argv[]) {
               << std::endl;
     return EXIT_FAILURE;
   }
-  
+
   //--------------------initialize parameters---------------------
 
   uint16_t num_subnets = 1U;
@@ -55,7 +59,7 @@ int main(int argc, char *argv[]) {
   uint32_t DEVELOPER_num_null_marginals = 1000000U;
 
   //--------------------parsing filesystem------------------------
-  
+
   const std::string exp_mat_file = makeUnixDirectoryNameUniversal(
       (std::string)getCmdOption(argv, argv + argc, "-e"));
   const std::string reg_list_file = makeUnixDirectoryNameUniversal(
@@ -67,7 +71,8 @@ int main(int argc, char *argv[]) {
   if (output_dir.back() != directory_slash)
     output_dir += directory_slash;
 
-  const std::string cached_dir = makeUnixDirectoryNameUniversal("./" + hiddenfpre + "ARACNe3_cached/");
+  const std::string cached_dir =
+      makeUnixDirectoryNameUniversal("./" + hiddenfpre + "ARACNe3_cached/");
   //--------------------parsing parameters------------------------
 
   if (cmdOptionExists(argv, argv + argc, "--alpha"))
@@ -140,8 +145,10 @@ int main(int argc, char *argv[]) {
   std::string log_file_path = output_dir + log_filename;
 
   std::ofstream log_output(log_file_path);
-  const std::string subnets_dir = makeUnixDirectoryNameUniversal(output_dir + "subnets_" + runid + "/");
-  const std::string subnets_log_dir = makeUnixDirectoryNameUniversal(output_dir + "subnets_log_" + runid + "/");
+  const std::string subnets_dir =
+      makeUnixDirectoryNameUniversal(output_dir + "subnets_" + runid + "/");
+  const std::string subnets_log_dir =
+      makeUnixDirectoryNameUniversal(output_dir + "subnets_log_" + runid + "/");
 
   makeDir(output_dir);
   makeDir(cached_dir);
@@ -161,7 +168,8 @@ int main(int argc, char *argv[]) {
              << "---------" << std::endl;
 
   std::cout
-      << "Beginning ARACNe3 instance.  See logs and progress reports in \"" + log_file_path + "\"."
+      << "Beginning ARACNe3 instance.  See logs and progress reports in \"" +
+             log_file_path + "\"."
       << std::endl;
   log_output << "Beginning ARACNe3 instance..." << std::endl;
 
@@ -170,10 +178,11 @@ int main(int argc, char *argv[]) {
 
   log_output << "\nGene expression matrix & regulators list read time: ";
 
-  auto data = readExpMatrixAndCopulaTransform(exp_mat_file, subsampling_percent, rand);
-  const gene_to_floats& exp_mat = std::get<0>(data);
-  const gene_to_shorts& ranks_mat = std::get<1>(data);
-  const geneset& genes = std::get<2>(data);
+  auto data =
+      readExpMatrixAndCopulaTransform(exp_mat_file, subsampling_percent, rand);
+  const gene_to_floats &exp_mat = std::get<0>(data);
+  const gene_to_shorts &ranks_mat = std::get<1>(data);
+  const geneset &genes = std::get<2>(data);
   const uint16_t tot_num_samps = std::get<3>(data);
 
   uint16_t tot_num_subsample = std::ceil(subsampling_percent * tot_num_samps);
@@ -197,7 +206,8 @@ int main(int argc, char *argv[]) {
   watch1.reset();
   //-------------------------
 
-  APMINullModel nullmodel = APMINullModel(DEVELOPER_num_null_marginals, tot_num_subsample, cached_dir, rand);
+  APMINullModel nullmodel = APMINullModel(DEVELOPER_num_null_marginals,
+                                          tot_num_subsample, cached_dir, rand);
   nullmodel.cacheNullModel(cached_dir);
 
   //-------time module-------
@@ -221,13 +231,14 @@ int main(int argc, char *argv[]) {
       for (const uint16_t reg : regulators)
         regulons[reg];
 
-      int max_subnets = 65536; // arbitrary
+      int max_subnets = 65536;                  // arbitrary
       int max_subnets_when_criteria_filled = 0; // needed since multithreading
       bool stoppingCriteriaMet = false;
 
 #pragma omp parallel for num_threads(nthreads)
       for (int subnet_num = 0; subnet_num < max_subnets; ++subnet_num) {
-        if (stoppingCriteriaMet && subnet_num >= max_subnets_when_criteria_filled)
+        if (stoppingCriteriaMet &&
+            subnet_num >= max_subnets_when_criteria_filled)
           continue; // skip loop iteration if stopping condition is met
         gene_to_floats subsample_exp_mat;
 #pragma omp critical(randObjectAccess)
@@ -257,7 +268,7 @@ int main(int argc, char *argv[]) {
             stoppingCriteriaMet = true;
             // adaptive + race conditions can cause overestimation of subnets
             if (subnet_num > max_subnets_when_criteria_filled)
-              max_subnets_when_criteria_filled = subnet_num; 
+              max_subnets_when_criteria_filled = subnet_num;
           }
         }
       }
@@ -299,11 +310,16 @@ int main(int argc, char *argv[]) {
 
     for (uint16_t subnet_num = 0; subnet_num < num_subnets_to_consolidate;
          ++subnet_num) {
-      const std::string subnets_file_path = subnets_dir + "subnet" + std::to_string(subnet_num+1) + ".tsv";
-      const std::string subnets_log_file_path = subnets_log_dir + "log_subnet" + std::to_string(subnet_num+1) + ".txt";
+      const std::string subnets_file_path =
+          subnets_dir + "subnet" + std::to_string(subnet_num + 1) + ".tsv";
+      const std::string subnets_log_file_path = subnets_log_dir + "log_subnet" +
+                                                std::to_string(subnet_num + 1) +
+                                                ".txt";
 
       try {
-        const auto &[subnet, FPR_estimate_subnet] = loadARACNe3SubnetsAndUpdateFPRFromLog(subnets_file_path, subnets_log_file_path);
+        const auto &[subnet, FPR_estimate_subnet] =
+            loadARACNe3SubnetsAndUpdateFPRFromLog(subnets_file_path,
+                                                  subnets_log_file_path);
         subnets.push_back(subnet);
         FPR_estimates.push_back(FPR_estimate_subnet);
       } catch (TooManySubnetsRequested e) {
@@ -333,22 +349,24 @@ int main(int argc, char *argv[]) {
     watch1.reset();
     //-------------------------
 
-    std::vector<consolidated_df_row> final_df = consolidate_subnets_vec(subnets, exp_mat, regulators, genes, ranks_mat);
+    std::vector<consolidated_df_row> final_df =
+        consolidate_subnets_vec(subnets, exp_mat, regulators, genes, ranks_mat);
 
     //-------time module-------
     log_output << watch1.getSeconds() << std::endl;
-    log_output << "Subnetworks consolidated: " << std::to_string(num_subnets) << std::endl;
+    log_output << "Subnetworks consolidated: " << std::to_string(num_subnets)
+               << std::endl;
     log_output << "\nWriting final network..." << std::endl;
     //-------------------------
 
-    writeConsolidatedNetwork(final_df, output_dir + "consolidated-net_" + runid + ".tsv");
+    writeConsolidatedNetwork(final_df,
+                             output_dir + "consolidated-net_" + runid + ".tsv");
 
   } else if (do_not_consolidate) {
 
     //-------time module-------
     log_output << "\nNo consolidation requested." << std::endl;
     //-------------------------
-
   }
 
   using namespace std::string_literals;

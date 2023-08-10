@@ -1,9 +1,9 @@
-#include <omp.h>
-#include <filesystem>
-#include <fstream>
 #include "apmi_nullmodel.hpp"
 #include "ARACNe3.hpp"
 #include "algorithms.hpp"
+#include <filesystem>
+#include <fstream>
+#include <omp.h>
 
 extern uint16_t nthreads;
 
@@ -117,7 +117,8 @@ void APMINullModel::cacheNullModel(const std::string cached_dir) {
   return;
 }
 
-const float APMINullModel::getMIPVal(const float &mi, const float &p_precise) const {
+const float APMINullModel::getMIPVal(const float &mi,
+                                     const float &p_precise) const {
   // points to first index for which mi > the rest.
   auto it = std::upper_bound(null_mis.cbegin(), null_mis.cend(), mi,
                              std::greater<float>());
