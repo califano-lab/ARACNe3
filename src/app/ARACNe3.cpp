@@ -203,6 +203,7 @@ int main(int argc, char *argv[]) {
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
   log_output << "\nMutual Information null model calculation time: ";
+  log_output.flush();
   watch1.reset();
   //-------------------------
 
@@ -222,7 +223,7 @@ int main(int argc, char *argv[]) {
   if (!go_to_consolidate) {
 
     //-------time module-------
-    log_output << "\nCreating subnetwork(s) time: ";
+    log_output << "\nCreating subnetwork(s) time: "; log_output.flush();
     watch1.reset();
     //-------------------------
 
@@ -304,7 +305,7 @@ int main(int argc, char *argv[]) {
 
     //-------time module-------
     log_output << "\nConsolidation requested." << std::endl;
-    log_output << "Reading subnetwork(s) time: ";
+    log_output << "Reading subnetwork(s) time: "; log_output.flush();
     watch1.reset();
     //-------------------------
 
@@ -345,7 +346,7 @@ int main(int argc, char *argv[]) {
   if (!do_not_consolidate) {
 
     //-------time module-------
-    log_output << "\nConsolidating subnetwork(s) time: ";
+    log_output << "\nConsolidating subnetwork(s) time: "; log_output.flush();
     watch1.reset();
     //-------------------------
 

@@ -168,7 +168,7 @@ createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
 
   //-------time module-------
   Watch watch1;
-  log_output << "\nRaw subnetwork computation time: ";
+  log_output << "\nRaw subnetwork computation time: "; log_output.flush();
   watch1.reset();
   //-------------------------
 
@@ -219,7 +219,7 @@ createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
 
   if (prune_MaxEnt) {
     //-------time module-------
-    log_output << "\nMaxEnt pruning time: ";
+    log_output << "\nMaxEnt pruning time: "; log_output.flush();
     watch1.reset();
     //-------------------------
 
@@ -260,6 +260,7 @@ createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
 
   //-------time module-------
   log_output << "\nPrinting subnetwork in directory \"" + subnets_dir + "\"...";
+  log_output.flush();
   watch1.reset();
   //-------------------------
 
