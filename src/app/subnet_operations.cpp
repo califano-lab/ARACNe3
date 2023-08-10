@@ -26,7 +26,7 @@ pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
       reg_tar_mi.emplace_back(reg, tar, mi);
 
   // sort descending
-  std::sort(reg_tar_mi.begin(), reg_tar_mi.end(),
+  std::sort(reg_tar_mi.cbegin(), reg_tar_mi.cend(),
             [](const std::tuple<gene_id, gene_id, float> &rtm1,
                const std::tuple<gene_id, gene_id, float> &rtm2) -> bool {
               return std::get<2>(rtm1) > std::get<2>(rtm2);
