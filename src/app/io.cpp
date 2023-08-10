@@ -38,49 +38,6 @@ void makeDir(const std::string &dir_name) {
   return;
 }
 
-/** @brief Ranks indices based on the values in vec.
- *
- * This function sorts the indices in the range [1, size) based on the values
- * of vec[index-1]. The returned vector represents the rank of each element in
- * vec with the smallest element ranked as 1 and the largest as size. If two
- * elements in vec have the same value, their corresponding indices in the
- * ranking are randomly shuffled.
- *
- * @param vec The input vector for which the ranking should be formed.
- * @param rand A Mersenne Twister pseudo-random generator of 32-bit numbers
- * with a state size of 19937 bits. Used to shuffle indices corresponding to
- * equal values in vec.
- *
- * @return A vector representing the rank of indices in the input vector vec.
- *
- * @example vec = {9.2, 3.5, 7.4, 3.5} The function returns {4, 1, 3, 2}. Note
- * that the ranks for the elements with the same value 3.5 (indices 1 and 3)
- * may be shuffled differently in different runs.
- */
-std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
-                                  std::mt19937 &rand) {
-  std::vector<uint16_t> idx_ranks(vec.size());
-  std::iota(idx_ranks.begin(), idx_ranks.end(), 0U); /* 0, 1, ..., size-1 */
-  std::sort(idx_ranks.begin(), idx_ranks.end(),
-            [&vec](const uint16_t &num1, const uint16_t &num2) -> bool {
-              return vec[num1] < vec[num2];
-            }); /* sort ascending */
-  for (uint16_t r = 0U; r < idx_ranks.size();) {
-    uint16_t same_range = 1U;
-    while (r + same_range < idx_ranks.size() &&
-           vec[idx_ranks[r]] == vec[idx_ranks[r + same_range]])
-      ++same_range; // same_range is off-end index
-    if (same_range > 1U) {
-      std::shuffle(idx_ranks.begin() + r, idx_ranks.begin() + r + same_range,
-                   rand);
-      r = r + same_range;
-    } else {
-      ++r;
-    }
-  }
-  return idx_ranks;
-}
-
 /*
  Create a subsampled gene_to_floats.  Requires that exp_mat and
  tot_num_subsample are set.
