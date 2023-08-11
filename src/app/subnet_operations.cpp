@@ -84,7 +84,7 @@ pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
 /*
  Prune the network according to the MaxEnt weakest-edge reduction.
  */
-std::pair<gene_to_gene_to_float, uint32_t> 
+std::pair<gene_to_gene_to_float, uint32_t>
 pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
             const geneset &regulators,
             gene_to_gene_to_float network_reg_reg_only) {
@@ -128,15 +128,14 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
 /*
  Generates an ARACNe3 subnet (called from main).
 */
-std::pair<gene_to_gene_to_float, float>
-createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
-               const geneset &regulators, const geneset &genes,
-               const uint16_t tot_num_samps, const uint16_t tot_num_subsample,
-               const uint16_t subnet_num, const bool prune_alpha,
-               const APMINullModel &nullmodel, const std::string &method,
-               const float alpha, const bool prune_MaxEnt,
-               const std::string &output_dir, const std::string &subnets_dir,
-               const std::string &subnets_log_dir) {
+std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
+    const gene_to_floats &subsample_exp_mat, const geneset &regulators,
+    const geneset &genes, const uint16_t tot_num_samps,
+    const uint16_t tot_num_subsample, const uint16_t subnet_num,
+    const bool prune_alpha, const APMINullModel &nullmodel,
+    const std::string &method, const float alpha, const bool prune_MaxEnt,
+    const std::string &output_dir, const std::string &subnets_dir,
+    const std::string &subnets_log_dir) {
 
   float FPR_estimate_subnet;
   std::ofstream log_output(subnets_log_dir + "log_subnet" +
@@ -169,7 +168,8 @@ createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
 
   //-------time module-------
   Watch watch1;
-  log_output << "\nRaw subnetwork computation time: "; log_output.flush();
+  log_output << "\nRaw subnetwork computation time: ";
+  log_output.flush();
   watch1.reset();
   //-------------------------
 
@@ -221,7 +221,8 @@ createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
 
   if (prune_MaxEnt) {
     //-------time module-------
-    log_output << "\nMaxEnt pruning time: "; log_output.flush();
+    log_output << "\nMaxEnt pruning time: ";
+    log_output.flush();
     watch1.reset();
     //-------------------------
 
@@ -284,9 +285,9 @@ createARACNe3Subnet(const gene_to_floats &subsample_exp_mat,
 
 const std::vector<consolidated_df_row>
 consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
-                        const float FPR_estimate, const gene_to_floats &exp_mat,
-                        const geneset &regulators, const geneset &genes,
-                        const gene_to_shorts &ranks_mat) {
+                      const float FPR_estimate, const gene_to_floats &exp_mat,
+                      const geneset &regulators, const geneset &genes,
+                      const gene_to_shorts &ranks_mat) {
   std::vector<consolidated_df_row> final_df;
   const uint32_t tot_poss_edgs = regulators.size() * (genes.size() - 1);
 
