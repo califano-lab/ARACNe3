@@ -29,7 +29,6 @@ endif (WIN32 AND MINGW)
 
 if(USE_OPENMP)
 	target_link_libraries(ARACNe3_app PUBLIC OpenMP::OpenMP_CXX)
-	target_compile_options(ARACNe3_app PUBLIC -fopenmp)
 endif()
 
 target_include_directories(ARACNe3_app PUBLIC "${CMAKE_SOURCE_DIR}/deps/boost/libs/math/include/boost/math")
