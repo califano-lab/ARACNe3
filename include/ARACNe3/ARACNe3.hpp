@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #if defined __linux__ || defined __APPLE__
