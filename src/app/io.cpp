@@ -224,12 +224,12 @@ void writeConsolidatedNetwork(const std::vector<consolidated_df_row> &final_df,
     std::exit(2);
   }
   ofs << "regulator.values\ttarget.values\tmi.values\tscc.values\tcount."
-         "values\tp.values\n";
+         "values\tlog.p.values\n";
   for (const auto &edge : final_df)
     ofs << decompression_map[edge.regulator] << '\t'
         << decompression_map[edge.target] << '\t' << edge.final_mi << '\t'
         << edge.final_scc << '\t' << edge.num_subnets_incident << '\t'
-        << edge.final_p
+        << edge.final_log_p
         << '\n'; // using '\n' over std::endl, better for performance
 }
 

@@ -10,11 +10,11 @@ typedef struct consolidated_df_row {
   const float final_mi;
   const float final_scc;
   const uint16_t num_subnets_incident;
-  const double final_p;
+  const double final_log_p;
   consolidated_df_row(const gene_id &r, const gene_id &t, const float &mi,
-                      const float &scc, const uint16_t &n, const double &p)
+                      const float &scc, const uint16_t &n, const double &lp)
       : regulator(r), target(t), num_subnets_incident(n), final_mi(mi),
-        final_scc(scc), final_p(p){};
+        final_scc(scc), final_log_p(lp){};
 } consolidated_df_row;
 
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name);
