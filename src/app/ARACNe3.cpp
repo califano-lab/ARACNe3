@@ -372,25 +372,9 @@ int main(int argc, char *argv[]) {
   }
 
   using namespace std::string_literals;
-  const char *success_A3 =
-      R"(
-
-                |
-                |
-                ;                            
-                ;                            
-                |                            
-           ,  / | \   ,
-         , ;_/ ,L-, `_;  ,
-         \._/.ARACNe3.\_./
-           \_./(::)\._/                      
-                ''
-
-
-SUCCESS!
-)";
-  std::cout << success_A3 << std::endl;
-  log_output << success_A3 << std::endl;
+  const std::string success = "SUCCESS!";
+  std::cout << success << std::endl;
+  log_output << success << std::endl;
 
   return EXIT_SUCCESS;
 }
