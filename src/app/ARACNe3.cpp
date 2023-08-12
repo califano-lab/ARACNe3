@@ -225,62 +225,46 @@ int main(int argc, char *argv[]) {
   if (!go_to_consolidate) {
 
     //-------time module-------
-    log_output << "\nCreating subnetwork(s) time: "; log_output.flush();
+    log_output << "\nCreating subnetwork(s) time: ";
+    log_output.flush();
     watch1.reset();
     //-------------------------
 
     if (adaptive) {
-      gene_to_geneset regulons;
-      for (const uint16_t reg : regulators)
-        regulons[reg];
+      gene_to_geneset regulons(regulators.size());
 
-      int max_subnets = 65536;                  // arbitrary
-      int max_subnets_when_criteria_filled = 0; // needed since multithreading
       bool stoppingCriteriaMet = false;
+      uint16_t subnet_num = 0;
 
-#pragma omp parallel for num_threads(nthreads) schedule(static,1)
-      for (int subnet_num = 0; subnet_num < max_subnets; ++subnet_num) {
-        if (stoppingCriteriaMet &&
-            subnet_num >= max_subnets_when_criteria_filled)
-          continue; // skip loop iteration if stopping condition is met
-        gene_to_floats subsample_exp_mat;
-#pragma omp critical(randObjectAccess)
-        {
-          subsample_exp_mat = sampleExpMatAndReCopulaTransform(
-              exp_mat, tot_num_subsample, rand);
-        }
+      while (!stoppingCriteriaMet) {
+        gene_to_floats subsample_exp_mat =
+            sampleExpMatAndReCopulaTransform(exp_mat, tot_num_subsample, rand);
 
         const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
             tot_num_subsample, subnet_num, prune_alpha, nullmodel, method,
             alpha, prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir);
 
-#pragma omp critical(stopConditionCheck)
-        {
-          subnets.push_back(subnet);
-          FPR_estimates.push_back(FPR_estimate_subnet);
-          uint16_t min_regulon_size = 65535U;
-          // add any new edges to the regulon_set
-          for (const auto [reg, tar_mi] : subnet) {
-            for (const auto [tar, mi] : tar_mi)
-              regulons[reg].insert(tar);
-            if (regulons[reg].size() < min_regulon_size)
-              min_regulon_size = regulons[reg].size();
-          }
+        subnets.push_back(subnet);
+        FPR_estimates.push_back(FPR_estimate_subnet);
+        uint16_t min_regulon_size = 65535U;
+        // add any new edges to the regulon_set
+        for (const auto [reg, tar_mi] : subnet) {
+          for (const auto [tar, mi] : tar_mi)
+            regulons[reg].insert(tar);
+          if (regulons[reg].size() < min_regulon_size)
+            min_regulon_size = regulons[reg].size();
+
           if (min_regulon_size >= targets_per_regulator) {
             stoppingCriteriaMet = true;
-            // adaptive + race conditions can cause overestimation of subnets
-            if (subnet_num > max_subnets_when_criteria_filled)
-              max_subnets_when_criteria_filled = subnet_num;
           }
         }
       }
-      subnets.resize(max_subnets_when_criteria_filled);
       num_subnets = subnets.size();
     } else if (!adaptive) {
       subnets = std::vector<gene_to_gene_to_float>(num_subnets);
       FPR_estimates = std::vector<float>(num_subnets);
-#pragma omp parallel for num_threads(nthreads) schedule(static,1)
+#pragma omp parallel for num_threads(nthreads) schedule(static, 1)
       for (int i = 0; i < num_subnets; ++i) {
         gene_to_floats subsample_exp_mat;
 #pragma omp critical(randObjectAccess)
@@ -307,7 +291,8 @@ int main(int argc, char *argv[]) {
 
     //-------time module-------
     log_output << "\nConsolidation requested." << std::endl;
-    log_output << "Reading subnetwork(s) time: "; log_output.flush();
+    log_output << "Reading subnetwork(s) time: ";
+    log_output.flush();
     watch1.reset();
     //-------------------------
 
@@ -348,7 +333,8 @@ int main(int argc, char *argv[]) {
   if (!do_not_consolidate) {
 
     //-------time module-------
-    log_output << "\nConsolidating subnetwork(s) time: "; log_output.flush();
+    log_output << "\nConsolidating subnetwork(s) time: ";
+    log_output.flush();
     watch1.reset();
     //-------------------------
 
