@@ -131,7 +131,7 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
 std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
     const gene_to_floats &subsample_exp_mat, const geneset &regulators,
     const geneset &genes, const uint16_t tot_num_samps,
-    const uint16_t tot_num_subsample, const uint16_t subnet_num,
+    const uint16_t tot_num_subsample, const uint16_t cur_subnet_ct,
     const bool prune_alpha, const APMINullModel &nullmodel,
     const std::string &method, const float alpha, const bool prune_MaxEnt,
     const std::string &output_dir, const std::string &subnets_dir,
@@ -139,13 +139,13 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
 
   float FPR_estimate_subnet;
   std::ofstream log_output(subnets_log_dir + "log_subnet" +
-                           std::to_string(subnet_num + 1) + ".txt");
+                           std::to_string(cur_subnet_ct + 1) + ".txt");
   std::time_t t = std::time(nullptr);
 
   log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z")
              << "---------" << std::endl
              << std::endl;
-  log_output << "Subnetwork #: " + std::to_string(subnet_num + 1) << std::endl;
+  log_output << "Subnetwork #: " + std::to_string(cur_subnet_ct + 1) << std::endl;
   log_output << "Total # regulators (defined in gexp mat): " +
                     std::to_string(regulators.size())
              << std::endl;
@@ -269,13 +269,13 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
 
   // writes the individual subnet output
   writeNetworkRegTarMI(subnetwork, subnets_dir + "subnet" +
-                                       std::to_string(subnet_num + 1) + ".tsv");
+                                       std::to_string(cur_subnet_ct + 1) + ".tsv");
 
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
   //-------------------------
 
-  std::cout << "...subnetwork " + std::to_string(subnet_num + 1) +
+  std::cout << "...subnetwork " + std::to_string(cur_subnet_ct + 1) +
                    " completed = " + std::to_string(size_of_subnetwork) +
                    " edges returned..."
             << std::endl;

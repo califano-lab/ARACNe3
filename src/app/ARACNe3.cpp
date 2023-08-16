@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
       gene_to_geneset regulons(regulators.size());
 
       bool stoppingCriteriaMet = false;
-      uint16_t subnet_num = 0;
+      uint16_t cur_subnet_ct = 0;
 
       while (!stoppingCriteriaMet) {
         gene_to_floats subsample_exp_mat =
@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
 
         const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
-            tot_num_subsample, subnet_num, prune_alpha, nullmodel, method,
+            tot_num_subsample, cur_subnet_ct, prune_alpha, nullmodel, method,
             alpha, prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir);
 
         subnets.push_back(subnet);
