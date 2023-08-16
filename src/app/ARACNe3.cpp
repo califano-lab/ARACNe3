@@ -264,14 +264,9 @@ int main(int argc, char *argv[]) {
     } else if (!adaptive) {
       subnets = std::vector<gene_to_gene_to_float>(num_subnets);
       FPR_estimates = std::vector<float>(num_subnets);
-#pragma omp parallel for num_threads(nthreads) schedule(static, 1)
       for (int i = 0; i < num_subnets; ++i) {
-        gene_to_floats subsample_exp_mat;
-#pragma omp critical(randObjectAccess)
-        {
-          subsample_exp_mat = sampleExpMatAndReCopulaTransform(
+        gene_to_floats subsample_exp_mat = sampleExpMatAndReCopulaTransform(
               exp_mat, tot_num_subsample, rand);
-        }
         const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
             tot_num_subsample, i, prune_alpha, nullmodel, method, alpha,
