@@ -7,6 +7,7 @@
 #include <boost/math/distributions/beta.hpp>
 #include <fstream>
 #include <iostream>
+#include <omp.h>
 
 /*
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if
@@ -135,7 +136,7 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
     const bool prune_alpha, const APMINullModel &nullmodel,
     const std::string &method, const float alpha, const bool prune_MaxEnt,
     const std::string &output_dir, const std::string &subnets_dir,
-    const std::string &subnets_log_dir) {
+    const std::string &subnets_log_dir, const uint16_t nthreads) {
 
   float FPR_estimate_subnet;
   std::ofstream log_output(subnets_log_dir + "log_subnet" +
@@ -175,16 +176,36 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
 
   uint32_t size_of_subnetwork = 0U;
 
+  // vectorize sets and network for parallelism
+  const std::vector<gene_id> regs_vec(regulators.begin(), regulators.end()),
+      genes_vec(genes.begin(), genes.end());
+
+  std::vector<std::vector<float>> subnetwork_vec(
+      regulators.size(), std::vector<float>(genes.size(), 0.f));
+
+#pragma omp parallel for num_threads(nthreads)
+  for (int reg_idx = 0; reg_idx < regulators.size(); ++reg_idx) {
+    const gene_id reg = regs_vec[reg_idx];
+    for (int tar_idx = 0; tar_idx < genes.size(); ++tar_idx) {
+      const gene_id tar = genes_vec[tar_idx];
+      if (reg != tar)
+        subnetwork_vec[reg_idx][tar_idx] =
+            calcAPMI(subsample_exp_mat.at(reg), subsample_exp_mat.at(tar));
+    }
+  }
+
+  // transfer back to hash map structure
   gene_to_gene_to_float subnetwork;
   subnetwork.reserve(regulators.size());
-  for (uint16_t reg : regulators) {
-    subnetwork[reg].reserve(genes.size() - 1);
-    for (uint16_t tar : genes)
+  for (uint16_t reg_idx = 0U; reg_idx < regulators.size(); ++reg_idx) {
+    const gene_id reg = regs_vec[reg_idx];
+    for (uint16_t tar_idx = 0U; tar_idx < genes.size(); ++tar_idx) {
+      const gene_id tar = genes_vec[tar_idx];
       if (reg != tar) {
-        subnetwork[reg][tar] =
-            calcAPMI(subsample_exp_mat.at(reg), subsample_exp_mat.at(tar));
-        size_of_subnetwork += 1;
+        subnetwork[reg][tar] = subnetwork_vec[reg_idx][tar_idx];
+        ++size_of_subnetwork;
       }
+    }
   }
 
   //-------time module-------

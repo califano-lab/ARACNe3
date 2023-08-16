@@ -12,7 +12,7 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
     const bool prune_alpha, const APMINullModel &nullmodel,
     const std::string &method, const float alpha, const bool prune_MaxEnt,
     const std::string &output_dir, const std::string &subnets_dir,
-    const std::string &subnet_log_dir);
+    const std::string &subnet_log_dir, const uint16_t nthreads);
 
 const std::vector<consolidated_df_row>
 consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
