@@ -32,12 +32,37 @@ if(USE_OPENMP)
 	if(OpenMP_CXX_FOUND)
 		add_definitions(-DOPENMP_ENABLED=1)
 		message(STATUS "OpenMP package found by include(FindOpenMP)")
-	else()
-		message(STATUS "OpenMP package not found by include(FindOpenMP)")
-	endif(OpenMP_CXX_FOUND)
 
-	target_link_libraries(ARACNe3_app PUBLIC OpenMP::OpenMP_CXX)
-endif()
+		target_link_libraries(ARACNe3_app PUBLIC OpenMP::OpenMP_CXX)
+	else()
+		message(STATUS "OpenMP package not found by include(FindOpenMP). Attempting fallback methods.")
+		# Check for the macOS platform
+		if(APPLE)
+			# Check for x86 architecture
+			execute_process(
+				COMMAND uname -m
+				OUTPUT_VARIABLE ARCHITECTURE
+				OUTPUT_STRIP_TRAILING_WHITESPACE
+				)
+
+			if("${ARCHITECTURE}" STREQUAL "x86_64")
+				# Set the flags if on x86 macOS
+				set(LIBOMP_PATH "/usr/local/opt/libomp")
+
+				# Create libomp as an imported target
+				message(STATUS "Attempting libomp_imported target creation")
+				add_library(libomp_imported STATIC IMPORTED)
+				set_target_properties(libomp_imported PROPERTIES
+					IMPORTED_LOCATION "${LIBOMP_PATH}/lib/libomp.a"
+					INTERFACE_INCLUDE_DIRECTORIES "${LIBOMP_PATH}/include"
+					)
+				
+				message(STATUS "Attempting to link libomp_imported")
+				target_link_libraries(ARACNe3_app PRIVATE libomp_imported)
+			endif()
+		endif()
+	endif()
+endif(USE_OPENMP)
 
 target_include_directories(ARACNe3_app PUBLIC "${CMAKE_SOURCE_DIR}/deps/boost/libs/math/include/boost/math")
 target_link_libraries(ARACNe3_app PUBLIC Boost::math)
