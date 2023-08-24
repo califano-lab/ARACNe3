@@ -1,7 +1,3 @@
-# Include header files in root/include/ARACNe3 directory
-include_directories(${PROJECT_SOURCE_DIR}/include/ARACNe3)
-include_directories(${OpenMP_CXX_INCLUDE_DIRS})
-
 # Set the source files for ARACNe3
 set(SOURCES
 	ARACNe3.cpp 
@@ -13,19 +9,16 @@ set(SOURCES
 	subnet_operations.cpp
 )
 
-# Name of executable & target, source file list (h files ignored)
-add_executable(ARACNe3_app ${SOURCES})
+# Mainly for testing suite, but also so ARACNe3_app can easily add includes
+add_library(ARACNe3_lib ${SOURCES})
 
-set_target_properties(ARACNe3_app PROPERTIES
-  CXX_STANDARD 17
-  CXX_STANDARD_REQUIRED ON
-  DEBUG_POSTFIX "_debug"
-  RELEASE_POSTFIX "_release"
+# Public includes so ARACNe3_app can see them, yet sources are private
+target_include_directories(ARACNe3_lib
+	PUBLIC
+        ${PROJECT_SOURCE_DIR}/include/ARACNe3
+	${OpenMP_CSS_INCLUDE_DIRS}
+	"${CMAKE_SOURCE_DIR}/deps/boost/libs/math/include/boost/math"
 )
-
-if (WIN32 AND MINGW)
-	target_compile_options(ARACNe3_app PUBLIC -static-libstdc++)
-endif (WIN32 AND MINGW)
 
 if(USE_OPENMP)
 	include(FindOpenMP)
@@ -33,7 +26,7 @@ if(USE_OPENMP)
 		add_definitions(-DOPENMP_ENABLED=1)
 		message(STATUS "OpenMP package found by include(FindOpenMP)")
 
-		target_link_libraries(ARACNe3_app PUBLIC OpenMP::OpenMP_CXX)
+		target_link_libraries(ARACNe3_lib PUBLIC OpenMP::OpenMP_CXX)
 	else()
 		message(STATUS "OpenMP package not found by include(FindOpenMP). Attempting fallback methods.")
 		# Check for the macOS platform
@@ -58,25 +51,32 @@ if(USE_OPENMP)
 					)
 				
 				message(STATUS "Attempting to link libomp_imported")
-				target_link_libraries(ARACNe3_app PRIVATE libomp_imported)
+				target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
 			endif()
 		endif()
 	endif()
 endif(USE_OPENMP)
 
-target_include_directories(ARACNe3_app PUBLIC "${CMAKE_SOURCE_DIR}/deps/boost/libs/math/include/boost/math")
-target_link_libraries(ARACNe3_app PUBLIC Boost::math)
+target_link_libraries(ARACNe3_lib PUBLIC Boost::math)
+
+if (WIN32 AND MINGW)
+	target_compile_options(ARACNe3_lib PUBLIC -static-libstdc++)
+endif (WIN32 AND MINGW)
 
 # The -lstdc++fs flag is needed for the std::filesystem library on some platforms, like CentOS 6.5 with older GCC versions. However, on most systems, the std::filesystem library is already included in the standard library.
 if(UNIX AND NOT APPLE)
-  target_compile_options(ARACNe3_app PRIVATE -lstdc++fs)
-  target_link_libraries(ARACNe3_app PRIVATE stdc++fs)
+	target_compile_options(ARACNe3_lib PUBLIC -lstdc++fs)
+	target_link_libraries(ARACNe3_lib PUBLIC stdc++fs)
 endif()
 
-# For testing suite
-add_library(ARACNe3_lib ${SOURCES})
+add_executable(ARACNe3_app ${SOURCES})
 
-target_include_directories(ARACNe3_lib
-    PUBLIC
-        ${PROJECT_SOURCE_DIR}/include/ARACNe3
+set_target_properties(ARACNe3_app PROPERTIES
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON
+  DEBUG_POSTFIX "_debug"
+  RELEASE_POSTFIX "_release"
 )
+
+# Links the public libraries and includes, including the headers for A3
+target_link_libraries(ARACNe3_app PRIVATE ARACNe3_lib)
