@@ -1,6 +1,5 @@
 # Set the source files for ARACNe3
 set(SOURCES
-	ARACNe3.cpp 
 	cmdline_parser.cpp
 	stopwatch.cpp
 	io.cpp
@@ -69,7 +68,7 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(ARACNe3_lib PUBLIC stdc++fs)
 endif()
 
-add_executable(ARACNe3_app ${SOURCES})
+add_executable(ARACNe3_app ARACNe3.cpp ${SOURCES})
 
 set_target_properties(ARACNe3_app PROPERTIES
   CXX_STANDARD 17
