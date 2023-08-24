@@ -2,6 +2,7 @@
 #include "ARACNe3.hpp"
 #include <iostream>
 #include <numeric>
+#include <algorithm>
 
 extern float DEVELOPER_mi_cutoff;
 

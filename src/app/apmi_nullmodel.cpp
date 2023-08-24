@@ -3,6 +3,8 @@
 #include "algorithms.hpp"
 #include <filesystem>
 #include <fstream>
+#include <iterator>
+#include <algorithm>
 #include <omp.h>
 
 extern uint16_t nthreads;

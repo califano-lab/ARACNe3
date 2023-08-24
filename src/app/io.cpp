@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 std::vector<std::string> decompression_map;
 static std::unordered_map<std::string, uint16_t> compression_map;
