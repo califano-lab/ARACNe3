@@ -54,17 +54,6 @@ endif(USE_SANITIZER)
 ## OpenMP
 option(USE_OPENMP "Compile with multithreading support" ON)
 
-if(USE_OPENMP)
-	include(FindOpenMP)
-	if(OpenMP_CXX_FOUND)
-		add_definitions(-DOPENMP_ENABLED=1)
-		message(STATUS "OpenMP package found by include(FindOpenMP)")
-	else()
-		message(STATUS "OpenMP package not found by include(FindOpenMP)")
-	endif(OpenMP_CXX_FOUND)
-endif()
-
-
 ##### ADD SUBDIRECTORIES #####
 
 add_subdirectory(src)
