@@ -1,8 +1,8 @@
 # ARACNe3
 
-## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) in C++
+## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3)
 
-`ARACNe3` is the C++ implementation of `ARACNe`.  `ARACNe3` presents multiple computational and theoretical improvements to the existing `ARACNe-AP` implementation, formulated in Java by Lachmann and colleagues in 2016.  
+`ARACNe3` is an implementation of `ARACNe` which presents computational improvements and theoretical changes to the recent `ARACNe-AP` implementation.  Given a list of regulators and a gene expression profile, `ARACNe3` is used to infer irreducibly dependent regulatory interactions and output a Gene Regulatory Network (GRN). The mainstream analysis generates many GRNs of subsamples of the profile ("subnetworks") and then consolidates the subnetworks into a robust GRN.  The consolidated output is a GRN whose edge strengths can be quantified by several statistical metrics.
 
 Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information.* **Bioinformatics.** 2016 Jul 15;32(14):2233-5. doi: [10.1093/bioinformatics/btw216](https://dx.doi.org/10.1093/bioinformatics/btw216). Epub 2016 Apr 23.
 
@@ -10,113 +10,98 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 
 ## Downloading ARACNe3
 
-`git clone https://github.com/califano-lab/ARACNe3 # Clone the repo`
+You may [download ARACNe3](https://github.com/califano-lab/ARACNe3) for MacOS and Windows or build `ARACNe3` manually for niche uses, like on an HPC cluster.
 
-After cloning the repository, you may build `ARACNe3` manually or access the latest executables in the `products/` directory.  Currently, `ARACNe3` has been pre-compiled to work on MacOS 12.0 or later (in `products/macOS 12.0/`) and Windows 10 (`products/windows/`).  Make sure that if using Windows, you choose the version compiled for your CPU architecture (ARM 64-bit or x86 64-bit)
+If running the `ARACNe3` executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
 
-Note that you may require additional software to run the C++ executables.  If running the `ARACNe3` executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
+## Building ARACNe3 (Optional)
+### Installing Libraries
+`ARACNe3` supports multithreading using `OpenMP`.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) already installed.
 
-## Building ARACNe3 Manually (Optional)
-The C++17 standard is used when compiling `ARACNe3` into an executable.  `ARACNe3` utilizes multiple threads with `OpenMP` directives, so you must have libraries that support them installed.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) installed already.
-
-`brew install llvm libomp`
-
-Build the executable by cloning the repository, compiling all C++ files, and then linking `ARACNe3` with object file dependencies in the manner below.  Make sure that `OpenMP` libraries have been installed, and their include directories and library directories have been implied by your [environment variables](https://en.wikipedia.org/wiki/Environment_variable).  Make sure to utilize all available runtime optimization compiler options.  
-### Compiling Example:
 ```
-g++ -std=c++17 -O3 -fopenmp -c ARACNe3.cpp NullModel.cpp IO.cpp APMI.cpp AlphaPruning.cpp MaxEntPruning.cpp RegWebFns.cpp Consolidator.cpp -lstdc++fs
+brew install libomp  # Install OpenMP
 ```
-### Linking Example:
+
+### Build ARACNe3 with CMake
+`cmake` is used to build `ARACNe3` and simplify cross-platform compatibility. After installing `cmake`, follow the instructions below to build `ARACNe3`.
+
 ```
-g++ -std=c++17 -O3 -fopenmp ARACNe3.o NullModel.o IO.o APMI.o AlphaPruning.o MaxEntPruning.o RegWebFns.o Consolidator.o -o ARACNe3 -lstdc++fs
-``` 
-### Troubleshooting Build Issues
-If you face issues building `ARACNe3` besides lacking a C++17 compiler, or if you are experiencing `segmentation fault` even with proper usage, try compiling `ARACNe3` without the clang `-O3` compiler optimization option, or repace it with `-O2`. 
+git clone https://github.com/califano-lab/ARACNe3  # Clone the repo
+
+cd ARACNe3/
+git submodule update --init --recursive  # Install dependencies
+
+mkdir build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build  # Build ARACNe3
+```
+
+The executable should be built in `./build/src/app/ARACNe3_app_release`. If you are having issues, try using `cmake3` instead of `cmake` in the instructions above.
 
 ## Using ARACNe3
-### Input files needed to run ARACNe3
-See below for file format specification (or download the test files from our repository)
-1.	A `G+1 x N+1` normalized expression matrix (CPM, TPM, etc.)
-2.	List of regulators (e.g. Transcription Factors)
-
 ### Steps required to run ARACNe3
-1.	Normalize a gene expression profile for sequencing depth in each sample.
+1.	Normalize a gene expression profile for sequencing depth in each sample (CPM, TPM, etc.).
 2.	Run `ARACNe3` according to command line instructions below.
 
-### Optional ways to run ARACNe3
-1.	Customizing the population percentage from which to subsample for network generation, or to remove subsampling (`--subsample 1`).
-2.	Removing the MaxEnt pruning step will preserve every edge that passes the FDR/FWER Pruning Step.
-3.	Customizing the FDR restriction for the first pruning step.  For an FDR restriction, the first pruning step rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.  
-4.	Control for the Family Wise Error Rate (FWER) instead of the FDR during the first pruning step (`--FWER`).  If chosen, `--alpha` will be chosen as the FWER control parameter. 
-5.	Using regulon occupancy, or minimum targets per regulator, as a stopping criteria as opposed to number of subnetworks (`--adaptive -x 30`).
+### ARACNe3 input files (see [input file format](#input-file-format) below)
+1.	A `tsv` that contains the `G+1 x N+1` normalized expression profile, with genes as rows and samples as columns. Note: the "`+1`" is for header names & column names, respectively.
+2.	List of regulators (e.g., transcription factors).
 
-### Output of ARACNe3
-`ARACNe3` will output a directory structure within the output directory provided by the user (e.g., `-o outputdir/`) that contains the subnetworks (in `outputdir/subnets/`), the consensus network (`outputdir/finalNet.txt`), and log information for the subnetworks (in `outputdir/log/`) and the overall `ARACNe3` runtime (`outputdir/finalLog.txt`).  The subnetworks subdirectory will contain a file for each subnetwork (`-x #`) requested, automatically named `output_subnet#.txt`. Each file shows every significant interaction in three columns:
+### ARACNe3 output files
+`ARACNe3` will output several files & directories within the output directory provided by the user (e.g., `-o outputdir/`).  If `ARACNe3` is run with the `--runid abc`, within `outputdir/` will be the subnetworks (in `outputdir/subnets_abc/`), the consolidated network (`outputdir/consolidated-net_abc.tsv`), log information for each subnetwork created (in `outputdir/subnets_log_abc/`), and log information for the overall `ARACNe3` instance (`outputdir/log_abc.txt`).  
+
+The subnetworks directory `outputdir/subnets_abc/` contains a file for each subnetwork (e.g., 5 files if `-x 5`) requested, named `subnet#.tsv`.  Each subnetwork file describes significant interactions in three columns:
 1.	The regulator.
 2.	The target.
 3.	The APMI (Mutual Information estimated by Adaptive Partitioning) of the pair, based on the subsampled gene expression profiles of the regulator and target.
+A subnetwork with 10 edges will have 11 rows (+1 for header row).
 
-The consensus network `outputdir/finalNet.txt` is a file that consolidates all generated networks and summarizes each edge in five columns:
+The consensus network `outputdir/consolidated-net_abc.tsv` is a file that consolidates subnetworks and summarizes each edge in five columns:
 1.	The regulator.
 2.	The target.
 3.	The APMI of the pair, based on the full gene expression profiles of the regulator and target.
 4.	The Spearman's Rank Correlation Coefficient of the pair, based on the full gene expression profile.
-5.	The p-value of the edge, based on how many subnetworks in which it was identified (see the [manuscript](https://github.com/califano-lab/ARACNe3-CPP) for methodology).
-
-## Input file format
-### A gene/regulator list
-A text file, containing one gene symbol per line. Every line has important information. E.g.,
-```
-g_10_
-g_10011_
-g_1_
-```
-### Dataset
-A `G+1 x N+1`, normalized and transformed expression profile, with genes on rows and samples on columns.  All columns should be tab-delimited (`\t`), and all rows should be newline delimited (`\n`).  Do not include any important information in the first row, except for an equal number of columns (delimited by tab) as the rows below. E.g.,
-```
-gene	Samp5	Sample2	Samp1
-g_1_	4.99	2.93	0.39
-g_10_	0.58	0.18	2.65
-g_9432_	3.00	1.27	7.63
-g_10006_	1.30	0.05	0.68
-g_10011_	0.055	0.73	4.64
-```
+5.	The _p_-value of the edge, based on how many subnetworks in which it was identified (see the [manuscript](https://github.com/califano-lab/ARACNe3) for methodology).
+A consensus network with 15 edges will have 16 rows.
 
 ## Parameters
 ### Required
-``-e`` is the expression file.
+`-e` is the expression file.
 
-``-r`` is the list of regulators (e.g., TFs).
+`-r` is the list of regulators (e.g., TFs).
 
-``-o`` is the output directory.
+`-o` is the output directory.
 
-### Optional
-``-x`` is the stopping criteria for generating multiple subnetworks or consolidating subnetworks.  By default, it specifies a fixed number of subnetworks to generate (default: `-x 1`).
+### Useful
+`-x` adjusts the stopping criteria when generating or using multiple subnetworks.  By default (`-x 1`) specifies the fixed number of subnetworks to generate, in this case just 1.
 
-``--adaptive`` changes the stopping criteria `-x` to specify regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, if all subnetworks are consolidated into one (default: `-x 30`).
+`--adaptive` changes the meaning of `-x` to specify regulon occupancy, instead of number of subnetworks to generate.  Regulon occupancy is defined as the minimum number of unique targets observed per regulator, when all subnetworks are consolidated into one (default: `-x 30` if `--adaptive` is specified).  Note that different subnetworks find different targets because of different subsamples, but in the consolidated network there are metrics for confidence in these targets.
 
-``--threads`` sets the number of threads to use during subnetwork generation (default: `--threads 1`).
+`--alpha` is the cutoff for False Discovery Rate (FDR) pruning (default: `--alpha 0.05`).  The FDR cutoff is the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
-``--alpha`` is the alpha parameter for FDR or FWER pruning (default: `--alpha 0.05`).
+`--seed` sets the seed for random behavior (default: `--seed 0`).  Separate `ARACNe3` instances with the same exact inputs but a different seed will produce a different output.
 
-``--FWER`` tells ARACNe3 to prune by control of FWER alpha, instead of the default control for FDR alpha.
-
-``--subsample`` is the population percentage to subsample ($1-e^{-1}$ is default: `--subsample 0.63212...`).
-
-``--noAlpha`` tells ARACNe3 not to prune based on the FDR or FWER (same as: `--alpha 1`).
-
-``--noMaxEnt`` tells ARACNe3 not to prune edges based on the Principle of Maximum Entropy.
-
-``--seed`` sets the seed for all programmatic pseudorandom behavior (default: `--seed 0`).
-
-``--noConsolidate`` tells ARACNe3 to skip the consolidation step and instead only preserve the null model, the final log, the `log/` subdirectory, and all subnetworks generated in `subnets/`.
-
-``--consolidate`` tells ARACNe3 to run in consolidate mode.  An expression file and a list of regulators still must be provided with `-e` and `-r`, respectively.  `-o` specifies the directory location.  Finally, `-x` specifies how many subnetwork files to use (default: `-x 1`). Note that output directory structure `-o` **must** contain subdirectories `subnets/` and `log/` that follow the exact conventions as an ARACNe3 output.
+`--threads` sets the number of threads to use (default: `--threads 1`).
 
 `--runid` allows you to pass an identifier to replace `defaultid` in `log_defaultid.txt`. Does not affect each modulator's log, only the instance log (default: `--runid defaultid`).
 
+### Optional
+`--FWER` tells ARACNe3 to prune by control of Family Wise Error Rate (FWER) alpha, instead of the default control for FDR.
+
+`--FPR` tells ARACNe3 to prune by control of False Positive Rate (FPR) alpha (a.k.a., _p_-value), instead of the default control for FDR.
+
+`--subsample` is the population percentage to subsample ($1-e^{-1}$ is default: `--subsample 0.63212`).
+
+`--noAlpha` tells ARACNe3 to skip subnetwork pruning by FDR/FPR/FWER (same as: `--alpha 1`).
+
+`--noMaxEnt` tells ARACNe3 to skip subnetwork pruning by Principle of Maximum Entropy, the second pruning step.
+
+`--noConsolidate` tells ARACNe3 not to consolidate subnetworks, only keeping the final log, the `log/` subdirectory, and all subnetworks generated in `subnets/`.
+
+`--consolidate` tells ARACNe3 to skip generating subnetworks and consolidate existing subnetworks.  An expression file and a list of regulators must still be provided with `-e` and `-r`, respectively.  `-o` specifies the directory location of an `ARACNe3` output.  Finally, `-x` specifies how many subnetwork files to use in consolidate (default: `-x 1`). Note that output directory `-o` _**must**_ contain the subdirectories `subnets/` and `log/` that follow the exact conventions as an ARACNe3 output (including numbering).  Each subnetwork used must be mapped 1:1 with its log file because consolidation generates _p_-values for edges strictly based on parameters used during the subnetwork generation, which are stored in the log files.
+
 ## Examples
-Note: the examples have been written based on the provided test sets: ``test/exp_mat.txt`` (the normalized expression matrix) and ``test/regulators.txt`` (the list of regulators).  Due to the limited capacity of the repository, you may need to decompress the expression matrix before usage.
+Note: the examples have been written based on the provided test sets: `test/exp_mat.txt` (the normalized expression matrix) and `test/regulators.txt` (the list of regulators).
 
 ### Example 1: generate one ARACNe3 subnetwork, subsampling $1-e^{-1}%$ of expression profiles, controlling for FDR < 0.05, using only one CPU core
 ```
@@ -142,6 +127,28 @@ Note: the examples have been written based on the provided test sets: ``test/exp
 ```
 ./ARACNe3 -e test/exp_mat.txt -r test/regulators.txt -o test/output -x 50 -FWER --alpha 0.10 --adaptive --noMaxEnt
 ``` 
+
+## Input file format
+### A gene/regulator list
+A text file, containing one symbol per line. E.g.,
+
+```
+g_10_
+g_10011_
+g_1_
+```
+
+### Expression file
+A `G+1 x N+1`, normalized expression profile, with genes on rows and samples on columns (Note: the `+1` is extra, from the row names and column names). This should be in `tsv` format and have both row and column names. Row names are essential for `ARACNe3` to store a gene's expression. Column names are used to count the number of samples. For example, the `5+1 x 3+1` matrix below is a compliant `tsv`:
+
+```
+genes	col1	ColNamesNotImportant	Samp9
+g_1_	4.99	2.93	0.39
+g_10_	0.58	0.18	2.65
+g_9432_	3.00	1.27	7.63
+g_10006_	1.30	0.05	0.68
+g_10011_	0.055	0.73	4.64
+```
 
 ## Contact
 Please contact Aaron Griffin (theory) or Andrew Howe (codebase) for questions regarding this project.
