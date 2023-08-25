@@ -2,7 +2,7 @@
 
 ## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3)
 
-`ARACNe3` is an implementation of `ARACNe` which presents computational improvements and theoretical changes to the recent `ARACNe-AP` implementation.  Given a list of regulators and a gene expression profile, `ARACNe3` is used to infer irreducibly dependent regulatory interactions and output a Gene Regulatory Network (GRN). The mainstream analysis generates many GRNs of subsamples of the profile ("subnetworks") and then consolidates the subnetworks into a robust GRN.  The consolidated output is a GRN whose edge strengths can be quantified by several statistical metrics.
+ARACNe3 is an implementation of ARACNe which presents computational improvements and theoretical changes to the recent ARACNe-AP implementation.  Given a list of regulators and a gene expression profile, ARACNe3 is used to infer irreducibly dependent regulatory interactions and output a Gene Regulatory Network (GRN). The mainstream analysis generates many GRNs of subsamples of the profile ("subnetworks") and then consolidates the subnetworks into a robust GRN.  The consolidated output is a GRN whose edge strengths can be quantified by several statistical metrics.
 
 Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information.* **Bioinformatics.** 2016 Jul 15;32(14):2233-5. doi: [10.1093/bioinformatics/btw216](https://dx.doi.org/10.1093/bioinformatics/btw216). Epub 2016 Apr 23.
 
@@ -10,20 +10,20 @@ Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Cali
 
 ## Downloading ARACNe3
 
-You may [download ARACNe3](https://github.com/califano-lab/ARACNe3) for MacOS and Windows or build `ARACNe3` manually for niche uses, like on an HPC cluster.
+You may [download ARACNe3](https://github.com/califano-lab/ARACNe3) for MacOS and Windows or build ARACNe3 manually for niche uses, like on an HPC cluster.
 
-If running the `ARACNe3` executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
+If running the ARACNe3 executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
 
 ## Building ARACNe3 (Optional)
 ### Installing Libraries
-`ARACNe3` supports multithreading using `OpenMP`.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) already installed.
+ARACNe3 supports multithreading using OpenMP.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) already installed.
 
 ```
 brew install libomp  # Install OpenMP
 ```
 
 ### Build ARACNe3 with CMake
-`cmake` is used to build `ARACNe3` and simplify cross-platform compatibility. After installing `cmake`, follow the instructions below to build `ARACNe3`.
+`cmake` is used to build ARACNe3 and simplify cross-platform compatibility. After installing `cmake`, follow the instructions below to build ARACNe3.
 
 ```
 git clone https://github.com/califano-lab/ARACNe3  # Clone the repo
@@ -41,14 +41,14 @@ The executable should be built in `./build/src/app/ARACNe3_app_release`. If you 
 ## Using ARACNe3
 ### Steps required to run ARACNe3
 1.	Normalize a gene expression profile for sequencing depth in each sample (CPM, TPM, etc.).
-2.	Run `ARACNe3` according to command line instructions below.
+2.	Run ARACNe3 according to command line instructions below.
 
 ### ARACNe3 input files (see [input file format](#input-file-format) below)
 1.	A `tsv` that contains the `G+1 x N+1` normalized expression profile, with genes as rows and samples as columns. Note: the "`+1`" is for header names & column names, respectively.
 2.	List of regulators (e.g., transcription factors).
 
 ### ARACNe3 output files
-`ARACNe3` will output several files & directories within the output directory provided by the user (e.g., `-o outputdir/`).  If `ARACNe3` is run with the `--runid abc`, within `outputdir/` will be the subnetworks (in `outputdir/subnets_abc/`), the consolidated network (`outputdir/consolidated-net_abc.tsv`), log information for each subnetwork created (in `outputdir/subnets_log_abc/`), and log information for the overall `ARACNe3` instance (`outputdir/log_abc.txt`).  
+ARACNe3 will output several files & directories within the output directory provided by the user (e.g., `-o outputdir/`).  If ARACNe3 is run with the `--runid abc`, within `outputdir/` will be the subnetworks (in `outputdir/subnets_abc/`), the consolidated network (`outputdir/consolidated-net_abc.tsv`), log information for each subnetwork created (in `outputdir/subnets_log_abc/`), and log information for the overall ARACNe3 instance (`outputdir/log_abc.txt`).  
 
 The subnetworks directory `outputdir/subnets_abc/` contains a file for each subnetwork (e.g., 5 files if `-x 5`) requested, named `subnet#.tsv`.  Each subnetwork file describes significant interactions in three columns:
 1.	The regulator.
@@ -79,7 +79,7 @@ A consensus network with 15 edges will have 16 rows.
 
 `--alpha` is the cutoff for False Discovery Rate (FDR) pruning (default: `--alpha 0.05`).  The FDR cutoff is the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
-`--seed` sets the seed for random behavior (default: `--seed 0`).  Separate `ARACNe3` instances with the same exact inputs but a different seed will produce a different output.
+`--seed` sets the seed for random behavior (default: `--seed 0`).  Separate ARACNe3 instances with the same exact inputs but a different seed will produce a different output.
 
 `--threads` sets the number of threads to use (default: `--threads 1`).
 
@@ -98,7 +98,7 @@ A consensus network with 15 edges will have 16 rows.
 
 `--noConsolidate` tells ARACNe3 not to consolidate subnetworks, only keeping the final log, the `log/` subdirectory, and all subnetworks generated in `subnets/`.
 
-`--consolidate` tells ARACNe3 to skip generating subnetworks and consolidate existing subnetworks.  An expression file and a list of regulators must still be provided with `-e` and `-r`, respectively.  `-o` specifies the directory location of an `ARACNe3` output.  Finally, `-x` specifies how many subnetwork files to use in consolidate (default: `-x 1`). Note that output directory `-o` _**must**_ contain the subdirectories `subnets/` and `log/` that follow the exact conventions as an ARACNe3 output (including numbering).  Each subnetwork used must be mapped 1:1 with its log file because consolidation generates _p_-values for edges strictly based on parameters used during the subnetwork generation, which are stored in the log files.
+`--consolidate` tells ARACNe3 to skip generating subnetworks and consolidate existing subnetworks.  An expression file and a list of regulators must still be provided with `-e` and `-r`, respectively.  `-o` specifies the directory location of an ARACNe3 output.  Finally, `-x` specifies how many subnetwork files to use in consolidate (default: `-x 1`). Note that output directory `-o` _**must**_ contain the subdirectories `subnets/` and `log/` that follow the exact conventions as an ARACNe3 output (including numbering).  Each subnetwork used must be mapped 1:1 with its log file because consolidation generates _p_-values for edges strictly based on parameters used during the subnetwork generation, which are stored in the log files.
 
 ## Examples
 Note: the examples have been written based on the provided test sets: `test/exp_mat.txt` (the normalized expression matrix) and `test/regulators.txt` (the list of regulators).
@@ -139,7 +139,7 @@ g_1_
 ```
 
 ### Expression file
-A `G+1 x N+1`, normalized expression profile, with genes on rows and samples on columns (Note: the `+1` is extra, from the row names and column names). This should be in `tsv` format and have both row and column names. Row names are essential for `ARACNe3` to store a gene's expression. Column names are used to count the number of samples. For example, the `5+1 x 3+1` matrix below is a compliant `tsv`:
+A `G+1 x N+1`, normalized expression profile, with genes on rows and samples on columns (Note: the `+1` is extra, from the row names and column names). This should be in `tsv` format and have both row and column names. Row names are essential for ARACNe3 to store a gene's expression. Column names are used to count the number of samples. For example, the `5+1 x 3+1` matrix below is a compliant `tsv`:
 
 ```
 genes	col1	ColNamesNotImportant	Samp9
