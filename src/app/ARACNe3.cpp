@@ -261,6 +261,7 @@ int main(int argc, char *argv[]) {
             stoppingCriteriaMet = true;
           }
         }
+        ++cur_subnet_ct;
       }
       num_subnets = subnets.size();
     } else if (!adaptive) {
