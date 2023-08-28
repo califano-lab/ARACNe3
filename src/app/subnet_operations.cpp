@@ -324,7 +324,7 @@ consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
         const float final_scc = calcSCC(ranks_mat.at(reg), ranks_mat.at(tar));
         boost::math::beta_distribution<> dist(num_occurrences + 1,
                                               subnets.size() - 1);
-        const double final_log_p = float(boost::math::cdf(dist, FPR_estimate));
+        const double final_log_p = std::log(float(boost::math::cdf(dist, FPR_estimate)));
         final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences,
                               final_log_p);
       }
