@@ -249,18 +249,17 @@ int main(int argc, char *argv[]) {
 
         subnets.push_back(subnet);
         FPR_estimates.push_back(FPR_estimate_subnet);
-        uint16_t min_regulon_size = 65535U;
+        int min_regulon_size = 65535;
         // add any new edges to the regulon_set
         for (const auto [reg, tar_mi] : subnet) {
           for (const auto [tar, mi] : tar_mi)
             regulons[reg].insert(tar);
           if (regulons[reg].size() < min_regulon_size)
             min_regulon_size = regulons[reg].size();
-
-          if (min_regulon_size >= targets_per_regulator) {
-            stoppingCriteriaMet = true;
-          }
         }
+
+        if (min_regulon_size >= targets_per_regulator)
+          stoppingCriteriaMet = true;
         ++cur_subnet_ct;
       }
       num_subnets = subnets.size();
