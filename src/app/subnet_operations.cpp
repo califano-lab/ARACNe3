@@ -262,7 +262,7 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
     uint32_t num_edges_after_MaxEnt_pruning = size_of_subnetwork;
     if (method == "FDR")
       FPR_estimate_subnet = (alpha * num_edges_after_MaxEnt_pruning) /
-                            (regulators.size() * genes.size() -
+                            (regulators.size() * (genes.size() - 1) -
                              (1 - alpha) * num_edges_after_threshold_pruning);
     else if (method == "FWER")
       FPR_estimate_subnet = (alpha / (regulators.size() * (genes.size() - 1))) *
@@ -274,7 +274,7 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
   } else {
     if (method == "FDR")
       FPR_estimate_subnet = (alpha * num_edges_after_threshold_pruning) /
-                            (regulators.size() * genes.size() -
+                            (regulators.size() * (genes.size() - 1) -
                              (1 - alpha) * num_edges_after_threshold_pruning);
     else if (method == "FWER")
       FPR_estimate_subnet = alpha / (regulators.size() * (genes.size() - 1));
