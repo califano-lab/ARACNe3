@@ -301,7 +301,7 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
     subnet[compression_map[reg]][compression_map[tar]] = mi;
   }
 
-  genes.merge(regulators);
+  genes.insert(regulators.begin(), regulators.end());
 
   /*
    Read in the log file
