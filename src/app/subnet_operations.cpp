@@ -316,8 +316,9 @@ consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
     for (const gene_id &tar : genes) {
       uint16_t num_occurrences = 0;
       for (uint16_t sn = 0U; sn < subnets.size(); ++sn) {
-        if (subnets[sn].at(reg).find(tar) != subnets[sn].at(reg).end())
-          ++num_occurrences;
+        if (subnets[sn].find(reg) != subnets[sn].end())
+          if (subnets[sn].at(reg).find(tar) != subnets[sn].at(reg).end())
+            ++num_occurrences;
       }
       if (num_occurrences > 0) {
         const float final_mi = calcAPMI(exp_mat.at(reg), exp_mat.at(tar));
