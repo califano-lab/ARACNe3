@@ -293,12 +293,12 @@ int main(int argc, char *argv[]) {
     watch1.reset();
     //-------------------------
 
-    for (uint16_t subnet_num = 0; subnet_num < num_subnets_to_consolidate;
-         ++subnet_num) {
+    for (uint16_t subnet_idx = 0; subnet_idx < num_subnets_to_consolidate;
+         ++subnet_idx) {
       const std::string subnets_file_path =
-          subnets_dir + "subnet" + std::to_string(subnet_num + 1) + ".tsv";
+          subnets_dir + "subnet" + std::to_string(subnet_idx + 1) + ".tsv";
       const std::string subnets_log_file_path = subnets_log_dir + "log_subnet" +
-                                                std::to_string(subnet_num + 1) +
+                                                std::to_string(subnet_idx + 1) +
                                                 ".txt";
 
       try {
