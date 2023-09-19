@@ -274,7 +274,7 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
 
   // discard the first line (header)
   std::string line;
-  getline(subnet_ifs, line, '\n');
+  std::getline(subnet_ifs, line, '\n');
   if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
     line.pop_back();
   gene_to_gene_to_float subnet;
@@ -323,11 +323,11 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
   // discard 8 lines
   std::string discard;
   for (uint8_t l = 0; l < 8; ++l)
-    getline(log_ifs, discard, '\n');
+    std::getline(log_ifs, discard, '\n');
 
   // next line contains the method
   std::string method;
-  getline(log_ifs, line, '\n');
+  std::getline(log_ifs, line, '\n');
   if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
     line.pop_back();
   if (line.find("FDR") != std::string::npos)
@@ -339,38 +339,39 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
 
   // next line contains alpha
   float alpha;
-  getline(log_ifs, line, '\n');
+  std::getline(log_ifs, line, '\n');
   if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
     line.pop_back();
   std::stringstream line_stream(line);
   line_stream >> discard >> alpha;
 
   // next line contains whether we have MaxEnt pruning
+  std::string prune_MaxEnt_str;
+  std::getline(log_ifs, line, '\n');
+  if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+    line.pop_back();
+  line_stream = std::stringstream(line);
+  line_stream >> discard >> discard >> prune_MaxEnt_str;
   bool prune_MaxEnt;
-  getline(log_ifs, line, '\n');
-  if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
-    line.pop_back();
-  line_stream = std::stringstream(line);
-  line_stream >> discard >> discard >> prune_MaxEnt;
+  prune_MaxEnt = (prune_MaxEnt_str == "true") ? true : false;
 
-  // skip 9 lines (including prev), the 10th contains edges after threshold
-  // pruning
-  uint32_t num_edges_after_threshold_pruning = 0U;
-  for (uint8_t l = 0U; l < 9; ++l)
-    getline(log_ifs, discard, '\n');
-  getline(log_ifs, line, '\n');
+  // skip 8 lines
+  for (uint8_t l = 0U; l < 8U; ++l)
+    std::getline(log_ifs, discard, '\n');
+  std::getline(log_ifs, line, '\n');
   if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
     line.pop_back();
   line_stream = std::stringstream(line);
+  uint32_t num_edges_after_threshold_pruning = 0U;
   line_stream >> discard >> discard >> discard >>
       num_edges_after_threshold_pruning;
 
-  // skip 4 lines (incl. prev), the 5th contains edges after MaxEnt pruning
+  // skip 3 lines, the 4th contains edges after MaxEnt pruning
   uint32_t num_edges_after_MaxEnt_pruning = 0U;
   if (prune_MaxEnt) {
-    for (uint8_t l = 0U; l < 4; ++l)
-      getline(log_ifs, discard, '\n');
-    getline(log_ifs, line, '\n');
+    for (uint8_t l = 0U; l < 3U; ++l)
+      std::getline(log_ifs, discard, '\n');
+    std::getline(log_ifs, line, '\n');
     if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
       line.pop_back();
     line_stream = std::stringstream(line);
@@ -382,7 +383,7 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
   if (prune_MaxEnt) {
     if (method == "FDR")
       FPR_estimate_subnet = (alpha * num_edges_after_MaxEnt_pruning) /
-                            (regulators.size() * genes.size() -
+                            (regulators.size() * (genes.size() - 1) -
                              (1 - alpha) * num_edges_after_threshold_pruning);
     else if (method == "FWER")
       FPR_estimate_subnet = (alpha / (regulators.size() * (genes.size() - 1))) *
@@ -394,7 +395,7 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
   } else {
     if (method == "FDR")
       FPR_estimate_subnet = (alpha * num_edges_after_threshold_pruning) /
-                            (regulators.size() * genes.size() -
+                            (regulators.size() * (genes.size() - 1) -
                              (1 - alpha) * num_edges_after_threshold_pruning);
     else if (method == "FWER")
       FPR_estimate_subnet = alpha / (regulators.size() * (genes.size() - 1));
