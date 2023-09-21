@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <ctime>
 
 uint16_t nthreads = 1U;
 
@@ -49,7 +50,7 @@ int main(int argc, char *argv[]) {
   float alpha = 0.05f;
   bool prune_alpha = true;
   bool prune_MaxEnt = true;
-  uint32_t seed = 0U;
+  uint32_t seed = static_cast<uint32_t>(std::time(nullptr));
   uint16_t num_subnets_to_consolidate = 0U;
   uint16_t targets_per_regulator = 30U;
   std::string runid = "defaultid";

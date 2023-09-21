@@ -79,7 +79,7 @@ A consensus network with 15 edges will have 16 rows.
 
 `--alpha` is the cutoff for False Discovery Rate (FDR) pruning (default: `--alpha 0.05`).  The FDR cutoff is the first pruning step, which rejects the null hypothesis for edges based on the Benjamini-Hochberg Procedure.
 
-`--seed` sets the seed for random behavior (default: `--seed 0`).  Separate ARACNe3 instances with the same exact inputs but a different seed will produce a different output.
+`--seed` fixes the seed for deterministic behavior (e.g.: `--seed 9001`).
 
 `--threads` sets the number of threads to use (default: `--threads 1`).
 
