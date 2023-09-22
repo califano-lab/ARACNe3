@@ -1,8 +1,9 @@
 #include "algorithms.hpp"
 #include "ARACNe3.hpp"
+
+#include <algorithm>
 #include <iostream>
 #include <numeric>
-#include <algorithm>
 
 extern float DEVELOPER_mi_cutoff;
 
@@ -92,10 +93,14 @@ const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
 
   // partition if chi-square or if initial square
   if (chisq > q_thresh || s.num_pts == s.tot_num_pts) {
-    const square tr{x_thresh, y_thresh,   s.width * 0.5f, tr_pts,   tr_num_pts, s.tot_num_pts},
-        br{x_thresh, s.y_bound1, s.width * 0.5f, br_pts, br_num_pts, s.tot_num_pts},
-        bl{s.x_bound1, s.y_bound1, s.width * 0.5f, bl_pts, bl_num_pts, s.tot_num_pts},
-        tl{s.x_bound1, y_thresh, s.width * 0.5f, tl_pts, tl_num_pts, s.tot_num_pts};
+    const square tr{x_thresh, y_thresh,   s.width * 0.5f,
+                    tr_pts,   tr_num_pts, s.tot_num_pts},
+        br{x_thresh, s.y_bound1, s.width * 0.5f,
+           br_pts,   br_num_pts, s.tot_num_pts},
+        bl{s.x_bound1, s.y_bound1, s.width * 0.5f,
+           bl_pts,     bl_num_pts, s.tot_num_pts},
+        tl{s.x_bound1, y_thresh,   s.width * 0.5f,
+           tl_pts,     tl_num_pts, s.tot_num_pts};
 
     return calcAPMISplit(x_ptr, y_ptr, tr) + calcAPMISplit(x_ptr, y_ptr, br) +
            calcAPMISplit(x_ptr, y_ptr, bl) + calcAPMISplit(x_ptr, y_ptr, tl);
@@ -194,7 +199,7 @@ double lchoose(const uint16_t &n, const uint16_t &k) {
 }
 
 double rightTailBinomialP(const uint16_t n, const uint16_t k,
-                             const float theta) {
+                          const float theta) {
   double p = 0.0;
   for (uint16_t i = n; i >= k; --i)
     p += std::exp(lchoose(n, i) + i * std::log(theta) +

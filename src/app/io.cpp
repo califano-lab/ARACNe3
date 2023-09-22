@@ -306,7 +306,7 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
    */
   std::ifstream subnet_ifs{subnet_file_path};
   if (!subnet_ifs) {
-    std::cerr << "error: could read from subnet file: " << subnet_file_path
+    std::cerr << "error: could not read from subnet file: " << subnet_file_path
               << "." << std::endl;
     std::cerr << "Subnet files must follow the output structure of ARACNe3. "
                  "Example \"-o " +

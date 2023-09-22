@@ -4,6 +4,7 @@
 #include "apmi_nullmodel.hpp"
 #include "io.hpp"
 #include "stopwatch.hpp"
+
 #include <boost/math/distributions/beta.hpp>
 #include <fstream>
 #include <iostream>
@@ -34,7 +35,7 @@ pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
               return std::get<2>(rtm1) > std::get<2>(rtm2);
             });
 
-  uint32_t argmax_k = 0;
+  uint32_t argmax_k = 0U;
   uint32_t m = size_of_network;
   if (method == "FDR") {
     // Benjamini-Hochberg
@@ -148,7 +149,8 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
   log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z")
              << "---------" << std::endl
              << std::endl;
-  log_output << "Subnetwork #: " + std::to_string(cur_subnet_ct + 1) << std::endl;
+  log_output << "Subnetwork #: " + std::to_string(cur_subnet_ct + 1)
+             << std::endl;
   log_output << "Total # regulators (defined in gexp mat): " +
                     std::to_string(regulators.size())
              << std::endl;
