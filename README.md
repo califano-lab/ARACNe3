@@ -1,7 +1,6 @@
 # ARACNe3
 
 ## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3)
-
 ARACNe3 is an implementation of ARACNe which presents computational improvements and theoretical changes to the recent ARACNe-AP implementation.  Given a list of regulators and a gene expression profile, ARACNe3 is used to infer irreducibly dependent regulatory interactions and output a Gene Regulatory Network (GRN). The mainstream analysis generates many GRNs of subsamples of the profile ("subnetworks") and then consolidates the subnetworks into a robust GRN.  The consolidated output is a GRN whose edge strengths can be quantified by several statistical metrics.
 
 Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information.* **Bioinformatics.** 2016 Jul 15;32(14):2233-5. doi: [10.1093/bioinformatics/btw216](https://dx.doi.org/10.1093/bioinformatics/btw216). Epub 2016 Apr 23.
@@ -9,7 +8,6 @@ Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse eng
 Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Califano A. *ARACNE: an algorithm for the reconstruction of gene regulatory networks in a mammalian cellular context.* **BMC Bioinformatics.** 2006 Mar 20;7 Suppl 1:S7. doi: [10.1186/1471-2105-7-S1-S7](https://dx.doi.org/10.1186/1471-2105-7-S1-S7)
 
 ## Downloading ARACNe3
-
 You may [download ARACNe3](https://github.com/califano-lab/ARACNe3) for MacOS and Windows or build ARACNe3 manually for niche uses, like on an HPC cluster.
 
 If running the ARACNe3 executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
@@ -140,7 +138,7 @@ g_1_
 A `G+1 x N+1`, normalized expression profile, with genes on rows and samples on columns (Note: the `+1` is extra, from the row names and column names). This should be in `tsv` format and have both row and column names. Row names are essential for ARACNe3 to store a gene's expression. Column names are used to count the number of samples. For example, the `5+1 x 3+1` matrix below is a compliant `tsv`:
 
 ```
-genes	col1	ColNamesNotImportant	Samp9
+col	names	NOT	important
 g_1_	4.99	2.93	0.39
 g_10_	0.58	0.18	2.65
 g_9432_	3.00	1.27	7.63
