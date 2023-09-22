@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
 
         subnets.push_back(subnet);
         FPR_estimates.push_back(FPR_estimate_subnet);
-        int min_regulon_size = 65535;
+        uint16_t min_regulon_size = 65535U;
         // add any new edges to the regulon_set
         for (const auto [reg, tar_mi] : subnet) {
           for (const auto [tar, mi] : tar_mi)
@@ -359,7 +359,6 @@ int main(int argc, char *argv[]) {
     //-------------------------
   }
 
-  using namespace std::string_literals;
   const std::string success = "SUCCESS!";
   std::cout << success << std::endl;
   log_output << success << std::endl;
