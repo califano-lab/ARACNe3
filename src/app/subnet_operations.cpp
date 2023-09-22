@@ -136,11 +136,13 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
     const bool prune_alpha, const APMINullModel &nullmodel,
     const std::string &method, const float alpha, const bool prune_MaxEnt,
     const std::string &output_dir, const std::string &subnets_dir,
-    const std::string &subnets_log_dir, const uint16_t nthreads) {
+    const std::string &subnets_log_dir, const uint16_t nthreads,
+    const std::string &runid) {
 
   float FPR_estimate_subnet;
   std::ofstream log_output(subnets_log_dir + "log_subnet" +
-                           std::to_string(cur_subnet_ct + 1) + ".txt");
+                           std::to_string(cur_subnet_ct + 1) + "_" + runid +
+                           ".txt");
   std::time_t t = std::time(nullptr);
 
   log_output << "---------" << std::put_time(std::localtime(&t), "%c %Z")
@@ -290,7 +292,8 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
 
   // writes the individual subnet output
   writeNetworkRegTarMI(subnetwork, subnets_dir + "subnet" +
-                                       std::to_string(cur_subnet_ct + 1) + ".tsv");
+                                       std::to_string(cur_subnet_ct + 1) + "_" +
+                                       runid + ".tsv");
 
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
