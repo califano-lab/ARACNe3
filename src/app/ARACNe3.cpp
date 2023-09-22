@@ -259,6 +259,11 @@ int main(int argc, char *argv[]) {
             min_regulon_size = regulons[reg].size();
         }
 
+        if (subnet.size() == 0) {
+          std::cerr << "Abort: No edges passed all pruning steps. Empty network." << std::endl;
+          std::exit(EXIT_FAILURE);
+        }
+
         if (min_regulon_size >= targets_per_regulator)
           stoppingCriteriaMet = true;
         ++cur_subnet_ct;
