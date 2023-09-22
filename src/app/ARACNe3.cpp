@@ -4,10 +4,10 @@
 #include "io.hpp"
 #include "stopwatch.hpp"
 #include "subnet_operations.hpp"
+#include <ctime>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <ctime>
 
 uint16_t nthreads = 1U;
 
@@ -295,25 +295,27 @@ int main(int argc, char *argv[]) {
     watch1.reset();
     //-------------------------
 
+    const auto &[subnet_filenames, subnet_log_filenames] =
+        findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir);
+
+    if (subnet_filenames.size() < num_subnets_to_consolidate) {
+      std::cerr << "Error: Too many subnets requested. Only " +
+                       std::to_string(subnet_filenames.size()) +
+                       " subnets found in \"" + subnets_dir + "\"."
+                << std::endl;
+      std::exit(2);
+    }
+
     for (uint16_t subnet_idx = 0; subnet_idx < num_subnets_to_consolidate;
          ++subnet_idx) {
-      const std::string subnets_file_path =
-          subnets_dir + "subnet" + std::to_string(subnet_idx + 1) + ".tsv";
-      const std::string subnets_log_file_path = subnets_log_dir + "log_subnet" +
-                                                std::to_string(subnet_idx + 1) +
-                                                ".txt";
-
-      try {
-        const auto &[subnet, FPR_estimate_subnet] =
-            loadARACNe3SubnetsAndUpdateFPRFromLog(subnets_file_path,
-                                                  subnets_log_file_path);
-        subnets.push_back(subnet);
-        FPR_estimates.push_back(FPR_estimate_subnet);
-      } catch (TooManySubnetsRequested e) {
-        std::cout << "Warning: " + std::string(e.what()) << std::endl;
-        break;
-      }
+      const auto &[subnet, FPR_estimate_subnet] =
+          loadARACNe3SubnetsAndUpdateFPRFromLog(
+              subnets_dir + subnet_filenames[subnet_idx],
+              subnets_log_dir + subnet_log_filenames[subnet_idx]);
+      subnets.push_back(subnet);
+      FPR_estimates.push_back(FPR_estimate_subnet);
     }
+
     num_subnets = subnets.size();
 
     //-------time module-------

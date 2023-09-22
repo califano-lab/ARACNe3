@@ -17,6 +17,9 @@ typedef struct consolidated_df_row {
         final_scc(scc), final_log_p(lp){};
 } consolidated_df_row;
 
+typedef std::pair<std::vector<std::string>, std::vector<std::string>>
+    pair_string_vecs;
+
 std::string makeUnixDirectoryNameUniversal(std::string &dir_name);
 std::string makeUnixDirectoryNameUniversal(std::string &&dir_name);
 void makeDir(const std::string &dir_name);
@@ -37,6 +40,10 @@ void writeNetworkRegTarMI(gene_to_gene_to_float &network,
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df_row> &final_df,
                               const std::string &file_path);
+
+pair_string_vecs
+findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
+                                 const std::string &subnets_log_dir);
 
 std::pair<gene_to_gene_to_float, float>
 loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,

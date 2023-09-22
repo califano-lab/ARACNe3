@@ -247,6 +247,52 @@ void addToCompressionVecs(const std::string &gene) {
 }
 
 /*
+ * Lists the files in the provided subnets dir and matches them to their log
+ * files, assuming heterogeneous runids.  Returns a pair of string vectors that
+ * are index-matched according to subnet, so the correct log statistics are used
+ * in later computation
+ */
+pair_string_vecs
+findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir, const std::string &subnets_log_dir) {
+  std::vector<std::string> subnet_filenames, subnet_log_filenames;
+  try {
+    for (const auto &entry : std::filesystem::directory_iterator(subnets_dir)) {
+      if (entry.is_regular_file()) {
+        std::string subnet_filename = entry.path().filename().string();
+        subnet_filenames.push_back(subnet_filename);
+
+        // Construct the expected log file name
+        std::string subnet_log_filename = "log_" + subnet_filename;
+
+        // Replace the extension .tsv with .txt
+        size_t pos = subnet_log_filename.rfind(".tsv");
+        if (pos != std::string::npos)
+          subnet_log_filename.replace(pos, 4, ".txt");
+
+        if (std::filesystem::exists(subnets_log_dir + subnet_log_filename))
+          subnet_log_filenames.push_back(subnet_log_filename);
+        else {
+          std::cerr << "Fatal: expected \"" + subnets_log_dir +
+                           subnet_log_filename +
+                           "\" to exist based on the file \"" +
+                           subnets_dir + subnet_filename +
+                           "\", but the log file was not found."
+                    << std::endl;
+          std::exit(2);
+        }
+      }
+    }
+  } catch (std::filesystem::filesystem_error &e) {
+    std::cerr << "Error reading directory: " << e.what() << std::endl;
+    std::cerr << "Check that your output directory has the subdirectories "
+                 "\"subnets/\" and \"subnets_log/\""
+              << std::endl;
+    std::exit(2);
+  }
+  return std::make_pair(subnet_filenames, subnet_log_filenames);
+}
+
+/*
  Reads a subnet file and then updates the FPR_estimates vector defined in
  "subnet_operations.cpp"
  */
