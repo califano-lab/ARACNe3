@@ -145,9 +145,9 @@ int main(int argc, char *argv[]) {
   //--------------------------------------------------------------
 
   const std::string subnets_dir =
-      makeUnixDirectoryNameUniversal(output_dir + "subnets_" + runid + "/");
+      makeUnixDirectoryNameUniversal(output_dir + "subnets/");
   const std::string subnets_log_dir =
-      makeUnixDirectoryNameUniversal(output_dir + "subnets_log_" + runid + "/");
+      makeUnixDirectoryNameUniversal(output_dir + "subnets_log/");
 
   makeDir(output_dir);
   makeDir(cached_dir);
@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
             subsample_exp_mat, regulators, genes, tot_num_samps,
             tot_num_subsample, cur_subnet_ct, prune_alpha, nullmodel, method,
             alpha, prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir,
-            nthreads);
+            nthreads, runid);
 
         subnets.push_back(subnet);
         FPR_estimates.push_back(FPR_estimate_subnet);
@@ -273,7 +273,8 @@ int main(int argc, char *argv[]) {
         const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
             tot_num_subsample, i, prune_alpha, nullmodel, method, alpha,
-            prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir, nthreads);
+            prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir, nthreads,
+            runid);
         subnets[i] = subnet;
         FPR_estimates[i] = FPR_estimate_subnet;
       }

@@ -48,21 +48,19 @@ The executable should be built in `./build/src/app/ARACNe3_app_release`. If you 
 2.	List of regulators (e.g., transcription factors).
 
 ### ARACNe3 output files
-ARACNe3 will output several files & directories within the output directory provided by the user (e.g., `-o outputdir/`).  If ARACNe3 is run with the `--runid abc`, within `outputdir/` will be the subnetworks (in `outputdir/subnets_abc/`), the consolidated network (`outputdir/consolidated-net_abc.tsv`), log information for each subnetwork created (in `outputdir/subnets_log_abc/`), and log information for the overall ARACNe3 instance (`outputdir/log_abc.txt`).  
+ARACNe3 outputs in the directory provided by the user (e.g., `-o outputdir/`).  If ARACNe3 is run with `--runid abc`, within `outputdir/` the subnetworks are in `outputdir/subnets/`, the consolidated network is the file `outputdir/consolidated-net_abc.tsv`, and log information for each subnetwork is in `outputdir/subnets_log/`. Log information for the overall ARACNe3 instance is the file `outputdir/log_abc.txt`.  
 
-The subnetworks directory `outputdir/subnets_abc/` contains a file for each subnetwork (e.g., 5 files if `-x 5`) requested, named `subnet#.tsv`.  Each subnetwork file describes significant interactions in three columns:
+The subnetworks directory `outputdir/subnets/` contains a file for each subnetwork named `subnet#_abc.tsv`.  Each subnetwork file describes significant interactions in three columns:
 1.	The regulator.
 2.	The target.
-3.	The APMI (Mutual Information estimated by Adaptive Partitioning) of the pair, based on the subsampled gene expression profiles of the regulator and target.
-A subnetwork with 10 edges will have 11 rows (+1 for header row).
+3.	The APMI (Mutual Information estimated by Adaptive Partitioning) of the pair, based on the subsampled gene expression profiles.
 
 The consensus network `outputdir/consolidated-net_abc.tsv` is a file that consolidates subnetworks and summarizes each edge in five columns:
 1.	The regulator.
 2.	The target.
-3.	The APMI of the pair, based on the full gene expression profiles of the regulator and target.
+3.	The APMI of the pair, based on the full gene expression profiles.
 4.	The Spearman's Rank Correlation Coefficient of the pair, based on the full gene expression profile.
 5.	The _p_-value of the edge, based on how many subnetworks in which it was identified (see the [manuscript](https://github.com/califano-lab/ARACNe3) for methodology).
-A consensus network with 15 edges will have 16 rows.
 
 ## Parameters
 ### Required

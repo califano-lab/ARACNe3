@@ -266,10 +266,11 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
                  "Example \"-o " +
                      makeUnixDirectoryNameUniversal("./output") +
                      "\" will contain a subdirectory \"" +
-                     makeUnixDirectoryNameUniversal("subnets_<runid>/") +
+                     makeUnixDirectoryNameUniversal("subnets/") +
                      "\", which has subnet files formatted *and named* exactly "
                      "how ARACNe3 outputs subnet files."
               << std::endl;
+    std::exit(2);
   }
 
   // discard the first line (header)
@@ -314,10 +315,11 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
                  "ARACNe3. Example \"-o " +
                      makeUnixDirectoryNameUniversal("./output") +
                      "\" will contain a subdirectory \"" +
-                     makeUnixDirectoryNameUniversal("subnets_log_<runid>/") +
+                     makeUnixDirectoryNameUniversal("subnets_log/") +
                      "\", which has subnet log files formatted *and named* "
                      "exactly how ARACNe3 outputs subnet log files."
               << std::endl;
+      std::exit(2);
   }
 
   // discard 8 lines
