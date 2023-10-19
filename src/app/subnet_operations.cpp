@@ -89,31 +89,59 @@ pruneAlpha(const gene_to_gene_to_float &network, const geneset &regulators,
 std::pair<gene_to_gene_to_float, uint32_t>
 pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
             const geneset &regulators,
-            gene_to_gene_to_float network_reg_reg_only) {
+            gene_to_gene_to_float network_reg_reg_only,
+            const uint16_t nthreads) {
 
   gene_to_geneset edges_to_remove;
   edges_to_remove.reserve(regulators.size());
 
-  // triangular matrix (reg and reg+1)
-  for (const auto [reg1, reg2_mi] : network_reg_reg_only) {
-    const std::unordered_map<gene_id, float> &reg1_regulon = network.at(reg1);
-    std::unordered_set<gene_id> &remove_from_reg1 = edges_to_remove[reg1];
-    for (const auto [reg2, mi_regs] : reg2_mi) {
+  // make into triangular matrix (remove all reg from all reg2 targets regulon)
+  for (const auto [reg1, reg2_mi] : network_reg_reg_only)
+    for (const auto [reg2, mi_regs] : reg2_mi)
       network_reg_reg_only[reg2].erase(reg1);
-      const std::unordered_map<gene_id, float> &reg2_regulon = network.at(reg2);
-      std::unordered_set<gene_id> &remove_from_reg2 = edges_to_remove[reg2];
-      for (const auto [tar, mi_reg1_tar] : reg1_regulon) {
-        if (reg2_regulon.find(tar) != reg2_regulon.end()) {
-          const float mi_reg2_tar = reg2_regulon.at(tar);
-          if (mi_reg1_tar < mi_regs && mi_reg1_tar < mi_reg2_tar)
-            remove_from_reg1.insert(tar);
-          else if (mi_reg2_tar < mi_regs && mi_reg2_tar < mi_reg1_tar)
-            remove_from_reg2.insert(tar);
-          else {
-            remove_from_reg1.insert(reg2);
-            remove_from_reg2.insert(reg1);
+
+#pragma omp parallel num_threads(nthreads)
+  {
+    // Local version for each thread
+    gene_to_geneset local_edges_to_remove;
+
+    // schedule in skips as opposed to chunks, faster now
+#pragma omp for schedule(static, 1)
+    for (uint32_t i = 0U; i < network_reg_reg_only.size(); ++i) {
+      auto it = network_reg_reg_only.cbegin();
+      std::advance(it, i);
+      const uint16_t reg1 = it->first;
+      const gene_to_float &reg2_mi = it->second;
+
+      const gene_to_float &reg1_regulon = network.at(reg1);
+      geneset &remove_from_reg1 = local_edges_to_remove[reg1];
+
+      for (const auto [reg2, mi_regs] : reg2_mi) {
+        const gene_to_float &reg2_regulon = network.at(reg2);
+        geneset &remove_from_reg2 = local_edges_to_remove[reg2];
+
+        for (const auto [tar, mi_reg1_tar] : reg1_regulon) {
+
+          if (reg2_regulon.find(tar) != reg2_regulon.end()) {
+            const float mi_reg2_tar = reg2_regulon.at(tar);
+            if (mi_reg1_tar < mi_regs && mi_reg1_tar < mi_reg2_tar)
+              remove_from_reg1.insert(tar);
+            else if (mi_reg2_tar < mi_regs && mi_reg2_tar < mi_reg1_tar)
+              remove_from_reg2.insert(tar);
+            else {
+              remove_from_reg1.insert(reg2);
+              remove_from_reg2.insert(reg1);
+            }
           }
         }
+      }
+    }
+
+// Merging local results into global result
+#pragma omp critical
+    {
+      for (const auto &[reg, remove_set] : local_edges_to_remove) {
+        edges_to_remove[reg].insert(remove_set.begin(), remove_set.end());
       }
     }
   }
