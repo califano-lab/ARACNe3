@@ -281,7 +281,7 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
 
     size_prev = size_of_subnetwork;
     std::tie(subnetwork, size_of_subnetwork) = pruneMaxEnt(
-        subnetwork, size_of_subnetwork, regulators, subnetwork_reg_reg_only);
+        subnetwork, size_of_subnetwork, regulators, subnetwork_reg_reg_only, nthreads);
 
     //-------time module-------
     log_output << watch1.getSeconds() << std::endl;
