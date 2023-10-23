@@ -189,8 +189,10 @@ float calcSCC(const std::vector<uint16_t> &x_ranked,
               const std::vector<uint16_t> &y_ranked) {
   const auto &n = x_ranked.size();
   int sigma_dxy = 0;
-  for (uint16_t i = 0; i < n; ++i)
-    sigma_dxy += (x_ranked[i] - y_ranked[i]) * (x_ranked[i] - y_ranked[i]);
+  for (uint16_t i = 0; i < n; ++i) {
+    int diff = static_cast<int>(x_ranked[i]) - static_cast<int>(y_ranked[i]);
+    sigma_dxy += diff * diff;
+  }
   return 1 - 6.0f * sigma_dxy / n / (n * n - 1);
 }
 
