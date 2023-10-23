@@ -182,8 +182,7 @@ int main(int argc, char *argv[]) {
 
   log_output << "\nGene expression matrix & regulators list read time: ";
 
-  auto data =
-      readExpMatrixAndCopulaTransform(exp_mat_file, subsampling_percent, rand);
+  auto data = readExpMatrixAndCopulaTransform(exp_mat_file, rand);
   const gene_to_floats &exp_mat = std::get<0>(data);
   const gene_to_shorts &ranks_mat = std::get<1>(data);
   const geneset &genes = std::get<2>(data);

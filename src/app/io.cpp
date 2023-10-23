@@ -76,7 +76,6 @@ sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat,
 std::tuple<const gene_to_floats, const gene_to_shorts, const geneset,
            const uint16_t>
 readExpMatrixAndCopulaTransform(const std::string &filename,
-                                const float &subsampling_percent,
                                 std::mt19937 &rand) {
   std::ifstream ifs{filename};
   if (!ifs.is_open()) {

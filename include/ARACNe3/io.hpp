@@ -27,7 +27,6 @@ void makeDir(const std::string &dir_name);
 std::tuple<const gene_to_floats, const gene_to_shorts, const geneset,
            const uint16_t>
 readExpMatrixAndCopulaTransform(const std::string &filename,
-                                const float &subsampling_percent,
                                 std::mt19937 &rand);
 const geneset readRegList(const std::string &filename);
 gene_to_floats
