@@ -95,7 +95,7 @@ readExpMatrixAndCopulaTransform(const std::string &filename,
 
   // count samples from number of columns in first line
   for (size_t pos = 0U;
-       (pos = line.find_first_of("\t, ", pos)) != std::string::npos; ++pos)
+       (pos = line.find_first_of("\t", pos)) != std::string::npos; ++pos)
     ++tot_num_samps;
 
   uint32_t linesread = 1U;
@@ -109,10 +109,10 @@ readExpMatrixAndCopulaTransform(const std::string &filename,
     expr_vec.reserve(tot_num_samps);
     std::vector<uint16_t> expr_ranks_vec(tot_num_samps, 0U);
 
-    std::size_t prev = 0U, pos = line.find_first_of("\t, ", prev);
+    std::size_t prev = 0U, pos = line.find_first_of("\t", prev);
     std::string gene = line.substr(prev, pos - prev);
     prev = pos + 1;
-    while ((pos = line.find_first_of("\t, ", prev)) != std::string::npos) {
+    while ((pos = line.find_first_of("\t", prev)) != std::string::npos) {
       if (pos > prev) {
         expr_vec.emplace_back(stof(line.substr(prev, pos - prev)));
       }
