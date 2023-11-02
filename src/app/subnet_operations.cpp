@@ -117,20 +117,23 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
       geneset &remove_from_reg1 = local_edges_to_remove[reg1];
 
       for (const auto [reg2, mi_regs] : reg2_mi) {
-        const gene_to_float &reg2_regulon = network.at(reg2);
-        geneset &remove_from_reg2 = local_edges_to_remove[reg2];
+        // check if reg2 has regulon
+        if (network.find(reg2) != network.end()) {
+          const gene_to_float &reg2_regulon = network.at(reg2);
+          geneset &remove_from_reg2 = local_edges_to_remove[reg2];
 
-        for (const auto [tar, mi_reg1_tar] : reg1_regulon) {
+          for (const auto [tar, mi_reg1_tar] : reg1_regulon) {
 
-          if (reg2_regulon.find(tar) != reg2_regulon.end()) {
-            const float mi_reg2_tar = reg2_regulon.at(tar);
-            if (mi_reg1_tar < mi_regs && mi_reg1_tar < mi_reg2_tar)
-              remove_from_reg1.insert(tar);
-            else if (mi_reg2_tar < mi_regs && mi_reg2_tar < mi_reg1_tar)
-              remove_from_reg2.insert(tar);
-            else {
-              remove_from_reg1.insert(reg2);
-              remove_from_reg2.insert(reg1);
+            if (reg2_regulon.find(tar) != reg2_regulon.end()) {
+              const float mi_reg2_tar = reg2_regulon.at(tar);
+              if (mi_reg1_tar < mi_regs && mi_reg1_tar < mi_reg2_tar)
+                remove_from_reg1.insert(tar);
+              else if (mi_reg2_tar < mi_regs && mi_reg2_tar < mi_reg1_tar)
+                remove_from_reg2.insert(tar);
+              else {
+                remove_from_reg1.insert(reg2);
+                remove_from_reg2.insert(reg1);
+              }
             }
           }
         }
