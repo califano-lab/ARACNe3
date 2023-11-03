@@ -188,12 +188,12 @@ std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
 float calcSCC(const std::vector<uint16_t> &x_ranked,
               const std::vector<uint16_t> &y_ranked) {
   const auto &n = x_ranked.size();
-  int sigma_dxy = 0;
+  double sigma_dxy = 0; // Use double to prevent overflow!
   for (uint16_t i = 0; i < n; ++i) {
     int diff = static_cast<int>(x_ranked[i]) - static_cast<int>(y_ranked[i]);
     sigma_dxy += diff * diff;
   }
-  return 1 - 6.0f * sigma_dxy / n / (n * n - 1);
+  return 1. - 6. * sigma_dxy / n / (n * n - 1);
 }
 
 double lchoose(const uint16_t &n, const uint16_t &k) {
