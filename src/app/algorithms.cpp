@@ -202,6 +202,7 @@ double lchoose(const uint16_t &n, const uint16_t &k) {
 
 double rightTailBinomialP(const uint16_t n, const uint16_t k,
                           const float theta) {
+  if (k == 0) return 1.0;
   double p = 0.0;
   for (uint16_t i = n; i >= k; --i)
     p += std::exp(lchoose(n, i) + i * std::log(theta) +
