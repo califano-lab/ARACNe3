@@ -60,12 +60,10 @@ add_subdirectory(src)
 
 
 ##### TESTING #####
+option(BUILD_TESTS "Build the tests" OFF)
 
-# 'gtest' is the root directory of the Google Test source
-# 'gtest' must be excluded from all build configurations to prevent double linking
-add_subdirectory(deps/gtest EXCLUDE_FROM_ALL)
-
-# Enable testing capabilities
-#enable_testing()
-
-#add_subdirectory(tests)
+if(BUILD_TESTS)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/deps/gtest)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
