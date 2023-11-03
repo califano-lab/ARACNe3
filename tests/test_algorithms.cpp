@@ -44,3 +44,23 @@ TEST(AlgorithmsTest, CalcSCCNoCorrelation) {
     // Since this is random, we allow a bit more tolerance here
     EXPECT_NEAR(expected, result, 0.1f);
 }
+
+// lchoose
+TEST(AlgorithmsTest, LchooseBasic) {
+  EXPECT_NEAR(0.0, lchoose(5, 0), 1e-9); // n choose 0 should always be 1, log(1) is 0
+  EXPECT_NEAR(0.0, lchoose(5, 5), 1e-9); // n choose n should always be 1, log(1) is 0
+  EXPECT_NEAR(std::log(10.0), lchoose(5, 2), 1e-9); // 5 choose 2 is 10, log(10) should be the result
+  EXPECT_NEAR(std::log(9.77449461715677e103), lchoose(350, 175), 1e-9);  // google'd result
+}
+
+// rightTailBinomialP 
+TEST(AlgorithmsTest, RightTailBinomialPKnownValues) {
+    EXPECT_NEAR(0.5, rightTailBinomialP(9, 5, 0.5), 1e-5);
+    EXPECT_NEAR(0.0107, rightTailBinomialP(10, 9, 0.5), 1e-4);
+    EXPECT_NEAR(0.00, rightTailBinomialP(350, 349, 0.01), 1e-5);
+}
+
+TEST(AlgorithmsTest, RightTailBinomialPExtremeValues) {
+    EXPECT_NEAR(1.0, rightTailBinomialP(10, 0, 0.5), 1e-5); 
+    EXPECT_NEAR(0.0009765625, rightTailBinomialP(10, 10, 0.5), 1e-5); 
+}
