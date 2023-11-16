@@ -1,7 +1,7 @@
 # ARACNe3
 
 ## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3)
-ARACNe3 is an implementation of ARACNe which presents computational improvements and theoretical changes to the recent ARACNe-AP implementation.  Given a list of regulators and a gene expression profile, ARACNe3 is used to infer irreducibly dependent regulatory interactions and output a Gene Regulatory Network (GRN). The mainstream analysis generates many GRNs of subsamples of the profile ("subnetworks") and then consolidates the subnetworks into a robust GRN.  The consolidated output is a GRN whose edge strengths can be quantified by several statistical metrics.
+ARACNe3 is an implementation of ARACNe which presents computational improvements and theoretical changes to the recent ARACNe-AP implementation.  Given a list of regulators and a gene expression profile, ARACNe3 is used to infer irreducibly dependent regulatory interactions and output a Gene Regulatory Network (GRN). The mainstream analysis generates many GRNs of subsamples of the profile (called "subnetworks") and then consolidates the subnetworks into a robust GRN.  The consolidated output is a GRN whose edge strengths can be quantified by several statistical metrics.
 
 Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information.* **Bioinformatics.** 2016 Jul 15;32(14):2233-5. doi: [10.1093/bioinformatics/btw216](https://dx.doi.org/10.1093/bioinformatics/btw216). Epub 2016 Apr 23.
 
@@ -42,7 +42,7 @@ The executable should be built in `./build/src/app/ARACNe3_app_release`. If you 
 2.	Run ARACNe3 according to command line instructions below.
 
 ### ARACNe3 input files (see [input file format](#input-file-format) below)
-1.	A `tsv` that contains the `G+1 x N+1` normalized expression profile, with genes as rows and samples as columns. Note: the "`+1`" is for header names & column names, respectively.
+1.	A `tsv` that contains the `G+1 x N+1` normalized expression profile, with genes as rows and samples as columns. Note: the "`+1`" is for row names & column names, respectively.
 2.	List of regulators (e.g., transcription factors).
 
 ### ARACNe3 output files
