@@ -200,13 +200,15 @@ double lchoose(const uint16_t &n, const uint16_t &k) {
   return std::lgamma(n + 1) - std::lgamma(k + 1) - std::lgamma(n - k + 1);
 }
 
-double rightTailBinomialP(const uint16_t n, const uint16_t k,
-                          const float theta) {
+double rightTailBinomialP(uint16_t n, uint16_t k, float theta) {
+  // If k is 0, the right-tail probability includes all possibilities, which sum to 1.
   if (k == 0) return 1.0;
+
   double p = 0.0;
-  for (uint16_t i = n; i >= k; --i)
-    p += std::exp(lchoose(n, i) + i * std::log(theta) +
-                  (n - i) * std::log(1 - theta));
+  // Start from k and go up to n to avoid underflow.
+  for (uint16_t i = k; i <= n; ++i)
+    p += std::exp(lchoose(n, i) + i * std::log(theta) + (n - i) * std::log(1 - theta));
+
   return p;
 }
 
