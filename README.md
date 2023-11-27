@@ -19,11 +19,14 @@ brew install libomp  # Install OpenMP
 `cmake` is used to build ARACNe3 and simplify cross-platform compatibility. After installing `cmake`, follow the instructions below to build ARACNe3.
 
 ```
-git clone https://github.com/califano-lab/ARACNe3  # Clone the repo
+# Clone the repo
+git clone https://github.com/califano-lab/ARACNe3
 
+# Install dependencies
 cd ARACNe3/
-git submodule update --init --recursive  # Install dependencies
+git submodule update --init --recursive
 
+# Build executable
 mkdir build
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build  # Build ARACNe3
