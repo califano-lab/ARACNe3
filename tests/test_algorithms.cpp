@@ -56,11 +56,19 @@ TEST(AlgorithmsTest, LchooseBasic) {
 // rightTailBinomialP 
 TEST(AlgorithmsTest, RightTailBinomialPKnownValues) {
     EXPECT_NEAR(0.5, rightTailBinomialP(9, 5, 0.5), 1e-5);
-    EXPECT_NEAR(0.0107, rightTailBinomialP(10, 9, 0.5), 1e-4);
+    EXPECT_NEAR(0.0107421875, rightTailBinomialP(10, 9, 0.5), 1e-5);
     EXPECT_NEAR(0.00, rightTailBinomialP(350, 349, 0.01), 1e-5);
 }
 
 TEST(AlgorithmsTest, RightTailBinomialPExtremeValues) {
     EXPECT_NEAR(1.0, rightTailBinomialP(10, 0, 0.5), 1e-5); 
     EXPECT_NEAR(0.0009765625, rightTailBinomialP(10, 10, 0.5), 1e-5); 
+}
+
+// lRightTailBinomialP 
+TEST(AlgorithmsTest, LogRightTailBinomialPKnownValues) {
+    EXPECT_NEAR(std::log(0.5), lRightTailBinomialP(9, 5, 0.5), 1e-5);
+    EXPECT_NEAR(std::log(0.0107421875), lRightTailBinomialP(10, 9, 0.5), 1e-5);
+    EXPECT_NEAR(-200, lRightTailBinomialP(200, 200, 1./std::exp(1)), 1e-5);
+    EXPECT_NEAR(-65534, lRightTailBinomialP(65534U, 65534U, 1./std::exp(1)), 1e-5);
 }

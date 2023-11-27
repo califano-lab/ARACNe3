@@ -213,6 +213,33 @@ double rightTailBinomialP(uint16_t n, uint16_t k, float theta) {
 }
 
 /**
+ * Calculates the right-tail binomial probability density while remaining in log
+ * space. Prevents underflow
+ */
+double lRightTailBinomialP(uint16_t n, uint16_t k, float theta) {
+    // If k is 0, the right-tail probability includes all possibilities, which is p = 1.
+    if (k == 0) return std::log(1.);
+
+    double max_log_p = -std::numeric_limits<double>::infinity();
+    std::vector<double> log_ps;
+
+    // Calculate log probabilities and find the maximum log probability
+    for (uint16_t i = k; i <= n; ++i) {
+        double log_p = lchoose(n, i) + i * std::log(theta) + (n - i) * std::log(1. - theta);
+        max_log_p = std::max(max_log_p, log_p);
+        log_ps.push_back(log_p);
+    }
+
+    // Apply log-sum-exp trick to sum in log domain
+    double log_sum_exp = 0.;
+    for (double log_p : log_ps) {
+        log_sum_exp += std::exp(log_p - max_log_p);
+    }
+
+    return max_log_p + std::log(log_sum_exp);
+}
+
+/**
  * @brief Calculate linear regression to find the slope and y-intercept.
  *
  * This function takes two float vector parameters, x and y, representing data

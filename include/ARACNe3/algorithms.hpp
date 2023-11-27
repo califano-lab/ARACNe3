@@ -25,3 +25,5 @@ double lchoose(const uint16_t &n, const uint16_t &k);
 
 double rightTailBinomialP(const uint16_t n, const uint16_t k,
                           const float theta);
+double lRightTailBinomialP(const uint16_t n, const uint16_t k,
+                          const float theta);
