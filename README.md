@@ -7,12 +7,7 @@ Lachmann A, Giorgi FM, Lopez G, Califano A. *ARACNe-AP: gene network reverse eng
 
 Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, Dalla Favera R, Califano A. *ARACNE: an algorithm for the reconstruction of gene regulatory networks in a mammalian cellular context.* **BMC Bioinformatics.** 2006 Mar 20;7 Suppl 1:S7. doi: [10.1186/1471-2105-7-S1-S7](https://dx.doi.org/10.1186/1471-2105-7-S1-S7)
 
-## Downloading ARACNe3
-You may [download ARACNe3](https://github.com/califano-lab/ARACNe3) for MacOS and Windows or build ARACNe3 manually for niche uses, like on an HPC cluster.
-
-If running the ARACNe3 executables fails, on MacOS try installing the [Xcode Command Line Tools](https://mac.install.guide/commandlinetools/4.html), and on Windows install the [Visual C++ Redistributable for Visual Studio](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
-
-## Building ARACNe3 (Optional)
+## Building ARACNe3
 ### Installing Libraries
 ARACNe3 supports multithreading using OpenMP.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) already installed.
 
