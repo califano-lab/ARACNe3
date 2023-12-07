@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <omp.h>
+#include <set>
 
 /*
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if
@@ -95,10 +96,17 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
   gene_to_geneset edges_to_remove;
   edges_to_remove.reserve(regulators.size());
 
-  // make into triangular matrix (remove all reg from all reg2 targets regulon)
+  // make unique data structure that stores redundant edges
+  std::set<std::pair<gene_id, gene_id>> to_remove;  // can't use unordered because hash fn not defined for pair; set is binary tree
   for (const auto [reg1, reg2_mi] : network_reg_reg_only)
     for (const auto [reg2, mi_regs] : reg2_mi)
-      network_reg_reg_only[reg2].erase(reg1);
+      if (to_remove.find(std::make_pair(reg1, reg2)) == to_remove.end() &&
+          to_remove.find(std::make_pair(reg2, reg1)) == to_remove.end())
+        to_remove.insert(std::make_pair(reg2, reg1));
+
+  // make into triangular matrix (remove all reg from all reg2 targets regulon)
+  for (const auto &[reg1, reg2] : to_remove)
+    network_reg_reg_only.at(reg1).erase(reg2);
 
 #pragma omp parallel num_threads(nthreads)
   {
