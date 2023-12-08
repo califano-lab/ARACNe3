@@ -4,6 +4,7 @@
 #include "io.hpp"
 #include "stopwatch.hpp"
 #include "subnet_operations.hpp"
+
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -249,19 +250,22 @@ int main(int argc, char *argv[]) {
 
         subnets.push_back(subnet);
         FPR_estimates.push_back(FPR_estimate_subnet);
-        uint16_t min_regulon_size = 65535U;
-        // add any new edges to the regulon_set
-        for (const auto [reg, tar_mi] : subnet) {
-          for (const auto [tar, mi] : tar_mi)
-            regulons[reg].insert(tar);
-          if (regulons[reg].size() < min_regulon_size)
-            min_regulon_size = regulons[reg].size();
-        }
 
         if (subnet.size() == 0) {
           std::cerr << "Abort: No edges left after all pruning steps. Empty subnetwork." << std::endl;
           std::exit(EXIT_FAILURE);
         }
+
+        // add any new edges to the regulon_set
+        for (const auto [reg, tar_mi] : subnet)
+          for (const auto [tar, mi] : tar_mi)
+            regulons[reg].insert(tar);
+
+        // Check minimum regulon size
+        uint16_t min_regulon_size = 65535U;
+        for (const auto &[reg, regulon] : regulons)
+          if (regulons[reg].size() < min_regulon_size)
+            min_regulon_size = regulons[reg].size();
 
         if (min_regulon_size >= targets_per_regulator)
           stoppingCriteriaMet = true;
