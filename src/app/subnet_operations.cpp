@@ -356,9 +356,9 @@ consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
   std::vector<consolidated_df_row> final_df;
   const uint32_t tot_poss_edgs = regulators.size() * (genes.size() - 1);
 
-  for (const gene_id &reg : regulators) {
-    for (const gene_id &tar : genes) {
-      uint16_t num_occurrences = 0;
+  for (const gene_id reg : regulators) {
+    for (const gene_id tar : genes) {
+      uint16_t num_occurrences = 0U;
       for (uint16_t sn = 0U; sn < subnets.size(); ++sn) {
         if (subnets[sn].find(reg) != subnets[sn].end())
           if (subnets[sn].at(reg).find(tar) != subnets[sn].at(reg).end())
