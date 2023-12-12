@@ -162,7 +162,7 @@ readExpMatrixAndCopulaTransform(const std::string &filename,
  well as the compression mapping, as file static variables hidden to the rest of
  the app.
  */
-const geneset readRegList(const std::string &filename) {
+const geneset readRegList(const std::string &filename, const bool verbose) {
   std::ifstream ifs{filename};
   if (!ifs.is_open()) {
     std::cerr << "error: file open failed \"" << filename << "\"." << std::endl;
@@ -171,16 +171,23 @@ const geneset readRegList(const std::string &filename) {
   geneset regulators;
 
   std::string reg;
+  static uint16_t num_errors_read = 0U;
   while (std::getline(ifs, reg, '\n')) {
     if (reg.back() == '\r') /* Alert! We have a Windows dweeb! */
       reg.pop_back();
-    if (compression_map.find(reg) == compression_map.end())
-      std::cerr << "Warning: " + reg +
-                       " found in regulators list, but no entry in expression "
-                       "matrix. Ignoring in network generation."
-                << std::endl;
-    else
+    if (compression_map.find(reg) == compression_map.end()) {
+      if (verbose || num_errors_read++ < 3U) {
+        std::cerr << "Warning: " + reg +
+                         " found in regulators list, but no entry in expression "
+                         "matrix. Ignoring in network generation."
+                  << std::endl;
+      } else if (num_errors_read++ == 3U) {
+        std::cerr << "... Suppressing further warnings (unless --verbose) ... "
+                  << std::endl;
+      }
+    } else {
       regulators.insert(compression_map[reg]);
+    }
   }
 
   return regulators;

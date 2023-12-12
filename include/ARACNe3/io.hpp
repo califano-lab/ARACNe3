@@ -28,7 +28,7 @@ std::tuple<const gene_to_floats, const gene_to_shorts, const geneset,
            const uint16_t>
 readExpMatrixAndCopulaTransform(const std::string &filename,
                                 std::mt19937 &rand);
-const geneset readRegList(const std::string &filename);
+const geneset readRegList(const std::string &filename, const bool verbose);
 gene_to_floats
 sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat,
                                  const uint16_t &tot_num_subsample,

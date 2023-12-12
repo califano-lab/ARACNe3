@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
   uint16_t targets_per_regulator = 30U;
   std::string runid = "defaultid";
   std::string method = "FDR";
+  bool verbose = false;
 
   float DEVELOPER_mi_cutoff = 0.0f;
   uint32_t DEVELOPER_num_null_marginals = 1000000U;
@@ -122,6 +123,8 @@ int main(int argc, char *argv[]) {
     go_to_consolidate = true;
   if (cmdOptionExists(argv, argv + argc, "--runid"))
     runid = getCmdOption(argv, argv + argc, "--runid");
+  if (cmdOptionExists(argv, argv + argc, "--verbose"))
+    verbose = true;
 
   //--------------------developer parameters----------------------
 
@@ -202,7 +205,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Subsampled N Samples: " + std::to_string(tot_num_subsample)
             << std::endl;
 
-  const geneset regulators = readRegList(reg_list_file);
+  const geneset regulators = readRegList(reg_list_file, verbose);
 
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
