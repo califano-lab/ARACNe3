@@ -171,17 +171,18 @@ const geneset readRegList(const std::string &filename, const bool verbose) {
   geneset regulators;
 
   std::string reg;
-  static uint16_t num_errors_read = 0U;
+  static uint16_t num_missing = 0U;
   while (std::getline(ifs, reg, '\n')) {
     if (reg.back() == '\r') /* Alert! We have a Windows dweeb! */
       reg.pop_back();
     if (compression_map.find(reg) == compression_map.end()) {
-      if (verbose || num_errors_read++ < 3U) {
+      ++num_missing;
+      if (verbose || num_missing < 3U) {
         std::cerr << "Warning: " + reg +
                          " found in regulators list, but no entry in expression "
                          "matrix. Ignoring in network generation."
                   << std::endl;
-      } else if (num_errors_read++ == 3U) {
+      } else if (num_missing == 3U) {
         std::cerr << "... Suppressing further warnings (unless --verbose) ... "
                   << std::endl;
       }
