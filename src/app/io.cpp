@@ -1,11 +1,11 @@
 #include "io.hpp"
 #include "ARACNe3.hpp"
 #include "algorithms.hpp"
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <algorithm>
 
 std::vector<std::string> decompression_map;
 static std::unordered_map<std::string, uint16_t> compression_map;
@@ -178,13 +178,15 @@ const geneset readRegList(const std::string &filename, const bool verbose) {
     if (compression_map.find(reg) == compression_map.end()) {
       ++num_missing;
       if (verbose || num_missing < 3U) {
-        std::cerr << "Warning: " + reg +
-                         " found in regulators list, but no entry in expression "
-                         "matrix. Ignoring in network generation."
-                  << std::endl;
+        std::cerr
+            << "Warning: " + reg +
+                   " found in regulators list, but no entry in expression "
+                   "matrix. Ignoring in network generation."
+            << std::endl;
       } else if (num_missing == 3U) {
-        std::cerr << "... Suppressing further warnings (unless --verbose) ... "
-                  << std::endl;
+        std::cerr
+            << "... Suppressing further warnings (unless --verbose) ... \n"
+            << std::endl;
       }
     } else {
       regulators.insert(compression_map[reg]);
@@ -260,7 +262,8 @@ void addToCompressionVecs(const std::string &gene) {
  * in later computation
  */
 pair_string_vecs
-findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir, const std::string &subnets_log_dir) {
+findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
+                                 const std::string &subnets_log_dir) {
   std::vector<std::string> subnet_filenames, subnet_log_filenames;
   try {
     for (const auto &entry : std::filesystem::directory_iterator(subnets_dir)) {
@@ -281,8 +284,8 @@ findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir, const std::stri
         else {
           std::cerr << "Fatal: expected \"" + subnets_log_dir +
                            subnet_log_filename +
-                           "\" to exist based on the file \"" +
-                           subnets_dir + subnet_filename +
+                           "\" to exist based on the file \"" + subnets_dir +
+                           subnet_filename +
                            "\", but the log file was not found."
                     << std::endl;
           std::exit(2);
@@ -372,7 +375,7 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
                      "\", which has subnet log files formatted *and named* "
                      "exactly how ARACNe3 outputs subnet log files."
               << std::endl;
-      std::exit(2);
+    std::exit(2);
   }
 
   // discard 8 lines
