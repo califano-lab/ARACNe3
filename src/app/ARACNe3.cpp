@@ -57,6 +57,7 @@ int main(int argc, char *argv[]) {
   std::string runid = "defaultid";
   std::string method = "FDR";
   bool verbose = false;
+  uint16_t min_subnets = 65535U;
 
   float DEVELOPER_mi_cutoff = 0.0f;
   uint32_t DEVELOPER_num_null_marginals = 1000000U;
@@ -125,6 +126,8 @@ int main(int argc, char *argv[]) {
     runid = getCmdOption(argv, argv + argc, "--runid");
   if (cmdOptionExists(argv, argv + argc, "--verbose"))
     verbose = true;
+  if (cmdOptionExists(argv, argv + argc, "--min-subnets"))
+    min_subnets = std::stoi(getCmdOption(argv, argv + argc, "--min-subnets"));
 
   //--------------------developer parameters----------------------
 
@@ -255,7 +258,9 @@ int main(int argc, char *argv[]) {
         FPR_estimates.push_back(FPR_estimate_subnet);
 
         if (subnet.size() == 0) {
-          std::cerr << "Abort: No edges left after all pruning steps. Empty subnetwork." << std::endl;
+          std::cerr << "Abort: No edges left after all pruning steps. Empty "
+                       "subnetwork."
+                    << std::endl;
           std::exit(EXIT_FAILURE);
         }
 
@@ -270,9 +275,11 @@ int main(int argc, char *argv[]) {
           if (regulons[reg].size() < min_regulon_size)
             min_regulon_size = regulons[reg].size();
 
-        if (min_regulon_size >= targets_per_regulator)
-          stoppingCriteriaMet = true;
         ++cur_subnet_ct;
+
+        if (min_regulon_size >= targets_per_regulator ||
+            cur_subnet_ct >= min_subnets)
+          stoppingCriteriaMet = true;
       }
       num_subnets = subnets.size();
     } else if (!adaptive) {
