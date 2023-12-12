@@ -177,13 +177,13 @@ const geneset readRegList(const std::string &filename, const bool verbose) {
       reg.pop_back();
     if (compression_map.find(reg) == compression_map.end()) {
       ++num_missing;
-      if (verbose || num_missing < 3U) {
+      if (verbose || num_missing <= 3U) {
         std::cerr
             << "Warning: " + reg +
                    " found in regulators list, but no entry in expression "
                    "matrix. Ignoring in network generation."
             << std::endl;
-      } else if (num_missing == 3U) {
+      } else if (num_missing == 4U) {
         std::cerr
             << "... Suppressing further warnings (unless --verbose) ... \n"
             << std::endl;
