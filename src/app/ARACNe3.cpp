@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
   std::string runid = "defaultid";
   std::string method = "FDR";
   bool verbose = false;
-  uint16_t min_subnets = 65535U;
+  uint16_t min_subnets = 0U;
 
   float DEVELOPER_mi_cutoff = 0.0f;
   uint32_t DEVELOPER_num_null_marginals = 1000000U;
@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
 
         ++cur_subnet_ct;
 
-        if (min_regulon_size >= targets_per_regulator ||
+        if (min_regulon_size >= targets_per_regulator &&
             cur_subnet_ct >= min_subnets)
           stoppingCriteriaMet = true;
       }
