@@ -122,14 +122,14 @@ void APMINullModel::cacheNullModel(const std::string cached_dir) {
 const float APMINullModel::getMIPVal(const float &mi,
                                      const float &p_precise) const {
   // points to first index for which mi > the rest.
-  auto it = std::upper_bound(null_mis.cbegin(), null_mis.cend(), mi,
-                             std::greater<float>());
+  uint32_t n_nulls_gte = std::upper_bound(null_mis.cbegin(), null_mis.cend(), mi,
+                             std::greater<float>()) - null_mis.cbegin();
 
   // p-value as a percentile.  We add 1 because it is an index
-  const float p = (it - null_mis.cbegin() + 1) / (float)null_mis.size();
+  const float p = (n_nulls_gte + 1.f) / (null_mis.size() + 1.f);
 
   if (p < p_precise)
-    return std::min(p, std::exp(m * mi + b)); // invert log
+    return std::exp(m * mi + b);
   else
     return p;
 }
