@@ -40,36 +40,23 @@ if(USE_OPENMP)
 			if("${ARCHITECTURE}" STREQUAL "x86_64")
 				# Set the flags if on x86 macOS
 				set(LIBOMP_PATH "/usr/local/opt/libomp")
-
-				# Create libomp as an imported target
-				message(STATUS "Attempting libomp_imported target creation")
-				add_library(libomp_imported STATIC IMPORTED)
-				set_target_properties(libomp_imported PROPERTIES
-					IMPORTED_LOCATION "${LIBOMP_PATH}/lib/libomp.a"
-					INTERFACE_INCLUDE_DIRECTORIES "${LIBOMP_PATH}/include"
-					)
-				
-				message(STATUS "Attempting to link libomp_imported")
-
-				target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -fopenmp")
       else()
 				# Set the flags if on arm64 macOS
 				set(LIBOMP_PATH "/opt/homebrew/opt/libomp")
-
-				# Create libomp as an imported target
-				message(STATUS "Attempting libomp_imported target creation")
-				add_library(libomp_imported STATIC IMPORTED)
-				set_target_properties(libomp_imported PROPERTIES
-					IMPORTED_LOCATION "${LIBOMP_PATH}/lib/libomp.a"
-					INTERFACE_INCLUDE_DIRECTORIES "${LIBOMP_PATH}/include"
-					)
-				
-				message(STATUS "Attempting to link libomp_imported")
-
-				target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -fopenmp")
       endif()
+
+      # Create libomp as an imported target
+      message(STATUS "Attempting libomp_imported target creation")
+      add_library(libomp_imported STATIC IMPORTED)
+      set_target_properties(libomp_imported PROPERTIES
+        IMPORTED_LOCATION "${LIBOMP_PATH}/lib/libomp.a"
+        INTERFACE_INCLUDE_DIRECTORIES "${LIBOMP_PATH}/include"
+        )
+      
+      message(STATUS "Attempting to link libomp_imported")
+
+      target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -fopenmp")
 		endif()
 	endif()
 endif(USE_OPENMP)
