@@ -27,9 +27,10 @@ if(USE_OPENMP)
 
 		target_link_libraries(ARACNe3_lib PUBLIC OpenMP::OpenMP_CXX)
 	else()
-		message(STATUS "OpenMP package not found by include(FindOpenMP). Attempting fallback methods.")
+		message(STATUS "OpenMP package not found by include(FindOpenMP).")
 		# Check for the macOS platform
 		if(APPLE)
+      message(STATUS "Attempting APPLE fallback method.")
 			# Check for x86 architecture
 			execute_process(
 				COMMAND uname -m
@@ -47,6 +48,7 @@ if(USE_OPENMP)
 
       # Create libomp as an imported target
       message(STATUS "Attempting libomp_imported target creation")
+
       add_library(libomp_imported STATIC IMPORTED)
       set_target_properties(libomp_imported PROPERTIES
         IMPORTED_LOCATION "${LIBOMP_PATH}/lib/libomp.a"
@@ -57,8 +59,8 @@ if(USE_OPENMP)
 
       target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -fopenmp")
-		endif()
-	endif()
+    endif(APPLE)
+  endif()
 endif(USE_OPENMP)
 
 target_link_libraries(ARACNe3_lib PUBLIC Boost::math)
