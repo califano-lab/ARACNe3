@@ -20,7 +20,7 @@ target_include_directories(ARACNe3_lib
 )
 
 if(USE_OPENMP)
-	include(FindOpenMP)
+  include(FindOpenMP)
 	if(OpenMP_CXX_FOUND)
 		add_definitions(-DOPENMP_ENABLED=1)
 		message(STATUS "OpenMP package found by include(FindOpenMP)")
@@ -50,7 +50,9 @@ if(USE_OPENMP)
 					)
 				
 				message(STATUS "Attempting to link libomp_imported")
+
 				target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -fopenmp")
       else()
 				# Set the flags if on arm64 macOS
 				set(LIBOMP_PATH "/opt/homebrew/opt/libomp")
@@ -64,7 +66,9 @@ if(USE_OPENMP)
 					)
 				
 				message(STATUS "Attempting to link libomp_imported")
+
 				target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -fopenmp")
       endif()
 		endif()
 	endif()
