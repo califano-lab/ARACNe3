@@ -51,7 +51,21 @@ if(USE_OPENMP)
 				
 				message(STATUS "Attempting to link libomp_imported")
 				target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
-			endif()
+      else()
+				# Set the flags if on arm64 macOS
+				set(LIBOMP_PATH "/opt/homebrew/opt/libomp")
+
+				# Create libomp as an imported target
+				message(STATUS "Attempting libomp_imported target creation")
+				add_library(libomp_imported STATIC IMPORTED)
+				set_target_properties(libomp_imported PROPERTIES
+					IMPORTED_LOCATION "${LIBOMP_PATH}/lib/libomp.a"
+					INTERFACE_INCLUDE_DIRECTORIES "${LIBOMP_PATH}/include"
+					)
+				
+				message(STATUS "Attempting to link libomp_imported")
+				target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
+      endif()
 		endif()
 	endif()
 endif(USE_OPENMP)
@@ -68,7 +82,7 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(ARACNe3_lib PUBLIC stdc++fs)
 endif()
 
-add_executable(ARACNe3_app ARACNe3.cpp ${SOURCES})
+add_executable(ARACNe3_app ARACNe3.cpp)
 
 set_target_properties(ARACNe3_app PROPERTIES
   CXX_STANDARD 17
