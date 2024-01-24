@@ -1,0 +1,9 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// Config.h generated from Config.h.in in /include/common/
+
+#define CACHE_PATH "@CACHE_PATH@"
+#define APP_VERSION "@ARACNe3_VERSION@"
+
+#endif // CONFIG_H

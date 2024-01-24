@@ -1,7 +1,16 @@
-include_directories(${gtest_SOURCE_DIR}/include)
+add_executable(aracne3_test
+  test_algorithms.cpp
+)
 
-add_executable(algorithms_test test_algorithms.cpp)
-target_link_libraries(algorithms_test gtest gtest_main ARACNe3_lib)
+target_link_libraries(aracne3_test
+  PRIVATE
+    gtest_main
+    aracne3tools
+)
 
-# Create a test called "AlgorithmTests" based on the executable "algorithm_tests"
-add_test(NAME AlgorithmsTest COMMAND algorithms_test)
+target_include_directories(aracne3_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/include/ARACNe3
+  )
+
+gtest_discover_tests(aracne3_test)

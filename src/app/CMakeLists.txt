@@ -1,23 +1,54 @@
-# Set the source files for ARACNe3
-set(SOURCES
+# ---- Define aracne3tools target ----
+add_library(aracne3tools SHARED  # Used by both ARACNe3_app and aracne3io
 	cmdline_parser.cpp
 	stopwatch.cpp
-	io.cpp
 	algorithms.cpp
 	apmi_nullmodel.cpp
-	subnet_operations.cpp
+  )
+
+target_include_directories(aracne3tools PRIVATE
+  ${PROJECT_SOURCE_DIR}/include/ARACNe3
 )
 
-# Mainly for testing suite, but also so ARACNe3_app can easily add includes
-add_library(ARACNe3_lib ${SOURCES})
+# TODO: Remove apmi_nullmodel dependency on linking fs (only aracne3io should)
+if(UNIX AND NOT APPLE)
+  target_link_libraries(aracne3tools PRIVATE stdc++fs)
+endif()
 
-# Public includes so ARACNe3_app can see them, yet sources are private
-target_include_directories(ARACNe3_lib
-	PUBLIC
-        ${PROJECT_SOURCE_DIR}/include/ARACNe3
-	${OpenMP_CSS_INCLUDE_DIRS}
-	"${CMAKE_SOURCE_DIR}/deps/boost/libs/math/include/boost/math"
+# ---- Define the aracne3io target ----
+add_library(aracne3io STATIC
+	io.cpp
+  )
+
+target_include_directories(aracne3io PRIVATE
+	${PROJECT_SOURCE_DIR}/include/aracne3
 )
+
+target_link_libraries(aracne3io PRIVATE aracne3tools)
+
+if(UNIX AND NOT APPLE)
+  target_link_libraries(aracne3io PRIVATE stdc++fs)
+endif()
+
+# ---- Build ARACNe3 ----
+add_executable(ARACNe3_app ARACNe3.cpp subnet_operations.cpp)
+
+set_target_properties(ARACNe3_app PROPERTIES
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON
+  DEBUG_POSTFIX "_debug"
+  RELEASE_POSTFIX "_release"
+)
+
+target_link_libraries(ARACNe3_app PRIVATE 
+  aracne3io
+  aracne3tools
+  Boost::serialization
+  )
+
+target_include_directories(ARACNe3_app PRIVATE 
+  ${PROJECT_SOURCE_DIR}/include/ARACNe3
+  )
 
 if(USE_OPENMP)
   include(FindOpenMP)
@@ -25,7 +56,7 @@ if(USE_OPENMP)
 		add_definitions(-DOPENMP_ENABLED=1)
 		message(STATUS "OpenMP package found by include(FindOpenMP)")
 
-		target_link_libraries(ARACNe3_lib PUBLIC OpenMP::OpenMP_CXX)
+		target_link_libraries(ARACNe3_app PUBLIC OpenMP::OpenMP_CXX)
 	else()
 		message(STATUS "OpenMP package not found by include(FindOpenMP).")
 		# Check for the macOS platform
@@ -57,32 +88,8 @@ if(USE_OPENMP)
       
       message(STATUS "Attempting to link libomp_imported")
 
-      target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
+      target_link_libraries(ARACNe3_app PUBLIC libomp_imported)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -fopenmp")
     endif(APPLE)
   endif()
 endif(USE_OPENMP)
-
-target_link_libraries(ARACNe3_lib PUBLIC Boost::math)
-
-if (WIN32 AND MINGW)
-	target_compile_options(ARACNe3_lib PUBLIC -static-libstdc++)
-endif (WIN32 AND MINGW)
-
-# The -lstdc++fs flag is needed for the std::filesystem library on some platforms, like CentOS 6.5 with older GCC versions. However, on most systems, the std::filesystem library is already included in the standard library.
-if(UNIX AND NOT APPLE)
-	target_compile_options(ARACNe3_lib PUBLIC -lstdc++fs)
-	target_link_libraries(ARACNe3_lib PUBLIC stdc++fs)
-endif()
-
-add_executable(ARACNe3_app ARACNe3.cpp)
-
-set_target_properties(ARACNe3_app PROPERTIES
-  CXX_STANDARD 17
-  CXX_STANDARD_REQUIRED ON
-  DEBUG_POSTFIX "_debug"
-  RELEASE_POSTFIX "_release"
-)
-
-# Links the public libraries and includes, including the headers for A3
-target_link_libraries(ARACNe3_app PRIVATE ARACNe3_lib)

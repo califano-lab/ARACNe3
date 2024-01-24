@@ -1,7 +1,8 @@
+# ---- Project Definitions ----
 cmake_minimum_required(VERSION 3.1...3.15)
 
-project(ARACNe3	VERSION 1.0.0
-	DESCRIPTION "Algorithm for the Reconstruction of Accurate Cellular Networks 3"
+project(ARACNe3	VERSION 0.2.0
+	DESCRIPTION "Algorithm for the Reconstruction of Accurate Cellular Networks"
 		LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -12,58 +13,51 @@ endif()
 
 message(STATUS "CMake version ${CMAKE_VERSION}")
 
-# Set the default build type to Release if not specified.  RelWithDebInfo
-# minimizes performance costs while including debugging information.
+# Set the default build type if not specified with -DCMAKE_BUILD_TYPE=<type>
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE RelWithDebInfo)
-endif()
-
-# #ifdef _DEBUG used for conditional compilation
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_definitions(-D_DEBUG)
 endif()
 
 # Set compiler flags for Debug and Release builds
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
+# ifdef _DEBUG for conditional compilation
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_definitions(-D_DEBUG)
+endif()
 
-##### REQUIRED LIBRARIES #####
+if(WIN32)
+    set(CACHE_PATH "$ENV{APPDATA}/ARACNe3")
+elseif(APPLE)
+    set(CACHE_PATH "$ENV{HOME}/.cache/aracne3")
+else() # Linux/Unix
+    set(CACHE_PATH "$ENV{HOME}/.cache/aracne3")
+endif()
+
+# ---- Generate Config.h from template header ----
+# Config.h will pass the caching path and project version
+configure_file(
+  "${PROJECT_SOURCE_DIR}/include/ARACNe3/generated/config.h.in"
+  "${PROJECT_BINARY_DIR}/include/ARACNe3/config.h"
+  )
+
+include_directories("${PROJECT_BINARY_DIR}/include/ARACNe3")
+
+# ---- Required Libraries ----
 add_subdirectory(deps/boost EXCLUDE_FROM_ALL)
 
-
-##### OPTIONS #####
-
-## Dev
-option(ENABLE_ALL_WARNINGS "Enable all compiler warnings. Only effective for
-GCC/Clang" OFF)
-
-## Sanitizers
-option(USE_SANITIZER "Use santizer flags" OFF)
-option(SANITIZER_PATH "Path to sanitizers.")
-set(ENABLED_SANITIZERS "address" "leak" CACHE STRING
-	  "Semicolon separated list of sanitizer names. E.g 'address;leak'.
-	  Supported sanitizers are
-	  address, leak, undefined and thread.")
-
-if(USE_SANITIZER)
-	  include(cmake/Sanitizer.cmake)
-	  enable_sanitizers("${ENABLED_SANITIZERS}")
-endif(USE_SANITIZER)
-
-## OpenMP
+# ---- Options ----
 option(USE_OPENMP "Compile with multithreading support" ON)
 
-##### ADD SUBDIRECTORIES #####
-
+# ---- Add Subdirectories ----
 add_subdirectory(src)
 
+# ---- Add testing suite ----
+# 'gtest' exclude from all build configurations to prevent double linking
+add_subdirectory(deps/gtest EXCLUDE_FROM_ALL)
 
-##### TESTING #####
-option(BUILD_TESTS "Build the tests" OFF)
+enable_testing()
+include(GoogleTest)  # enable ctest to discover tests from test targets
 
-if(BUILD_TESTS)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/deps/gtest)
-    enable_testing()
-    add_subdirectory(tests)
-endif()
+add_subdirectory(tests)
