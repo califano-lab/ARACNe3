@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <numeric>
+#include <stdexcept>
 
 extern float DEVELOPER_mi_cutoff;
 
@@ -109,16 +110,6 @@ const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
   }
 }
 
-/**
- * @brief Calculates the Adaptive Partitioning Mutual Information (APMI)
- * between two vectors.
- *
- * @param x_vec The first vector.
- * @param y_vec The second vector.
- * @param q_thresh A threshold for chi-square.
- * @param size_thresh A threshold for minimum partition size.
- * @return float The APMI value between the two input vectors.
- */
 float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
                const float q_thresh, const uint16_t size_thresh) {
   // Set file static variables
@@ -141,25 +132,6 @@ float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
   return calcAPMISplit(x_ptr, y_ptr, init);
 }
 
-/** @brief Ranks indices based on the values in vec.
- *
- * This function sorts the indices in the range [1, size) based on the values
- * of vec[index-1]. The returned vector represents the rank of each element in
- * vec with the smallest element ranked as 1 and the largest as size. If two
- * elements in vec have the same value, their corresponding indices in the
- * ranking are randomly shuffled.
- *
- * @param vec The input vector for which the ranking should be formed.
- * @param rand A Mersenne Twister pseudo-random generator of 32-bit numbers
- * with a state size of 19937 bits. Used to shuffle indices corresponding to
- * equal values in vec.
- *
- * @return A vector representing the rank of indices in the input vector vec.
- *
- * @example vec = {9.2, 3.5, 7.4, 3.5} The function returns {4, 1, 3, 2}. Note
- * that the ranks for the elements with the same value 3.5 (indices 1 and 3)
- * may be shuffled differently in different runs.
- */
 std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
                                   std::mt19937 &rand) {
   std::vector<uint16_t> idx_ranks(vec.size());
@@ -211,10 +183,6 @@ double rightTailBinomialP(uint16_t n, uint16_t k, float theta) {
   return p;
 }
 
-/**
- * Calculates the right-tail binomial probability density while remaining in log
- * space. Prevents underflow
- */
 double lRightTailBinomialP(uint16_t n, uint16_t k, float theta) {
     // If k is 0, the right-tail probability includes all possibilities, which is p = 1.
     if (k == 0) return std::log(1.);
@@ -251,31 +219,51 @@ double lRightTailBinomialP(uint16_t n, uint16_t k, float theta) {
  *
  * @return A pair of floats (m,b).
  */
-std::pair<float, float> linearRegress(const std::vector<float> &x,
-                                      const std::vector<float> &y) {
-  std::vector<float>::size_type N = x.size();
+std::pair<float, float> OLS(const std::vector<float> &x_vec,
+                            const std::vector<float> &y_vec) {
+    const size_t n = x_vec.size();
 
-  float sumx = 0.0f, sumx2 = 0.0f, sumxy = 0.0f, sumy = 0.0f, sumy2 = 0.0f;
+    if (x_vec.size() != y_vec.size())
+        throw std::runtime_error(
+            "Cannot perform regression on vectors of unequal size");
 
-  for (uint32_t i = 0; i < N; ++i) {
-    sumx += x[i];
-    sumx2 += x[i] * x[i];
-    sumxy += x[i] * y[i];
-    sumy += y[i];
-    sumy2 += y[i] * y[i];
-  }
+    float x_mean =
+        std::reduce(x_vec.cbegin(), x_vec.cend()) / static_cast<float>(n);
+    float y_mean =
+        std::reduce(y_vec.cbegin(), y_vec.cend()) / static_cast<float>(n);
 
-  float denom = (N * sumx2 - sumx * sumx);
-  float m = 0.0f, b = 0.0f;
-  if (denom == 0) {
-    std::cerr << "Could not fit piecewise null model to log(p) for p < 0.01. "
-                 "Aborting."
-              << std::endl;
-    std::exit(1);
-  }
+    float ssr_x = std::reduce(x_vec.cbegin(), x_vec.cend(), 0.f,
+                              [&x_mean](float a, float cur) {
+                                return a + (cur - x_mean) * (cur - x_mean);
+                              });
 
-  m = (N * sumxy - sumx * sumy) / denom;
-  b = (sumy * sumx2 - sumx * sumxy) / denom;
+    float sum_prod = 0.f;
+    for (size_t i = 0U; i < n; ++i)
+        sum_prod += (x_vec[i] - x_mean) * (y_vec[i] - y_mean);
 
-  return std::make_pair(m, b);
+    float slope = sum_prod / ssr_x;
+    float intercept = y_mean - slope * x_mean;
+
+    return {slope, intercept};
+}
+
+std::vector<float> copulaTransform(const std::vector<float> &data,
+                                   std::mt19937 &rand) {
+  uint32_t n = data.size();
+  std::vector<uint32_t> indices(n);
+  std::iota(indices.begin(), indices.end(), 0U);
+
+  // Shuffle indices for random tie breaking
+  std::shuffle(indices.begin(), indices.end(), rand);
+
+  // Sort indices based on corresponding data values
+  std::sort(indices.begin(), indices.end(),
+            [&](uint32_t i1, uint32_t i2) { return data[i1] < data[i2]; });
+
+  // Assign ranks (idx + 1) to the values, ratio by n + 1
+  std::vector<float> ranks(n);
+  for (uint32_t i = 0U; i != n; ++i)
+    ranks[indices[i]] = static_cast<float>(i + 1) / (n + 1);
+
+  return ranks;
 }

@@ -1,23 +1,25 @@
 #pragma once
 
-#include <random>
-#include <string>
 #include <vector>
 
 class APMINullModel {
+public:
+  APMINullModel();
+  APMINullModel(const std::vector<float> &nm, float om, float ob, size_t ns,
+                size_t nn, uint32_t s)
+      : null_mis(nm), ols_m(om), ols_b(ob), n_samps(ns), n_nulls(nn), seed(s){};
+  APMINullModel(const size_t n_samps, const size_t n_nulls,
+                const uint32_t seed);
+
+  float getMIPVal(const float mi, const float p_precise = 0.001f) const;
+  std::tuple<std::vector<float>, float, float, size_t, size_t, uint32_t>
+  getModel() {
+    return {null_mis, ols_m, ols_b, n_samps, n_nulls, seed};
+  }
+
 private:
   std::vector<float> null_mis;
-  float m, b;
-  std::string nulls_filename_no_extension, OLS_coefs_filename_no_extension;
-
-public:
-  APMINullModel(const APMINullModel &copied); // copy ctor
-  // rand should be passed from main based on seed for predictable behavior.
-  APMINullModel(const uint32_t n_nulls, const uint16_t tot_num_subsample,
-                const std::string &cached_dir, std::mt19937 &rand);
-  ~APMINullModel();
-  void cacheNullModel(const std::string cached_dir); // cache vec, m, and b
-  const float
-  getMIPVal(const float &mi,
-            const float &p_precise = 0.001f) const; // return p value
+  float ols_m, ols_b;
+  size_t n_samps, n_nulls;
+  uint32_t seed;
 };

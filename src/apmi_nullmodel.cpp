@@ -1,134 +1,57 @@
+#include <algorithm>
+#include <random>
+
 #include "apmi_nullmodel.hpp"
 #include "algorithms.hpp"
 
-#include <filesystem>
-#include <fstream>
-#include <iterator>
-#include <algorithm>
+APMINullModel::APMINullModel() {};
 
-extern uint16_t nthreads;
+APMINullModel::APMINullModel(const size_t n_samps, const size_t n_nulls,
+                             const uint32_t seed)
+    : n_samps(n_samps), n_nulls(n_nulls), seed(seed) {
+  std::mt19937 rand(seed);
 
-APMINullModel::APMINullModel(const APMINullModel &copied) {
-  null_mis = copied.null_mis;
-  m = copied.m;
-  b = copied.b;
-  nulls_filename_no_extension = copied.nulls_filename_no_extension;
-  OLS_coefs_filename_no_extension = copied.OLS_coefs_filename_no_extension;
+  // All null APMIs are based on a shuffled copula of ref_vec with n_samps
+  std::vector<float> ref_vec;
+  ref_vec.reserve(n_samps);
+  for (size_t i = 0u; i < n_samps; ++i)
+    ref_vec.emplace_back((i + 1.f) / (n_samps + 1.f));
+
+  std::vector<std::vector<float>> shuffle_vecs(n_nulls, ref_vec);
+  for (size_t i = 0u; i < n_nulls; ++i)
+    std::shuffle(shuffle_vecs[i].begin(), shuffle_vecs[i].end(), rand);
+
+  this->null_mis = std::vector<float>(n_nulls);
+  for (size_t i = 0u; i < n_nulls; ++i)
+    this->null_mis[i] = calcAPMI(ref_vec, shuffle_vecs[i]);
+
+  // sort largest to smallest
+  std::sort(null_mis.begin(), null_mis.end(), std::greater<float>());
+
+  // OLS regress log(p) vs MI for eCDF p < 0.01
+  float sig_p = 0.01f;
+  size_t sig_p_offendidx = std::floor(n_nulls * sig_p);
+  std::vector<float> sig_mis(null_mis.begin(),
+                             null_mis.begin() + sig_p_offendidx);
+  std::vector<float> sig_mi_ps(sig_mis.size());
+  for (size_t i = 0u; i < sig_mi_ps.size(); ++i)
+    sig_mi_ps[i] = (i + 1.f) / (n_nulls + 1.f); // fill p-vals
+  std::transform(sig_mi_ps.begin(), sig_mi_ps.end(), sig_mi_ps.begin(),
+                 [](const float p) { return std::log(p); }); // log-transform
+
+  const auto [m, b] = OLS(sig_mis, sig_mi_ps);
+  this->ols_m = m;
+  this->ols_b = b;
 }
 
-/*
- Computes 1 million null mutual information values for the sample size.  Checks
- whether there already exists a null_mi vector (nulls_filename) in the cached
- directory.
- */
-APMINullModel::APMINullModel(const uint32_t n_nulls,
-                             const uint16_t tot_num_subsample,
-                             const std::string &cached_dir,
-                             std::mt19937 &rand) {
-  this->nulls_filename_no_extension = "Nssamp-" +
-                                      std::to_string(tot_num_subsample) +
-                                      "_Nnull-" + std::to_string(n_nulls);
-  this->OLS_coefs_filename_no_extension = nulls_filename_no_extension + "_OLS";
+float APMINullModel::getMIPVal(const float mi, const float p_precise) const {
+  // points to the index where comp is true; i.e. off end of [elements] > mi.
+  size_t n_nulls_gt_mi = std::upper_bound(null_mis.cbegin(), null_mis.cend(),
+                                          mi, std::greater<float>()) -
+                         null_mis.cbegin();
 
-#ifdef _DEBUG // If debug, we must generate a new null model each time
-  constexpr bool debug = true;
-#else
-  constexpr bool debug = false;
-#endif
+  // p-value as a percentile.
+  const float p = (n_nulls_gt_mi + 1.f) / (null_mis.size() + 1.f);
 
-  if (std::filesystem::exists(cached_dir + nulls_filename_no_extension +
-                              ".txt") &&
-      std::filesystem::exists(cached_dir + OLS_coefs_filename_no_extension +
-                              ".txt") &&
-      !debug) {
-    this->null_mis.reserve(n_nulls);
-
-    std::ifstream nulls_file(cached_dir + nulls_filename_no_extension + ".txt",
-                             std::ios::in | std::ios::binary);
-    std::ifstream OLS_coef_file(cached_dir + OLS_coefs_filename_no_extension +
-                                    ".txt",
-                                std::ios::in | std::ios::binary);
-    std::istream_iterator<float> nulls_iterator(nulls_file);
-    std::istream_iterator<float> OLS_iterator(OLS_coef_file);
-
-    for (uint32_t i = 0; i < n_nulls; ++i)
-      null_mis.emplace_back(*nulls_iterator++);
-    this->m = *OLS_iterator++;
-    this->b = *OLS_iterator;
-  } else {
-    // make the ref vector for null APMI against shuffled version
-    std::vector<float> ref_vec;
-    ref_vec.reserve(tot_num_subsample);
-
-    for (uint16_t i = 1U; i <= tot_num_subsample; ++i)
-      ref_vec.emplace_back(((float)i) / (tot_num_subsample + 1));
-
-    std::vector<float> shuffle_vec = ref_vec;
-
-    this->null_mis = std::vector<float>(n_nulls);
-
-#pragma omp parallel for num_threads(nthreads)
-    for (uint32_t i = 0U; i < n_nulls; ++i) {
-#pragma omp critical
-      { std::shuffle(shuffle_vec.begin(), shuffle_vec.end(), rand); }
-      null_mis[i] = calcAPMI(ref_vec, shuffle_vec);
-    }
-
-    // sort largest to smallest
-    std::sort(null_mis.begin(), null_mis.end(), std::greater<float>());
-
-    // OLS regress log(p) vs MI for eCDF p < 0.01
-    uint32_t significant_thresh_idx =
-        std::ceil(n_nulls * 1.0f / 100.0f); // index of p = 0.01
-    std::vector<float> significant_mis(
-        null_mis.begin(), null_mis.begin() + significant_thresh_idx);
-    std::vector<float> significant_mi_ps(significant_thresh_idx);
-    for (uint32_t i = 0; i < significant_thresh_idx; ++i)
-      significant_mi_ps[i] = ((i + 1) / (float)n_nulls); // fill p-vals
-    std::transform(significant_mi_ps.begin(),
-                   significant_mi_ps.begin() + significant_thresh_idx,
-                   significant_mi_ps.begin(), [](const auto &p) -> float {
-                     return std::log(p);
-                   }); // log-transform
-
-    std::pair<float, float> sol =
-        linearRegress(significant_mis, significant_mi_ps);
-    this->m = sol.first;
-    this->b = sol.second;
-  }
-}
-
-APMINullModel::~APMINullModel() {}
-
-void APMINullModel::cacheNullModel(const std::string cached_dir) {
-  std::string nulls_filename =
-      cached_dir + nulls_filename_no_extension + ".txt";
-  std::string ols_filename =
-      cached_dir + OLS_coefs_filename_no_extension + ".txt";
-
-  if (!std::filesystem::exists(nulls_filename) ||
-      !std::filesystem::exists(ols_filename)) {
-    std::ofstream nulls_file(nulls_filename, std::ios::out | std::ios::binary);
-    std::ofstream OLS_coefs_file(ols_filename,
-                                 std::ios::out | std::ios::binary);
-    for (auto it = null_mis.cbegin(); it != null_mis.cend(); ++it)
-      nulls_file << *it << '\n';
-    OLS_coefs_file << m << '\n' << b << '\n';
-  }
-  return;
-}
-
-const float APMINullModel::getMIPVal(const float &mi,
-                                     const float &p_precise) const {
-  // points to first index for which mi > the rest.
-  uint32_t n_nulls_gte = std::upper_bound(null_mis.cbegin(), null_mis.cend(), mi,
-                             std::greater<float>()) - null_mis.cbegin();
-
-  // p-value as a percentile.  We add 1 because it is an index
-  const float p = (n_nulls_gte + 1.f) / (null_mis.size() + 1.f);
-
-  if (p < p_precise)
-    return std::exp(m * mi + b);
-  else
-    return p;
+  return p < p_precise ? std::exp(ols_m * mi + ols_b) : p;
 }

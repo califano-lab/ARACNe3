@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "ARACNe3.hpp"
 #include "apmi_nullmodel.hpp"
 #include "cmdline_parser.hpp"
@@ -10,8 +12,45 @@
 #include <iomanip>
 #include <iostream>
 
-uint16_t nthreads = 1U;
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp> // for object caching
+#include <boost/serialization/vector.hpp>
 
+// ---- Fetch app information ----
+#ifndef CACHE_PATH
+#define CACHE_PATH "cache/aracne3"
+#endif
+
+#ifndef APP_VERSION
+#define APP_VERSION "0.0.0"
+#endif
+
+// ---- Define APMINullModel serialization fn for Boost ----
+namespace boost {
+namespace serialization {
+
+template <class Archive>
+void serialize(Archive &ar, APMINullModel &model, const unsigned int version) {
+  auto [null_mis, ols_m, ols_b, n_samps, n_nulls, seed] = model.getModel();
+
+  ar &null_mis;
+  ar &ols_m;
+  ar &ols_b;
+  ar &n_samps;
+  ar &n_nulls;
+  ar &seed;
+
+  // For deserialization, set the values back into the model
+  if (Archive::is_loading::value) {
+    model = APMINullModel(null_mis, ols_m, ols_b, n_samps, n_nulls, seed);
+  }
+}
+} // namespace serialization
+} // namespace boost
+
+// ---- Begin ARACNe3 runtime ----
+
+uint16_t nthreads = 1U;
 extern std::vector<std::string> decompression_map;
 
 /*
@@ -217,9 +256,61 @@ int main(int argc, char *argv[]) {
   watch1.reset();
   //-------------------------
 
-  APMINullModel nullmodel = APMINullModel(DEVELOPER_num_null_marginals,
-                                          tot_num_subsample, cached_dir, rand);
-  nullmodel.cacheNullModel(cached_dir);
+  // ---- Get the null model for mutual information ----
+
+  //qlog("Getting null model for mutual information...");
+
+  const size_t n_samps = exp_mat[0].size();
+  constexpr size_t n_nulls = 1e6;
+  const std::string cached_blob_name =
+      cached_dir + "APMINullModel_" + std::to_string(n_samps) + "_" +
+      std::to_string(n_nulls) + "_" + std::to_string(seed) + "_" + APP_VERSION +
+      ".blob";
+
+  APMINullModel apmi_null_model;
+
+#ifdef _DEBUG  // Avoid caches when debugging
+    //qlog("Debug build: Generating new null model...");
+    watch1.reset();
+
+    apmi_null_model = APMINullModel(n_samps, n_nulls, seed);
+
+    //qlog("Null model generated. Time elapsed: " + watch1.getSeconds());
+
+    //qlog("Caching null model...");
+    watch1.reset();
+    std::ofstream ofs(cached_blob_name, std::ios::binary);
+    boost::archive::binary_oarchive oa(ofs);
+    oa << apmi_null_model;
+    //qlog("Null model cached. Time elapsed: " + watch1.getSeconds());
+#else
+    if (std::filesystem::exists(cached_blob_name)) {
+      //qlog("Cached null model found. Reading in null model...");
+      watch1.reset();
+
+      std::ifstream ifs(cached_blob_name, std::ios::binary);
+      if (ifs) {
+        boost::archive::binary_iarchive ia(ifs);
+        ia >> apmi_null_model;
+      }
+      //qlog("Null model read. Time elapsed: " + watch1.getSeconds());
+
+    } else {
+      //qlog("Null model not found. Generating new null model...");
+      watch1.reset();
+
+      apmi_null_model = APMINullModel(n_samps, n_nulls, seed);
+
+      //qlog("Null model generated. Time elapsed: " + watch1.getSeconds());
+
+      //qlog("Caching null model...");
+      watch1.reset();
+      std::ofstream ofs(cached_blob_name, std::ios::binary);
+      boost::archive::binary_oarchive oa(ofs);
+      oa << apmi_null_model;
+      //qlog("Null model cached. Time elapsed: " + watch1.getSeconds());
+    }
+#endif  /* _DEBUG */
 
   //-------time module-------
   log_output << watch1.getSeconds() << std::endl;
@@ -250,9 +341,9 @@ int main(int argc, char *argv[]) {
 
         const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
-            tot_num_subsample, cur_subnet_ct, prune_alpha, nullmodel, method,
-            alpha, prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir,
-            nthreads, runid);
+            tot_num_subsample, cur_subnet_ct, prune_alpha, apmi_null_model,
+            method, alpha, prune_MaxEnt, output_dir, subnets_dir,
+            subnets_log_dir, nthreads, runid);
 
         subnets.push_back(subnet);
         FPR_estimates.push_back(FPR_estimate_subnet);
@@ -291,7 +382,7 @@ int main(int argc, char *argv[]) {
 
         std::tie(subnets[i], FPR_estimates[i]) = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
-            tot_num_subsample, i, prune_alpha, nullmodel, method, alpha,
+            tot_num_subsample, i, prune_alpha, apmi_null_model, method, alpha,
             prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir, nthreads,
             runid);
       }
