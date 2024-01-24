@@ -34,7 +34,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # ---- Build ARACNe3 ----
-add_executable(ARACNe3_app ARACNe3.cpp subnet_operations.cpp)
+add_executable(ARACNe3_app main.cpp subnet_operations.cpp)
 
 set_target_properties(ARACNe3_app PROPERTIES
   CXX_STANDARD 17
