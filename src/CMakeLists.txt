@@ -1,5 +1,5 @@
 # ---- Define aracne3tools target ----
-add_library(aracne3tools SHARED  # Used by both ARACNe3_app and aracne3io
+add_library(aracne3tools OBJECT  # compile source files but do not archive
 	cmdline_parser.cpp
 	stopwatch.cpp
 	algorithms.cpp
@@ -24,7 +24,9 @@ target_include_directories(aracne3io PRIVATE
 	${PROJECT_SOURCE_DIR}/include/aracne3
 )
 
-target_link_libraries(aracne3io PRIVATE aracne3tools)
+target_link_libraries(aracne3io PRIVATE
+  $<TARGET_OBJECTS:aracne3tools>
+  )
 
 if(UNIX AND NOT APPLE)
   target_link_libraries(aracne3io PRIVATE stdc++fs)
@@ -42,7 +44,7 @@ set_target_properties(ARACNe3_app PROPERTIES
 
 target_link_libraries(ARACNe3_app PRIVATE 
   aracne3io
-  aracne3tools
+  $<TARGET_OBJECTS:aracne3tools>
   Boost::serialization
   )
 
