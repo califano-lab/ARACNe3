@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
   // Must exist regardless of whether we skip to consolidation
   std::vector<gene_to_gene_to_float> subnets;
   std::vector<float> FPR_estimates;
-  float FPR_estimate = 1.5E-4f;
+  float FPR_estimate = 1.5e-4f;
 
   if (!go_to_consolidate) {
 

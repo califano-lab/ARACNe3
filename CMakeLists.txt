@@ -27,6 +27,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-D_DEBUG)
 endif()
 
+# TODO: Must be more general if built and then downloaded elsewhere. Currently
+# resolves caching dir based on where the executable was built.
 if(WIN32)
     set(CACHE_PATH "$ENV{APPDATA}/ARACNe3")
 elseif(APPLE)
