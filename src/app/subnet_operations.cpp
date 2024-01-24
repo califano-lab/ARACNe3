@@ -345,7 +345,7 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
                    " edges returned..."
             << std::endl;
 
-  return std::make_pair(subnetwork, FPR_estimate_subnet);
+  return std::make_pair(std::move(subnetwork), FPR_estimate_subnet);
 }
 
 const std::vector<consolidated_df_row>

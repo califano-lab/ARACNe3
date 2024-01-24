@@ -288,13 +288,12 @@ int main(int argc, char *argv[]) {
       for (int i = 0; i < num_subnets; ++i) {
         gene_to_floats subsample_exp_mat =
             sampleExpMatAndReCopulaTransform(exp_mat, tot_num_subsample, rand);
-        const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
+
+        std::tie(subnets[i], FPR_estimates[i]) = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, tot_num_samps,
             tot_num_subsample, i, prune_alpha, nullmodel, method, alpha,
             prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir, nthreads,
             runid);
-        subnets[i] = subnet;
-        FPR_estimates[i] = FPR_estimate_subnet;
       }
     }
 

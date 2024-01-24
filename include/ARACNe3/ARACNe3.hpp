@@ -33,3 +33,5 @@ typedef std::vector<std::vector<uint16_t>> gene_to_shorts;
 typedef std::unordered_map<gene_id, float> gene_to_float;
 typedef std::unordered_map<gene_id, gene_to_float>
     gene_to_gene_to_float;
+
+using vv_float = std::vector<std::vector<float>>;

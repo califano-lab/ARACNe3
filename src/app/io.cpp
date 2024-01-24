@@ -201,7 +201,7 @@ const geneset readRegList(const std::string &filename, const bool verbose) {
  output_suffix.  Does not print to the console.  The data structure input is a
  gene_to_edge_tars, which is defined in "ARACNe3.hpp".
  */
-void writeNetworkRegTarMI(gene_to_gene_to_float &network,
+void writeNetworkRegTarMI(const gene_to_gene_to_float& network,
                           const std::string &file_path) {
   std::ofstream ofs{file_path};
   if (!ofs) {
@@ -215,8 +215,8 @@ void writeNetworkRegTarMI(gene_to_gene_to_float &network,
   }
 
   ofs << "regulator.values\ttarget.values\tmi.values" << std::endl;
-  for (const auto &[reg, tar_mi] : network)
-    for (const auto [tar, mi] : tar_mi)
+  for (const auto &[reg, regulon] : network)
+    for (const auto [tar, mi] : regulon)
       ofs << decompression_map[reg] << '\t' << decompression_map[tar] << '\t'
           << mi << '\n';
 }

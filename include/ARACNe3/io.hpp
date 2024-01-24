@@ -34,7 +34,7 @@ sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat,
                                  const uint16_t &tot_num_subsample,
                                  std::mt19937 &rand);
 
-void writeNetworkRegTarMI(gene_to_gene_to_float &network,
+void writeNetworkRegTarMI(const gene_to_gene_to_float& network,
                           const std::string &file_path);
 
 void writeConsolidatedNetwork(const std::vector<consolidated_df_row> &final_df,
