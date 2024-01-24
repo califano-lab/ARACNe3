@@ -1,19 +1,14 @@
-#ifndef WATCH_H
-#define WATCH_H
+#pragma once
 
 #include <chrono>
-#include <ostream>
 #include <string>
 
-// TODO: Add Documentation
-class Watch {
+class Stopwatch {
 public:
-  Watch();
+  Stopwatch();
   void reset();
   std::string getSeconds();
 
 private:
   std::chrono::time_point<std::chrono::high_resolution_clock> zero;
 };
-
-#endif // WATCH_H

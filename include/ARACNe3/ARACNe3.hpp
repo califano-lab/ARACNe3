@@ -5,17 +5,6 @@
 #include <unordered_map>
 #include <vector>
 
-#if defined __linux__ || defined __APPLE__
-const std::string hiddenfpre = ".";
-const char directory_slash = '/';
-#elif defined _WIN32 // in windows you must set a hidden file via properties
-const char directory_slash = '\\';
-const std::string hiddenfpre = "";
-#else
-const char directory_slash = '/';
-const std::string hiddenfpre = "";
-#endif /* __linux__ || __APPLE__ */
-
 /*
  Switching to this type alias to reduce confusion in other parts of the program
  */

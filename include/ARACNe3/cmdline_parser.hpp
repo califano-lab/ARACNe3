@@ -1,5 +1,14 @@
+#pragma once
+
 #include <string>
 
-// TODO: Add documentation
-char *getCmdOption(char **begin, char **end, const std::string &option);
-bool cmdOptionExists(char **begin, char **end, const std::string &option);
+class CmdLineParser {
+private:
+  char **begin, **end;
+  int argc;
+
+public:
+  CmdLineParser(int argc, char **argv);
+  char *getOpt(const std::string& option);
+  bool optExists(const std::string& option);
+};

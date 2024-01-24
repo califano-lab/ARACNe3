@@ -1,8 +1,20 @@
 #pragma once
 
+#include "logger.hpp"
 #include "ARACNe3.hpp"
+
 #include <random>
 #include <string>
+
+#if defined __linux__ || defined __APPLE__
+const std::string hiddenfpre = ".";
+const char directory_slash = '/';
+#elif defined _WIN32 // in windows you must set a hidden file via properties
+const char directory_slash = '\\';
+const std::string hiddenfpre = "";
+#else
+const std::string hiddenfpre = "";
+#endif /* __linux__ || __APPLE__ */
 
 typedef struct consolidated_df_row {
   const gene_id regulator;
@@ -20,9 +32,24 @@ typedef struct consolidated_df_row {
 typedef std::pair<std::vector<std::string>, std::vector<std::string>>
     pair_string_vecs;
 
-std::string makeUnixDirectoryNameUniversal(std::string &dir_name);
-std::string makeUnixDirectoryNameUniversal(std::string &&dir_name);
-void makeDir(const std::string &dir_name);
+/**
+ * Transforms a Unix-style directory name into a universal format suitable for
+ * both Unix and Windows. For Windows, it replaces '/' with '\'. Intended for
+ * display purposes, adapting to the system-specific directory separator.
+ *
+ * @param dir_name A string representing the directory name to be transformed.
+ * @return A string with the universal directory name.
+ */
+std::string makeUnixDirectoryNameUniversal(std::string dir_name);
+
+/**
+ * Creates a new full directory path using the Standard Template Library (STL)
+ * filesystem functions.
+ *
+ * @param dir_name A constant reference to a string representing the directory
+ * path.
+ */
+bool makeDirs(const std::string &dir_name, Logger *const logger);
 
 std::tuple<const gene_to_floats, const gene_to_shorts, const geneset,
            const uint16_t>

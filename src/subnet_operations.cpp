@@ -211,7 +211,7 @@ std::pair<gene_to_gene_to_float, float> createARACNe3Subnet(
   // begin subnet computation
 
   //-------time module-------
-  Watch watch1;
+  Stopwatch watch1;
   log_output << "\nRaw subnetwork computation time: ";
   log_output.flush();
   watch1.reset();

@@ -11,33 +11,37 @@
 std::vector<std::string> decompression_map;
 static std::unordered_map<std::string, uint16_t> compression_map;
 
-std::string makeUnixDirectoryNameUniversal(std::string &dir_name) {
+std::string makeUnixDirectoryNameUniversal(std::string dir_name) {
   std::replace(dir_name.begin(), dir_name.end(), '/', directory_slash);
   return dir_name;
 }
 
-std::string makeUnixDirectoryNameUniversal(std::string &&dir_name) {
-  std::replace(dir_name.begin(), dir_name.end(), '/', directory_slash);
-  return dir_name;
-}
-
-/*
- Will automatically checked if there already is a directory.  Then creates the
- output directory.
- */
-void makeDir(const std::string &dir_name) {
+bool makeDirs(const std::string &dir_name, Logger *const logger) {
   if (!std::filesystem::exists(dir_name)) {
-    if (std::filesystem::create_directory(dir_name)) {
-      std::cout << "Directory Created: \"" + dir_name + "\"." << std::endl;
+    std::filesystem::create_directories(dir_name);
+    if (std::filesystem::exists(dir_name)) {
+      const std::string out_msg = "Directory Created: \"" +
+                                  makeUnixDirectoryNameUniversal(dir_name) +
+                                  "\".";
+
+      std::cout << out_msg << std::endl;
+      if (logger)
+        logger->writeLineWithTime(out_msg);
+
+      return true;
     } else {
-      std::cerr
-          << "Failed to create directory: \"" + dir_name +
-                 "\". Make sure you have permissions over the output directory."
-          << std::endl;
-      std::exit(2);
+      const std::string err_msg = "Failed to create directory: \"" +
+                                  makeUnixDirectoryNameUniversal(dir_name) +
+                                  "\".";
+
+      std::cerr << err_msg << std::endl;
+      if (logger)
+        logger->writeLineWithTime(err_msg);
+
+      return false;
     }
   }
-  return;
+  return true;
 }
 
 /*

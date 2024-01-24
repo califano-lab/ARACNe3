@@ -4,6 +4,7 @@ add_library(aracne3tools OBJECT  # compile source files but do not archive
 	stopwatch.cpp
 	algorithms.cpp
 	apmi_nullmodel.cpp
+  logger.cpp
   )
 
 target_include_directories(aracne3tools PRIVATE
