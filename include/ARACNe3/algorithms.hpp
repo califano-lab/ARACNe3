@@ -74,3 +74,11 @@ double rightTailBinomialP(const uint16_t n, const uint16_t k,
  */
 double lRightTailBinomialP(const uint16_t n, const uint16_t k,
                            const float theta);
+
+float estimateFPRNoMaxEnt(const float alpha, const std::string &method,
+                          const uint32_t num_edges_after_threshold_pruning,
+                          const uint32_t tot_possible_edges);
+float estimateFPRWithMaxEnt(const float alpha, const std::string &method,
+                            const uint32_t num_edges_after_threshold_pruning,
+                            const uint32_t num_edges_after_MaxEnt_pruning,
+                            const uint32_t tot_possible_edges);

@@ -267,3 +267,32 @@ std::vector<float> copulaTransform(const std::vector<float> &data,
 
   return ranks;
 }
+
+float estimateFPRNoMaxEnt(const float alpha, const std::string &method,
+                          const uint32_t num_edges_after_threshold_pruning,
+                          const uint32_t tot_possible_edges) {
+  if (method == "FDR")
+    return alpha * num_edges_after_threshold_pruning /
+           (tot_possible_edges -
+            (1 - alpha) * num_edges_after_threshold_pruning);
+  else if (method == "FWER")
+    return alpha / tot_possible_edges;
+  else // method == "FPR"
+    return alpha;
+}
+
+float estimateFPRWithMaxEnt(const float alpha, const std::string &method,
+                            const uint32_t num_edges_after_threshold_pruning,
+                            const uint32_t num_edges_after_MaxEnt_pruning,
+                            const uint32_t tot_possible_edges) {
+  if (method == "FDR")
+    return alpha * num_edges_after_MaxEnt_pruning /
+           (tot_possible_edges -
+            (1 - alpha) * num_edges_after_threshold_pruning);
+  else if (method == "FWER")
+    return alpha / tot_possible_edges * num_edges_after_MaxEnt_pruning /
+           num_edges_after_threshold_pruning;
+  else // method == "FPR"
+    return alpha * num_edges_after_MaxEnt_pruning /
+           num_edges_after_threshold_pruning;
+}
