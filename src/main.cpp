@@ -111,10 +111,8 @@ int main(int argc, char *argv[]) {
   const std::string reg_list_file_path = clp.getOpt("-r");
   std::string output_dir = clp.getOpt("-o");
 
-  if (clp.optExists("--seed")) {
+  if (clp.optExists("--seed"))
     seed = std::stoi(clp.getOpt("--seed"));
-    seed_provided = true;
-  }
   if (clp.optExists("--threads"))
     threads = std::stoi(clp.getOpt("--threads"));
   if (clp.optExists("--runid"))
@@ -236,11 +234,12 @@ int main(int argc, char *argv[]) {
 
   qlog("Getting null model for mutual information by adaptive partitioning...");
 
-  const size_t n_samps = exp_mat[0].size();
+  const size_t n_samps = exp_mat.at(0).size();
+  constexpr uint32_t null_model_seed = 0u;
   const std::string cached_blob_name =
       cached_dir + "APMINullModel_" + std::to_string(n_samps) + "_" +
-      std::to_string(n_nulls) + "_" + std::to_string(seed) + "_" + APP_VERSION +
-      ".blob";
+      std::to_string(n_nulls) + "_" + std::to_string(null_model_seed) + "_" +
+      APP_VERSION + ".blob";
 
   APMINullModel apmi_null_model;
 
@@ -252,7 +251,7 @@ int main(int argc, char *argv[]) {
 
   qlog("Null model generated. Time elapsed: " + watch1.getSeconds());
 #else
-  if (seed_provided && std::filesystem::exists(cached_blob_name)) {
+  if (std::filesystem::exists(cached_blob_name)) {
     qlog("Cached null model found. Reading in null model...");
     watch1.reset();
 
@@ -267,20 +266,16 @@ int main(int argc, char *argv[]) {
     qlog("Generating new null model...");
     watch1.reset();
 
-    apmi_null_model = APMINullModel(n_samps, n_nulls, seed);
+    apmi_null_model = APMINullModel(n_samps, n_nulls, null_model_seed);
 
     qlog("Null model generated. Time elapsed: " + watch1.getSeconds());
 
-    if (seed_provided) {
-      qlog("Caching null model (seed: " + std::to_string(seed) + ")...");
-      watch1.reset();
-      std::ofstream ofs(cached_blob_name, std::ios::binary);
-      boost::archive::binary_oarchive oa(ofs);
-      oa << apmi_null_model;
-      qlog("Null model cached. Time elapsed: " + watch1.getSeconds());
-    } else {
-      qlog("No seed provided. Will not cache null model.");
-    }
+    qlog("Caching null model...");
+    watch1.reset();
+    std::ofstream ofs(cached_blob_name, std::ios::binary);
+    boost::archive::binary_oarchive oa(ofs);
+    oa << apmi_null_model;
+    qlog("Null model cached. Time elapsed: " + watch1.getSeconds());
   }
 #endif /* _DEBUG */
 
