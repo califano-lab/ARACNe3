@@ -19,7 +19,7 @@ Logger::Logger(const std::string &log_file_name, int argc, char *argv[])
              << "---------" << std::endl;
 }
 
-void Logger::write(const std::string &message) { log_output << message; }
+void Logger::write(const std::string &message) { log_output << message; log_output.flush(); }
 
 void Logger::writeLine(const std::string &message) {
   log_output << message << std::endl;
@@ -29,6 +29,7 @@ void Logger::writeWithTime(const std::string &message) {
   std::time_t t = std::time(nullptr);
   log_output << std::put_time(std::localtime(&t), "[%H:%M:%S]") << " "
              << message;
+  log_output.flush();
 }
 
 void Logger::writeLineWithTime(const std::string &message) {

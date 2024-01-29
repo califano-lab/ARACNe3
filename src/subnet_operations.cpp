@@ -279,7 +279,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
 
   uint32_t size_of_subnet;
   if (prune_MaxEnt) {
-    qlog("\nMaxEnt pruning time:");
+    qlog("\nMaxEnt pruning time: ");
     watch1.reset();
 
     uint32_t num_edges_after_MaxEnt_pruning;
