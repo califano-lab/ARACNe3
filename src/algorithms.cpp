@@ -156,15 +156,33 @@ std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
   return idx_ranks;
 }
 
-float calcSCC(const std::vector<uint16_t> &x_ranked,
-              const std::vector<uint16_t> &y_ranked) {
-  const auto &n = x_ranked.size();
-  double sigma_dxy = 0; // Use double to prevent overflow!
-  for (uint16_t i = 0; i < n; ++i) {
-    int diff = static_cast<int>(x_ranked[i]) - static_cast<int>(y_ranked[i]);
-    sigma_dxy += diff * diff;
-  }
-  return 1. - 6. * sigma_dxy / n / (n * n - 1);
+float pearsonsR(const std::vector<float> &x_vec,
+                const std::vector<float> &y_vec) {
+  const size_t n = x_vec.size();
+
+  if (x_vec.size() != y_vec.size())
+    throw std::runtime_error(
+        "Cannot perform regression on vectors of unequal size");
+
+  float x_mean =
+      std::reduce(x_vec.cbegin(), x_vec.cend()) / static_cast<float>(n);
+  float y_mean =
+      std::reduce(y_vec.cbegin(), y_vec.cend()) / static_cast<float>(n);
+
+  float ssr_x = std::reduce(x_vec.cbegin(), x_vec.cend(), 0.f,
+                            [&x_mean](float a, float cur) {
+                              return a + (cur - x_mean) * (cur - x_mean);
+                            });
+  float ssr_y = std::reduce(y_vec.cbegin(), y_vec.cend(), 0.f,
+                            [&y_mean](float a, float cur) {
+                              return a + (cur - y_mean) * (cur - y_mean);
+                            });
+
+  float sum_prod = 0.f;
+  for (size_t i = 0U; i < n; ++i)
+    sum_prod += (x_vec[i] - x_mean) * (y_vec[i] - y_mean);
+
+  return sum_prod / std::sqrt(ssr_x * ssr_y);
 }
 
 double lchoose(const uint16_t &n, const uint16_t &k) {

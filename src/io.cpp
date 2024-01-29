@@ -1,5 +1,4 @@
 #include "io.hpp"
-#include "ARACNe3.hpp"
 #include "algorithms.hpp"
 
 #include <algorithm>
@@ -7,9 +6,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-
-std::vector<std::string> decompression_map;
-static std::unordered_map<std::string, uint16_t> compression_map;
 
 std::string makeUnixDirectoryNameUniversal(std::string dir_name) {
   std::replace(dir_name.begin(), dir_name.end(), '/', directory_slash);
@@ -44,158 +40,153 @@ bool makeDirs(const std::string &dir_name, Logger *const logger) {
   return true;
 }
 
+void exitIfFileNotOpen(std::ifstream &ifs, const std::string &file_path,
+                       Logger *const logger) {
+  if (!ifs.is_open()) {
+    const std::string err_msg = "Error: could not open file \"" +
+                                makeUnixDirectoryNameUniversal(file_path) +
+                                "\".";
+
+    std::cerr << err_msg << std::endl;
+    if (logger)
+      logger->writeLineWithTime(err_msg);
+
+    std::exit(EXIT_FAILURE);
+  }
+
+  return;
+}
+
+std::tuple<vv_float, geneset, compression_map, decompression_map>
+readExpMatrixAndCopulaTransform(const std::string &exp_mat_file_path,
+                                std::mt19937 &rand, Logger *const logger) {
+
+  std::ifstream ifs{exp_mat_file_path};
+  exitIfFileNotOpen(ifs, exp_mat_file_path, logger);
+
+  // pop the first line
+  std::string cur_line;
+  getline(ifs, cur_line, '\n');
+  if (cur_line.back() == '\r') /* Alert! We have a Windows dweeb! */
+    cur_line.pop_back();
+
+  // parse the exp_mat
+  vv_float gexp_matrix;
+  geneset genes;
+  compression_map compressor;
+  decompression_map decompressor;
+
+  while (std::getline(ifs, cur_line, '\n')) {
+    if (cur_line.back() == '\r') /* Alert! We have a Windows dweeb! */
+      cur_line.pop_back();
+    std::vector<float> expr_vec;
+
+    if (gexp_matrix.size() > 0u)
+      expr_vec.reserve(gexp_matrix.at(0).size());
+
+    // gene name is first column of matrix
+    std::size_t cur_pos = 0U, cur_end = cur_line.find_first_of("\t", cur_pos);
+    const std::string gene = cur_line.substr(cur_pos, cur_end - cur_pos);
+    cur_pos = cur_end + 1;
+
+    // add gene to all 3 data structures
+    decompressor.push_back(gene);
+    compressor.insert({gene, decompressor.size() - 1u});
+    genes.insert(compressor.at(gene));
+
+    // fill gene vector
+    while ((cur_end = cur_line.find_first_of("\t", cur_pos)) !=
+           std::string::npos) {
+      if (cur_end > cur_pos)
+        expr_vec.emplace_back(
+            stof(cur_line.substr(cur_pos, cur_end - cur_pos)));
+      cur_pos = cur_end + 1;
+    }
+    expr_vec.emplace_back(stof(cur_line.substr(cur_pos, std::string::npos)));
+
+    // if this vector is bigger than the first, the data are invalid
+    if (gexp_matrix.size() > 0U && expr_vec.size() != gexp_matrix[0].size()) {
+      const std::string err_msg = "Error: genes in expression matrix do not "
+                                  "all have equal samples. Check that \"" +
+                                  gene + "\" has same number of samples as " +
+                                  decompressor[0];
+
+      std::cerr << err_msg << std::endl;
+      if (logger)
+        logger->writeLineWithTime(err_msg);
+
+      std::exit(EXIT_FAILURE);
+    }
+
+    // copula-transform expr_vec
+    expr_vec = copulaTransform(expr_vec, rand);
+
+    gexp_matrix.push_back(expr_vec);
+  }
+
+  return {gexp_matrix, genes, compressor, decompressor};
+}
+
 /*
  Create a subsampled gene_to_floats.  Requires that exp_mat and
- tot_num_subsample are set.
+n_subsample are set.
  */
-gene_to_floats
-sampleExpMatAndReCopulaTransform(const gene_to_floats &exp_mat,
-                                 const uint16_t &tot_num_subsample,
-                                 std::mt19937 &rand) {
-  std::vector<uint16_t> idxs(exp_mat.cbegin()->size());
+const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
+                                                const uint16_t n_subsamp,
+                                                std::mt19937 &rand) {
+  std::vector<uint16_t> idxs(exp_mat.at(0).size());
   std::iota(idxs.begin(), idxs.end(), 0U);
 
-  std::vector<uint16_t> fold(tot_num_subsample);
-  std::sample(idxs.begin(), idxs.end(), fold.begin(), tot_num_subsample, rand);
+  std::vector<uint16_t> fold(n_subsamp);
+  std::sample(idxs.begin(), idxs.end(), fold.begin(), n_subsamp, rand);
 
-  gene_to_floats subsample_exp_mat(exp_mat.size(),
-                                   std::vector<float>(tot_num_subsample, 0.f));
+  vv_float subsample_exp_mat(exp_mat.size(),
+                             std::vector<float>(n_subsamp, 0.f));
   for (gene_id gene = 0U; gene < exp_mat.size(); ++gene) {
-    for (uint16_t i = 0U; i < tot_num_subsample; ++i)
+    for (uint16_t i = 0U; i < n_subsamp; ++i)
       subsample_exp_mat[gene][i] = exp_mat[gene][fold[i]];
 
-    std::vector<uint16_t> idx_ranks =
-        rankIndices(subsample_exp_mat[gene], rand);
-    for (uint16_t r = 0U; r < tot_num_subsample; ++r)
-      subsample_exp_mat[gene][idx_ranks[r]] =
-          (r + 1) / ((float)tot_num_subsample + 1);
+    subsample_exp_mat[gene] = copulaTransform(subsample_exp_mat[gene], rand);
   }
+
   return subsample_exp_mat;
 }
 
-/* Reads a normalized (CPM, TPM) tab-separated (G+1)x(N+1) gene expression
- * matrix and outputs a pair containing the gene_to_floats for the entire
- * expression matrix (non-subsampled) as well as a subsampled version for every
- * subnetwork.
- */
-std::tuple<const gene_to_floats, const gene_to_shorts, const geneset,
-           const uint16_t>
-readExpMatrixAndCopulaTransform(const std::string &filename,
-                                std::mt19937 &rand) {
-  std::ifstream ifs{filename};
-  if (!ifs.is_open()) {
-    std::cerr << "error: file open failed " << filename << "." << std::endl;
-    std::exit(1);
-  }
+geneset readRegList(const std::string &regulators_list_file_path,
+                    const compression_map &defined_genes,
+                    Logger *const logger) {
 
-  uint16_t tot_num_samps = 0U;
-  geneset genes;
+  std::ifstream ifs{regulators_list_file_path};
+  exitIfFileNotOpen(ifs, regulators_list_file_path, logger);
 
-  // for the first line, we simply want to count the number of samples
-  std::string line;
-  std::getline(ifs, line, '\n');
-  if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
-    line.pop_back();
-
-  // count samples from number of columns in first line
-  for (size_t pos = 0U;
-       (pos = line.find_first_of("\t", pos)) != std::string::npos; ++pos)
-    ++tot_num_samps;
-
-  uint32_t linesread = 1U;
-  gene_to_floats exp_mat;
-  gene_to_shorts ranks_mat;
-  while (std::getline(ifs, line, '\n')) {
-    ++linesread;
-    if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
-      line.pop_back();
-    std::vector<float> expr_vec;
-    expr_vec.reserve(tot_num_samps);
-    std::vector<uint16_t> expr_ranks_vec(tot_num_samps, 0U);
-
-    std::size_t prev = 0U, pos = line.find_first_of("\t", prev);
-    std::string gene = line.substr(prev, pos - prev);
-    prev = pos + 1;
-    while ((pos = line.find_first_of("\t", prev)) != std::string::npos) {
-      if (pos > prev) {
-        expr_vec.emplace_back(stof(line.substr(prev, pos - prev)));
-      }
-      prev = pos + 1;
-    }
-    expr_vec.emplace_back(stof(line.substr(prev, std::string::npos)));
-
-    if (expr_vec.size() != tot_num_samps) {
-      std::cerr
-          << "Fatal: line " + std::to_string(linesread) +
-                 " length is not equal to line 1 length. Rows should have the "
-                 "same number of delimiters. Check that header row contains "
-                 "N+1 columns (empty corner + N sample names))."
-          << std::endl;
-      std::exit(1);
-    }
-
-    // copula-transform expr_vec values
-    {
-      std::vector<uint16_t> idx_ranks = rankIndices(expr_vec, rand);
-      for (uint16_t r = 0; r < tot_num_samps; ++r) {
-        expr_vec[idx_ranks[r]] = (r + 1) / ((float)tot_num_samps + 1);
-        expr_ranks_vec[idx_ranks[r]] = r + 1;
-      }
-    }
-
-    // create compression scheme from exp_mat
-    if (compression_map.find(gene) == compression_map.end()) {
-      compression_map[gene] = decompression_map.size(); // str -> idx
-      decompression_map.push_back(gene);                // idx -> str
-      genes.insert(compression_map[gene]);
-
-      // assumes index is same as the compression_map[gene]
-      exp_mat.emplace_back(expr_vec);
-      ranks_mat.emplace_back(expr_ranks_vec);
-    } else {
-      std::cerr << "Fatal: 2 rows corresponding to " + gene + " detected."
-                << std::endl;
-      std::exit(1);
-    }
-  }
-
-  return std::make_tuple(exp_mat, ranks_mat, genes, tot_num_samps);
-}
-
-/*
- Reads a newline-separated regulator list and sets the decompression mapping, as
- well as the compression mapping, as file static variables hidden to the rest of
- the app.
- */
-const geneset readRegList(const std::string &filename, const bool verbose) {
-  std::ifstream ifs{filename};
-  if (!ifs.is_open()) {
-    std::cerr << "error: file open failed \"" << filename << "\"." << std::endl;
-    std::exit(1);
-  }
+  std::string cur_reg;
   geneset regulators;
+  while (std::getline(ifs, cur_reg, '\n')) {
+    if (cur_reg.back() == '\r') /* Alert! We have a Windows dweeb! */
+      cur_reg.pop_back();
 
-  std::string reg;
-  static uint16_t num_missing = 0U;
-  while (std::getline(ifs, reg, '\n')) {
-    if (reg.back() == '\r') /* Alert! We have a Windows dweeb! */
-      reg.pop_back();
-    if (compression_map.find(reg) == compression_map.end()) {
-      ++num_missing;
-      if (verbose || num_missing <= 3U) {
-        std::cerr
-            << "Warning: " + reg +
-                   " found in regulators list, but no entry in expression "
-                   "matrix. Ignoring in network generation."
-            << std::endl;
-      } else if (num_missing == 4U) {
-        std::cerr
-            << "... Suppressing further warnings (unless --verbose) ... \n"
-            << std::endl;
-      }
+    if (defined_genes.find(cur_reg) == defined_genes.end()) {
+      const std::string warning_msg =
+          "Warning: \"" + cur_reg +
+          "\" found in regulators, but not in expression matrix. Removing "
+          "from analysis.";
+
+      std::cerr << warning_msg << std::endl;
+      if (logger)
+        logger->writeLineWithTime(warning_msg);
     } else {
-      regulators.insert(compression_map[reg]);
+      regulators.insert(defined_genes.at(cur_reg));
     }
+  }
+
+  if (regulators.empty()) {
+    const std::string abort_msg = "Abort: no regulators to analyze.";
+
+    std::cerr << abort_msg << std::endl;
+    if (logger)
+      logger->writeLineWithTime(abort_msg);
+
+    std::exit(EXIT_FAILURE);
   }
 
   return regulators;
@@ -206,57 +197,38 @@ const geneset readRegList(const std::string &filename, const bool verbose) {
  output_suffix.  Does not print to the console.  The data structure input is a
  gene_to_edge_tars, which is defined in "ARACNe3.hpp".
  */
-void writeNetworkRegTarMI(const gene_to_gene_to_float& network,
-                          const std::string &file_path) {
-  std::ofstream ofs{file_path};
+void writeNetworkRegTarMI(const std::string &output_file_name, const char sep,
+                          const gene_to_gene_to_float &network,
+                          const decompression_map &decompressor) {
+  std::ofstream ofs{output_file_name};
   if (!ofs) {
-    std::cerr << "error: could not write to file: " << file_path << "."
+    std::cerr << "error: could not write to file: " << output_file_name << "."
               << std::endl;
-    std::cerr << "Try making the output directory subdirectory of the working "
-                 "directory. Example \"-o " +
-                     makeUnixDirectoryNameUniversal("./run1") + "\"."
-              << std::endl;
-    std::exit(2);
+    std::exit(EXIT_FAILURE);
   }
 
-  ofs << "regulator.values\ttarget.values\tmi.values" << std::endl;
+  ofs << "regulator.values" << sep << "target.values" << sep << "mi.values"
+      << std::endl;
   for (const auto &[reg, regulon] : network)
     for (const auto [tar, mi] : regulon)
-      ofs << decompression_map[reg] << '\t' << decompression_map[tar] << '\t'
-          << mi << '\n';
+      ofs << decompressor[reg] << sep << decompressor[tar] << sep << mi << '\n';
 }
 
-void writeConsolidatedNetwork(const std::vector<consolidated_df_row> &final_df,
-                              const std::string &file_path) {
-  std::ofstream ofs{file_path};
-  if (!ofs) {
-    std::cerr << "error: could not write to file: " << file_path << "."
-              << std::endl;
-    std::cerr << "Try making the output directory subdirectory of the working "
-                 "directory. Example \"-o " +
-                     makeUnixDirectoryNameUniversal("./runs") + "\"."
-              << std::endl;
-    std::exit(2);
-  }
-  ofs << "regulator.values\ttarget.values\tmi.values\tscc.values\tcount."
-         "values\tlog.p.values\n";
-  for (const auto &edge : final_df)
-    ofs << decompression_map[edge.regulator] << '\t'
-        << decompression_map[edge.target] << '\t' << edge.final_mi << '\t'
-        << edge.final_scc << '\t' << edge.num_subnets_incident << '\t'
-        << edge.final_log_p
-        << '\n'; // using '\n' over std::endl, better for performance
-}
+void writeARACNe3DF(const std::string &output_file_name, const char sep,
+                    const std::vector<ARACNe3_df> &output_df,
+                    const decompression_map &decompressor) {
 
-/*
- This function will add genes to the compression scheme in any order.  It's use
- is currently only when reading subnets.
- */
-void addToCompressionVecs(const std::string &gene) {
-  // If we have a new gene, put it in compression scheme
-  if (compression_map.find(gene) == compression_map.end()) {
-    compression_map[gene] = decompression_map.size(); // str -> idx (hashmap)
-    decompression_map.push_back(gene);                // idx -> str (vector)
+  std::ofstream ofs(output_file_name);
+
+  ofs << "regulator.values" << sep << "target.values" << sep << "mi.values"
+      << sep << "scc.values" << sep << "count.values" << sep << "log.p.values"
+      << '\n';
+
+  for (size_t i = 0U; i < output_df.size(); ++i) {
+    const ARACNe3_df &row = output_df[i];
+    ofs << decompressor.at(row.regulator) << sep << decompressor.at(row.target)
+        << sep << row.final_mi << sep << row.final_scc << sep
+        << row.num_subnets_incident << sep << row.final_log_p << '\n';
   }
 }
 
@@ -276,10 +248,8 @@ findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
         std::string subnet_filename = entry.path().filename().string();
         subnet_filenames.push_back(subnet_filename);
 
-        // Construct the expected log file name
-        std::string subnet_log_filename = "log_" + subnet_filename;
-
-        // Replace the extension .tsv with .txt
+        // Construct the expected log file name, replacing .tsv with .txt
+        std::string subnet_log_filename = "log-" + subnet_filename;
         size_t pos = subnet_log_filename.rfind(".tsv");
         if (pos != std::string::npos)
           subnet_log_filename.replace(pos, 4, ".txt");
@@ -293,7 +263,7 @@ findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
                            subnet_filename +
                            "\", but the log file was not found."
                     << std::endl;
-          std::exit(2);
+          std::exit(EXIT_FAILURE);
         }
       }
     }
@@ -302,9 +272,9 @@ findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
     std::cerr << "Check that your output directory has the subdirectories "
                  "\"subnets/\" and \"subnets_log/\""
               << std::endl;
-    std::exit(2);
+    std::exit(EXIT_FAILURE);
   }
-  return std::make_pair(subnet_filenames, subnet_log_filenames);
+  return {subnet_filenames, subnet_log_filenames};
 }
 
 /*
@@ -313,32 +283,22 @@ findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
  */
 std::pair<gene_to_gene_to_float, float>
 loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
-                                      const std::string &subnet_log_file_path) {
-  geneset regulators, genes;
-
+                                      const std::string &subnet_log_file_path,
+                                      const compression_map &defined_genes,
+                                      const geneset &regulators,
+                                      Logger *const logger) {
   /*
    Read in the subnet file
    */
   std::ifstream subnet_ifs{subnet_file_path};
-  if (!subnet_ifs) {
-    std::cerr << "error: could not read from subnet file: " << subnet_file_path
-              << "." << std::endl;
-    std::cerr << "Subnet files must follow the output structure of ARACNe3. "
-                 "Example \"-o " +
-                     makeUnixDirectoryNameUniversal("./output") +
-                     "\" will contain a subdirectory \"" +
-                     makeUnixDirectoryNameUniversal("subnets/") +
-                     "\", which has subnet files formatted *and named* exactly "
-                     "how ARACNe3 outputs subnet files."
-              << std::endl;
-    std::exit(2);
-  }
+  exitIfFileNotOpen(subnet_ifs, subnet_file_path, logger);
 
   // discard the first line (header)
   std::string line;
   std::getline(subnet_ifs, line, '\n');
   if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
     line.pop_back();
+
   gene_to_gene_to_float subnet;
   while (std::getline(subnet_ifs, line, '\n')) {
     if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
@@ -352,40 +312,32 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
     const std::string tar = line.substr(prev, pos - prev);
     prev = pos + 1;
 
+    for (const std::string &gene : {reg, tar})
+      if (defined_genes.find(gene) == defined_genes.end()) {
+        const std::string err_msg = "Error: subnetwork file(s) contain gene "
+                                    "names undefined in expression matrix.";
+
+        std::cerr << err_msg << std::endl;
+        if (logger)
+          logger->writeLineWithTime(err_msg);
+
+        std::exit(EXIT_FAILURE);
+      }
+
     const float mi = std::stof(line.substr(prev, std::string::npos));
 
-    addToCompressionVecs(reg);
-    addToCompressionVecs(tar);
-
-    regulators.insert(compression_map[reg]);
-    genes.insert(compression_map[tar]);
-
-    subnet[compression_map[reg]][compression_map[tar]] = mi;
+    subnet[defined_genes.at(reg)][defined_genes.at(tar)] = mi;
   }
-
-  genes.insert(regulators.begin(), regulators.end());
 
   /*
    Read in the log file
    */
   std::ifstream log_ifs{subnet_log_file_path};
-  if (!log_ifs) {
-    std::cerr << "error: could read from subnet log file: "
-              << subnet_log_file_path << "." << std::endl;
-    std::cerr << "Subnet log files must follow the output structure of "
-                 "ARACNe3. Example \"-o " +
-                     makeUnixDirectoryNameUniversal("./output") +
-                     "\" will contain a subdirectory \"" +
-                     makeUnixDirectoryNameUniversal("subnets_log/") +
-                     "\", which has subnet log files formatted *and named* "
-                     "exactly how ARACNe3 outputs subnet log files."
-              << std::endl;
-    std::exit(2);
-  }
+  exitIfFileNotOpen(log_ifs, subnet_log_file_path, logger);
 
-  // discard 8 lines
+  // discard 9 lines
   std::string discard;
-  for (uint8_t l = 0; l < 8; ++l)
+  for (uint8_t l = 0; l < 9; ++l)
     std::getline(log_ifs, discard, '\n');
 
   // next line contains the method
@@ -430,8 +382,11 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
       num_edges_after_threshold_pruning;
 
   // skip 3 lines, the 4th contains edges after MaxEnt pruning
-  uint32_t num_edges_after_MaxEnt_pruning = 0U;
+  float FPR_estimate_subnet;
+  const uint32_t tot_possible_edges =
+      regulators.size() * (defined_genes.size() - 1);
   if (prune_MaxEnt) {
+    uint32_t num_edges_after_MaxEnt_pruning = 0U;
     for (uint8_t l = 0U; l < 3U; ++l)
       std::getline(log_ifs, discard, '\n');
     std::getline(log_ifs, line, '\n');
@@ -440,30 +395,12 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
     line_stream = std::stringstream(line);
     line_stream >> discard >> discard >> discard >>
         num_edges_after_MaxEnt_pruning;
-  }
-
-  float FPR_estimate_subnet;
-  if (prune_MaxEnt) {
-    if (method == "FDR")
-      FPR_estimate_subnet = (alpha * num_edges_after_MaxEnt_pruning) /
-                            (regulators.size() * (genes.size() - 1) -
-                             (1 - alpha) * num_edges_after_threshold_pruning);
-    else if (method == "FWER")
-      FPR_estimate_subnet = (alpha / (regulators.size() * (genes.size() - 1))) *
-                            (num_edges_after_MaxEnt_pruning) /
-                            (num_edges_after_threshold_pruning);
-    else if (method == "FPR")
-      FPR_estimate_subnet = alpha * num_edges_after_MaxEnt_pruning /
-                            num_edges_after_threshold_pruning;
+    FPR_estimate_subnet = estimateFPRWithMaxEnt(
+        alpha, method, num_edges_after_threshold_pruning,
+        num_edges_after_MaxEnt_pruning, tot_possible_edges);
   } else {
-    if (method == "FDR")
-      FPR_estimate_subnet = (alpha * num_edges_after_threshold_pruning) /
-                            (regulators.size() * (genes.size() - 1) -
-                             (1 - alpha) * num_edges_after_threshold_pruning);
-    else if (method == "FWER")
-      FPR_estimate_subnet = alpha / (regulators.size() * (genes.size() - 1));
-    else if (method == "FPR")
-      FPR_estimate_subnet = alpha;
+    FPR_estimate_subnet = estimateFPRNoMaxEnt(
+        alpha, method, num_edges_after_threshold_pruning, tot_possible_edges);
   }
 
   return std::make_pair(subnet, FPR_estimate_subnet);

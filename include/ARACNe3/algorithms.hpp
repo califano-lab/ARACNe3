@@ -58,8 +58,8 @@ std::vector<float> copulaTransform(const std::vector<float> &data,
 float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
                const float q_thresh = 7.815, const uint16_t size_thresh = 4);
 
-float calcSCC(const std::vector<uint16_t> &x_ranked,
-              const std::vector<uint16_t> &y_ranked);
+float pearsonsR(const std::vector<float> &x_vec,
+                const std::vector<float> &y_vec);
 
 std::pair<float, float> OLS(const std::vector<float> &x,
                             const std::vector<float> &y);

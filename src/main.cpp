@@ -1,6 +1,5 @@
 #include "config.h"
 
-#include "ARACNe3.hpp"
 #include "apmi_nullmodel.hpp"
 #include "cmdline_parser.hpp"
 #include "io.hpp"
@@ -13,6 +12,7 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp> // for object caching
@@ -52,8 +52,6 @@ void serialize(Archive &ar, APMINullModel &model, const unsigned int version) {
 
 // ---- Begin ARACNe3 runtime ----
 
-extern std::vector<std::string> decompression_map;
-
 int main(int argc, char *argv[]) {
 
   // ---- Initialize ARACNe3 runtime variables ----
@@ -67,12 +65,13 @@ int main(int argc, char *argv[]) {
 
   uint16_t n_subnets = 1u;
   float subsamp_pct = 1 - std::exp(-1);
-  bool skip_consolidate = false;
+  bool no_consolidate = false;
   bool consolidate_mode = false;
   bool adaptive = false;
   float alpha = 0.05f;
   bool prune_alpha = true;
   bool prune_MaxEnt = true;
+  bool save_subnets = false;
   uint16_t min_regulon_occpuancy = 30U;
   uint16_t min_subnets = 0u;
   std::string method = "FDR";
@@ -83,12 +82,21 @@ int main(int argc, char *argv[]) {
   float mi_cutoff = 0.f;
   uint32_t n_nulls = 1'000'000u;
 
-  // ---- Quick logging macro ----
+  // ---- Quick macros ----
 
   auto qlog = [&](const std::string &cur_msg) {
     std::cout << M << cur_msg << std::endl;
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime(cur_msg);
+    return;
+  };
+
+  auto qlog_subnet = [&](const uint16_t subnet_number,
+                         const uint32_t subnet_size) {
+    const std::string cur_msg =
+        "...subnetwork " + std::to_string(subnet_number) +
+        " completed = " + std::to_string(subnet_size) + " edges returned...";
+    qlog(cur_msg);
     return;
   };
 
@@ -108,7 +116,7 @@ int main(int argc, char *argv[]) {
   }
 
   const std::string exp_mat_file_path = clp.getOpt("-e");
-  const std::string reg_list_file_path = clp.getOpt("-r");
+  const std::string regulators_list_file_path = clp.getOpt("-r");
   std::string output_dir = clp.getOpt("-o");
 
   if (clp.optExists("--seed"))
@@ -138,9 +146,9 @@ int main(int argc, char *argv[]) {
   if (clp.optExists("--threads"))
     threads = std::stoi(clp.getOpt("--threads"));
 
-  if (clp.optExists("--noalpha"))
+  if (clp.optExists("--skip-alpha"))
     prune_alpha = false;
-  if (clp.optExists("--noMaxEnt"))
+  if (clp.optExists("--skip-maxent"))
     prune_MaxEnt = false;
 
   if (clp.optExists("--FDR"))
@@ -154,10 +162,16 @@ int main(int argc, char *argv[]) {
     adaptive = true;
   if (clp.optExists("--min-subnets"))
     min_subnets = std::stoi(clp.getOpt("--min-subnets"));
-  if (clp.optExists("--skipconsolidate"))
-    skip_consolidate = true;
+  if (clp.optExists("--save-subnetworks"))
+    save_subnets = true;
+  if (clp.optExists("--no-consolidate"))
+    no_consolidate = save_subnets = true;
   if (clp.optExists("--consolidate"))
     consolidate_mode = true;
+
+  // TODO: Make more formal
+  if (no_consolidate && consolidate_mode)
+    std::exit(EXIT_FAILURE);
 
   // ---- Developer options ----
 
@@ -179,19 +193,21 @@ int main(int argc, char *argv[]) {
 
   makeDirs(output_dir, aracne3_logger.get());
 
-  const std::string log_file_name = output_dir + "log_" + runid + ".txt";
+  const std::string log_file_name = output_dir + "log-network_" + runid + ".txt";
   if (!suppress_logs)
     aracne3_logger = std::make_unique<Logger>(log_file_name, argc, argv);
 
   makeDirs(cached_dir, aracne3_logger.get());
 
   const std::string subnets_dir =
-      makeUnixDirectoryNameUniversal(output_dir + "subnets/");
+      makeUnixDirectoryNameUniversal(output_dir + "subnetworks/");
   const std::string subnets_log_dir =
-      makeUnixDirectoryNameUniversal(output_dir + "subnets_log/");
+      makeUnixDirectoryNameUniversal(output_dir + "log-subnetworks/");
 
-  makeDirs(subnets_dir, aracne3_logger.get());
-  makeDirs(subnets_log_dir, aracne3_logger.get());
+  if (save_subnets) {
+    makeDirs(subnets_dir, aracne3_logger.get());
+    makeDirs(subnets_log_dir, aracne3_logger.get());
+  }
 
   // ---- Begin ARACNe3 instance ----
 
@@ -202,31 +218,42 @@ int main(int argc, char *argv[]) {
 
   if (aracne3_logger) {
     std::cout << M
-              << "See logs and progress reports in \"" + log_file_name + "\"."
+              << "See logs and progress reports in \"" + log_file_name + "\""
               << std::endl;
     aracne3_logger->writeLineWithTime(cur_msg);
   }
 
   // ---- Reading input files ----
 
+  vv_float exp_mat;
+  compression_map compressor;
+  decompression_map decompressor;
+  gene_to_geneset regulons;
+  geneset genes, regulators;
+
   qlog("Reading input files...");
   Stopwatch watch1{};
 
-  auto data = readExpMatrixAndCopulaTransform(exp_mat_file_path, rand);
-  const gene_to_floats &exp_mat = std::get<0>(data);
-  const gene_to_shorts &ranks_mat = std::get<1>(data);
-  const geneset &genes = std::get<2>(data);
-  const uint16_t tot_n_samps = std::get<3>(data);
+  try {
+    if (aracne3_logger)
+      aracne3_logger->writeLineWithTime("...processing expression matrix...");
+    std::tie(exp_mat, genes, compressor, decompressor) =
+        readExpMatrixAndCopulaTransform(exp_mat_file_path, rand,
+                                        aracne3_logger.get());
 
-  uint16_t tot_n_subsample = std::ceil(subsamp_pct * tot_n_samps);
-  if (tot_n_subsample >= tot_n_samps || tot_n_subsample < 0) {
-    std::cerr
-        << "Warning: subsample quantity invalid. All samples will be used."
-        << std::endl;
-    tot_n_subsample = tot_n_samps;
+    if (aracne3_logger)
+      aracne3_logger->writeLineWithTime("...processing regulators...");
+    regulators = readRegList(regulators_list_file_path, compressor,
+                             aracne3_logger.get());
+  } catch (const std::exception &e) {
+    std::string err_msg = std::string("Error: ") + e.what();
+
+    std::cerr << err_msg << std::endl;
+    if (aracne3_logger)
+      aracne3_logger->writeLineWithTime(err_msg);
+
+    throw; // re-throw the exception for natural program termination
   }
-
-  const geneset regulators = readRegList(reg_list_file_path, verbose);
 
   qlog("Input files read. Time elapsed: " + watch1.getSeconds());
 
@@ -247,7 +274,7 @@ int main(int argc, char *argv[]) {
   qlog("Debug build: Generating new null model...");
   watch1.reset();
 
-  apmi_null_model = APMINullModel(n_samps, n_nulls, seed);
+  apmi_null_model = APMINullModel(n_samps, n_nulls, null_model_seed);
 
   qlog("Null model generated. Time elapsed: " + watch1.getSeconds());
 #else
@@ -281,12 +308,13 @@ int main(int argc, char *argv[]) {
 
   // ---- Begin subnetwork generation ----
 
+  const uint16_t n_subsamp = std::ceil(n_samps * subsamp_pct);
   std::vector<gene_to_gene_to_float> subnets;
+  std::vector<uint32_t> subnet_sizes;
   std::vector<float> FPR_estimates;
   float FPR_estimate = 1.5e-4f;
 
   if (!consolidate_mode) {
-
     qlog("Creating subnetwork(s)...");
     watch1.reset();
 
@@ -294,19 +322,18 @@ int main(int argc, char *argv[]) {
       gene_to_geneset regulons(regulators.size());
 
       bool stoppingCriteriaMet = false;
-      uint16_t cur_subnet_ct = 0;
+      uint16_t cur_subnet_ct = 0u;
 
       while (!stoppingCriteriaMet) {
-        gene_to_floats subsample_exp_mat =
-            sampleExpMatAndReCopulaTransform(exp_mat, tot_n_subsample, rand);
+        vv_float subsample_exp_mat =
+            sampleExpMatAndReCopulaTransform(exp_mat, n_subsamp, rand);
 
-        const auto &[subnet, FPR_estimate_subnet] = createARACNe3Subnet(
-            subsample_exp_mat, regulators, genes, tot_n_samps, tot_n_subsample,
-            cur_subnet_ct, prune_alpha, apmi_null_model, method, alpha,
+        auto [subnet, FPR_estimate_subnet, subnet_size] = createARACNe3Subnet(
+            subsample_exp_mat, regulators, genes, n_samps, n_subsamp,
+            subnets.size() + 1u, prune_alpha, apmi_null_model, method, alpha,
             prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir, threads,
-            runid);
-
-        subnets.push_back(subnet);
+            runid, decompressor, save_subnets);
+        subnets.push_back(std::move(subnet));
         FPR_estimates.push_back(FPR_estimate_subnet);
 
         if (subnet.size() == 0) {
@@ -317,34 +344,47 @@ int main(int argc, char *argv[]) {
         }
 
         // add any new edges to the regulon_set
-        for (const auto [reg, tar_mi] : subnet)
-          for (const auto [tar, mi] : tar_mi)
-            regulons[reg].insert(tar);
+        for (const auto &[reg, regulon] : subnet)
+          for (const auto [tar, mi] : regulon)
+            regulons.at(reg).insert(tar);
 
-        // Check minimum regulon size
+        // check minimum regulon size
         uint16_t min_regulon_size = 65535U;
         for (const auto &[reg, regulon] : regulons)
-          if (regulons[reg].size() < min_regulon_size)
-            min_regulon_size = regulons[reg].size();
-
-        ++cur_subnet_ct;
+          if (regulons.at(reg).size() < min_regulon_size)
+            min_regulon_size = regulons.at(reg).size();
 
         if (min_regulon_size >= min_regulon_occpuancy &&
-            cur_subnet_ct >= min_subnets)
+            subnets.size() >= min_subnets)
           stoppingCriteriaMet = true;
+
+        qlog_subnet(subnets.size(), subnet_size);
       }
       n_subnets = subnets.size();
     } else if (!adaptive) {
       subnets = std::vector<gene_to_gene_to_float>(n_subnets);
+      subnet_sizes = std::vector<uint32_t>(n_subnets);
       FPR_estimates = std::vector<float>(n_subnets);
-      for (int i = 0; i < n_subnets; ++i) {
-        gene_to_floats subsample_exp_mat =
-            sampleExpMatAndReCopulaTransform(exp_mat, tot_n_subsample, rand);
 
-        std::tie(subnets[i], FPR_estimates[i]) = createARACNe3Subnet(
-            subsample_exp_mat, regulators, genes, tot_n_samps, tot_n_subsample,
-            i, prune_alpha, apmi_null_model, method, alpha, prune_MaxEnt,
-            output_dir, subnets_dir, subnets_log_dir, threads, runid);
+      for (uint16_t i = 0u; i < n_subnets; ++i) {
+        vv_float subsample_exp_mat =
+            sampleExpMatAndReCopulaTransform(exp_mat, n_subsamp, rand);
+
+        std::tie(subnets.at(i), FPR_estimates.at(i), subnet_sizes.at(i)) =
+            createARACNe3Subnet(subsample_exp_mat, regulators, genes, n_samps,
+                                n_subsamp, i + 1u, prune_alpha, apmi_null_model,
+                                method, alpha, prune_MaxEnt, output_dir,
+                                subnets_dir, subnets_log_dir, threads, runid,
+                                decompressor, save_subnets);
+
+        if (subnets.at(i).size() == 0) {
+          std::cerr << "Abort: No edges left after all pruning steps. Empty "
+                       "subnetwork."
+                    << std::endl;
+          std::exit(EXIT_FAILURE);
+        }
+
+        qlog_subnet(i + 1u, subnet_sizes.at(i));
       }
     }
 
@@ -375,7 +415,8 @@ int main(int argc, char *argv[]) {
       const auto &[subnet, FPR_estimate_subnet] =
           loadARACNe3SubnetsAndUpdateFPRFromLog(
               subnets_dir + subnet_filenames[subnet_idx],
-              subnets_log_dir + subnet_log_filenames[subnet_idx]);
+              subnets_log_dir + subnet_log_filenames[subnet_idx], compressor,
+              regulators, aracne3_logger.get());
       subnets.push_back(subnet);
       FPR_estimates.push_back(FPR_estimate_subnet);
     }
@@ -383,7 +424,7 @@ int main(int argc, char *argv[]) {
     n_subnets = subnets.size();
 
     qlog("Subnetworks read. Time elapsed: " + watch1.getSeconds());
-    qlog("Total subnets read: " + std::to_string(n_subnets));
+    qlog("Total subnetworks read: " + std::to_string(n_subnets));
   }
 
   // set the FPR estimate
@@ -391,24 +432,24 @@ int main(int argc, char *argv[]) {
       std::accumulate(FPR_estimates.begin(), FPR_estimates.end(), 0.0f) /
       FPR_estimates.size();
 
-  if (!skip_consolidate) {
+  if (!no_consolidate) {
 
     qlog("Consolidating subnetworks...");
     watch1.reset();
 
-    std::vector<consolidated_df_row> final_df = consolidateSubnetsVec(
-        subnets, FPR_estimate, exp_mat, regulators, genes, ranks_mat);
+    std::vector<ARACNe3_df> final_df = consolidateSubnetsVec(
+        subnets, FPR_estimate, exp_mat, regulators, genes);
 
     qlog("Consolidation complete. Time elapsed: " + watch1.getSeconds());
-    qlog("Total subnets consolidated: " + std::to_string(n_subnets));
+    qlog("Total subnetworks consolidated: " + std::to_string(n_subnets));
 
     qlog("Writing final network...");
     watch1.reset();
 
-    writeConsolidatedNetwork(final_df,
-                             output_dir + "consolidated-net_" + runid + ".tsv");
+    writeARACNe3DF(output_dir + "network_" + runid + ".tsv", '\t', final_df,
+                   decompressor);
 
-  } else if (skip_consolidate) {
+  } else if (no_consolidate) {
 
     qlog("No consolidation requested.");
   }

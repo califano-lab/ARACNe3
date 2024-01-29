@@ -33,6 +33,12 @@ public:
    */
   void write(const std::string &message);
 
+  /**
+   * Writes a message line to the log.
+   *
+   * @param message The message to be logged.
+   */
+  void writeLine(const std::string &message);
 
   /**
    * Writes a message to the log, prepended with a timestamp.
