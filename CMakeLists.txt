@@ -5,7 +5,7 @@ project(ARACNe3	VERSION 0.2.0
 	DESCRIPTION "Algorithm for the Reconstruction of Accurate Cellular Networks"
 		LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # Must be copied later
 
 if(${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
@@ -63,3 +63,10 @@ enable_testing()
 include(GoogleTest)  # enable ctest to discover tests from test targets
 
 add_subdirectory(tests)
+
+# ---- Post-configuration actions ----
+
+# copy compile commands
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+                        "${CMAKE_BINARY_DIR}/compile_commands.json"
+                        "${CMAKE_SOURCE_DIR}/compile_commands.json")
