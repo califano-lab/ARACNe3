@@ -285,6 +285,36 @@ int main(int argc, char *argv[]) {
   apmi_null_model = APMINullModel(n_samps, n_nulls, null_model_seed);
 
   qlog("Null model generated. Time elapsed: " + watch1.getSeconds());
+
+  std::string null_model_dir = output_dir + "null-model/";
+
+  qlog("Debug build: Printing null model in \'" + null_model_dir + "\'...");
+
+  makeDirs(null_model_dir, aracne3_logger.get());
+
+  std::ofstream mi_ofs(null_model_dir + "null-mis.csv");
+  std::ofstream stats_ofs(null_model_dir + "null-model-stats.csv");
+
+  if (!mi_ofs || !stats_ofs)
+    qexit("Error: could not write to files in \'" + null_model_dir + "\'.");
+
+  auto [null_mis, ols_m, ols_b, n_samps_nm, n_nulls_nm, seed_nm] =
+      apmi_null_model.getModel();
+
+  for (const float mi : null_mis)
+    mi_ofs << mi << ',';
+
+  stats_ofs << "ols_m" << ',' << ols_m << '\n';
+  stats_ofs << "ols_b" << ',' << ols_b << '\n';
+  stats_ofs << "n_samps" << ',' << n_samps_nm << '\n';
+  stats_ofs << "n_nulls" << ',' << n_nulls_nm << '\n';
+  stats_ofs << "seed" << ',' << seed_nm << '\n';
+
+  mi_ofs.close();
+  stats_ofs.close();
+
+  qlog("Debug build: Null model printed.");
+
 #else
   if (std::filesystem::exists(cached_blob_name)) {
     qlog("Cached null model found. Reading in null model...");
