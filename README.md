@@ -1,6 +1,8 @@
 # ARACNe3
 ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) is an implementation of the ARACNe algorithm. Given a list of regulators and a gene expression matrix, ARACNe3 infers all significant regulatory interactions and outputs a Transcriptional Regulatory Network. A robust analysis will generate these networks on subsamples (called "subnetworks") and then consolidate them into a robust **consensus network**.
 
+--- 
+
 ## Installing and Running ARACNe3
 ### Installing required libraries
 ARACNe3 supports multithreading using OpenMP.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) already installed.
@@ -26,6 +28,8 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build  # Build ARACNe3
 ```
 
+---
+
 ## Using ARACNe3
 ### ARACNe3 input files (see [file format](#input-file-format) below)
 1.	A `tsv` that contains the normalized expression profile, with genes as rows and samples as columns. Make sure your file includes both the row names (gene names) and header names.
@@ -49,6 +53,8 @@ ARACNe3 outputs a **consensus network** in the directory provided by the user (e
 Sometimes, individual subnetworks may take a very long time to compute, making an ensemble of, e.g. 100 subnetworks (`-x 100`), take several days. If you find yourself wanting to use a cluster computer to divide this labor, this is possible. In short, you should send independent jobs of fewer subnetworks (e.g. `-x 10`) to cluster nodes and target the same output directory. Send the parameter `--skip-consolidate` to avoid making a **consensus network** on 10 subnetworks and instead save the subnetworks. Then, once all jobs are done, run ARACNe3 with `--consolidate`, pointing to the original output directory of all jobs. ARACNe3 will enter consolidate mode, read all these subnetworks in, and then output a single **consensus network**.
 
 [Go to example 5](#example-5) to see a worked example.
+
+---
 
 ## Parameters
 ### Required
@@ -85,6 +91,8 @@ Sometimes, individual subnetworks may take a very long time to compute, making a
 `--suppress-log` do not log the ARACNe3 runtime.
 
 `--FWER` prunes by control of Family Wise Error Rate (FWER) alpha, instead of the FDR.
+
+---
 
 ## Examples
 Note: the examples have been written based on the provided test sets: `test/exp_mat.txt` (the normalized expression matrix) and `test/regulators.txt` (the list of regulators).
@@ -130,6 +138,8 @@ After all your jobs have finished, run ARACNe3 in `--consolidate-mode` to build 
 ( ... your scheduler command ... ) /location/of/ARACNe3/build/src/ARACNe3_app_release -e /path/to/exp_mat.txt -r /path/to/regulators.txt -o /common/output/location -x 100 --consolidate-mode
 ``` 
 
+---
+
 <a name="input-file-format"></a>
 ## Input file format
 ### A gene/regulator list
@@ -152,6 +162,8 @@ g_9432_	3.00	1.27	7.63
 g_10006_	1.30	0.05	0.68
 g_10011_	0.055	0.73	4.64
 ```
+
+---
 
 ## Contact
 Please contact Aaron Griffin or Andrew Howe for questions regarding this project.
