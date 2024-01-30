@@ -116,7 +116,7 @@ Note: the examples have been written based on the provided test sets: `test/exp_
 ``` 
 
 <a name="example-5"></a>
-### Example 5 (Optional): generate 100 ARACNe3 subnetworks, dividing the labor to 10 cluster nodes each with 4 cores, and then consolidate into one
+### Example 5 (Optional): generate 100 ARACNe3 subnetworks, dividing the labor between 10 jobs, and then consolidate into one
 #### Create the subnetworks
 You will have to prepare your job in a way that is specific to your HPC cluster. Assuming you create a Unix loop to submit each job, where the shell variable `JOBID` is unique for each job:
 - Set `--runid $JOBID` for each job.
