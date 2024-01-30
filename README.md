@@ -124,7 +124,7 @@ You will have to prepare your job in a way that is specific to your HPC cluster.
 - If you specify a `--seed`, you should provide a different seed to each job.
 
 ```
-( ... your job scheduler command, it usually points to a binary ... ) /location/of/ARACNe3/build/src/ARACNe3_app_release -e /path/to/exp_mat.txt -r /path/to/regulators.txt -o /common/output/location -x 10 --skip-consolidate --runid $JOBID
+( ... your scheduler command ... ) /location/of/ARACNe3/build/src/ARACNe3_app_release -e /path/to/exp_mat.txt -r /path/to/regulators.txt -o /common/output/location -x 10 --skip-consolidate --runid $JOBID
 ``` 
 
 We recommend also setting `--threads` to however many cores each cluster node has, but this is optional.
@@ -133,7 +133,7 @@ We recommend also setting `--threads` to however many cores each cluster node ha
 After all your jobs have finished, run ARACNe3 in `--consolidate-mode` to build your final network.
 
 ```
-( ... your job scheduler command, it usually points to a binary ... ) /location/of/ARACNe3/build/src/ARACNe3_app_release -e /path/to/exp_mat.txt -r /path/to/regulators.txt -o /common/output/location -x 100 --consolidate-mode
+( ... your scheduler command ... ) /location/of/ARACNe3/build/src/ARACNe3_app_release -e /path/to/exp_mat.txt -r /path/to/regulators.txt -o /common/output/location -x 100 --consolidate-mode
 ``` 
 
 <a name="input-file-format"></a>
