@@ -1,7 +1,5 @@
 # ARACNe3
-
-## ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3)
-ARACNe3 is an implementation of the ARACNe algorithm. Given a list of regulators and a gene expression matrix, ARACNe3 infers all significant regulatory interactions and outputs a Transcriptional Regulatory Network. A robust analysis will generate these networks on subsamples (called "subnetworks") and then consolidate them into a robust *consensus network*.
+ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) is an implementation of the ARACNe algorithm. Given a list of regulators and a gene expression matrix, ARACNe3 infers all significant regulatory interactions and outputs a Transcriptional Regulatory Network. A robust analysis will generate these networks on subsamples (called "subnetworks") and then consolidate them into a robust *consensus network*.
 
 ## Installing and Running ARACNe3
 ### Installing required libraries
