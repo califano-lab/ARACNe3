@@ -54,7 +54,7 @@ ARACNe3 outputs a *consensus network* in the directory provided by the user (e.g
 ### (Optional) Using an HPC cluster
 Sometimes, individual subnetworks may take a very long time to compute, making an ensemble of, e.g. 100 subnetworks (`-x 100`), take several days. If you find yourself wanting to use a cluster computer to divide this labor, this is possible. In short, you should send independent jobs of fewer subnetworks (e.g. `-x 10`) to cluster nodes and target the same output directory. Send the parameter `--skip-consolidate` to avoid making a *consensus network* on 10 subnetworks and instead save the subnetworks. Then, once all jobs are done, run ARACNe3 with `--consolidate`, pointing to the original output directory of all jobs. ARACNe3 will enter consolidate mode, read all these subnetworks in, and then output a single *consensus network*.
 
-[Go to example 5](#example-f) to see a worked example.
+[Go to example 5](#example-5) to see a worked example.
 
 ## Parameters
 ### Required
