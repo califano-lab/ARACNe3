@@ -134,7 +134,7 @@ n_subsample are set.
 const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
                                                 const uint16_t n_subsamp,
                                                 std::mt19937 &rand) {
-  std::vector<uint16_t> idxs(exp_mat.at(0).size());
+  std::vector<uint16_t> idxs(exp_mat[0].size());
   std::iota(idxs.begin(), idxs.end(), 0U);
 
   std::vector<uint16_t> fold(n_subsamp);
@@ -142,8 +142,8 @@ const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
 
   vv_float subsample_exp_mat(exp_mat.size(),
                              std::vector<float>(n_subsamp, 0.f));
-  for (gene_id gene = 0U; gene < exp_mat.size(); ++gene) {
-    for (uint16_t i = 0U; i < n_subsamp; ++i)
+  for (gene_id gene = 0u; gene < exp_mat.size(); ++gene) {
+    for (uint16_t i = 0u; i < n_subsamp; ++i)
       subsample_exp_mat[gene][i] = exp_mat[gene][fold[i]];
 
     subsample_exp_mat[gene] = copulaTransform(subsample_exp_mat[gene], rand);
@@ -212,6 +212,8 @@ void writeNetworkRegTarMI(const std::string &output_file_name, const char sep,
   for (const auto &[reg, regulon] : network)
     for (const auto [tar, mi] : regulon)
       ofs << decompressor[reg] << sep << decompressor[tar] << sep << mi << '\n';
+
+  ofs.close();
 }
 
 void writeARACNe3DF(const std::string &output_file_name, const char sep,
@@ -230,6 +232,8 @@ void writeARACNe3DF(const std::string &output_file_name, const char sep,
         << sep << row.final_mi << sep << row.final_scc << sep
         << row.num_subnets_incident << sep << row.final_log_p << '\n';
   }
+
+  ofs.close();
 }
 
 /*

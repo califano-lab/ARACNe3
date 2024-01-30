@@ -91,6 +91,13 @@ int main(int argc, char *argv[]) {
     return;
   };
 
+  auto qexit = [&](const std::string &cur_err) {
+    std::cout << M << cur_err << std::endl;
+    if (aracne3_logger)
+      aracne3_logger->writeLineWithTime(cur_err);
+    std::exit(EXIT_FAILURE);
+  };
+
   auto qlog_subnet = [&](const uint16_t subnet_number,
                          const uint32_t subnet_size) {
     const std::string cur_msg =
@@ -135,9 +142,9 @@ int main(int argc, char *argv[]) {
   if (clp.optExists("--subsample"))
     subsamp_pct = std::stof(clp.getOpt("--subsample"));
 
-  if (alpha > 1.f || alpha <= 0)
+  if (alpha > 1.f || alpha <= 0.f)
     alpha = 1.f;
-  if (subsamp_pct > 1.f || subsamp_pct <= 0)
+  if (subsamp_pct > 1.f || subsamp_pct <= 0.f)
     subsamp_pct = 1.f;
 
   if (clp.optExists("-x"))
@@ -193,7 +200,8 @@ int main(int argc, char *argv[]) {
 
   makeDirs(output_dir, aracne3_logger.get());
 
-  const std::string log_file_name = output_dir + "log-network_" + runid + ".txt";
+  const std::string log_file_name =
+      output_dir + "log-network_" + runid + ".txt";
   if (!suppress_logs)
     aracne3_logger = std::make_unique<Logger>(log_file_name, argc, argv);
 
@@ -336,12 +344,8 @@ int main(int argc, char *argv[]) {
         subnets.push_back(std::move(subnet));
         FPR_estimates.push_back(FPR_estimate_subnet);
 
-        if (subnet.size() == 0) {
-          std::cerr << "Abort: No edges left after all pruning steps. Empty "
-                       "subnetwork."
-                    << std::endl;
-          std::exit(EXIT_FAILURE);
-        }
+        if (subnet.size() == 0u)
+          qexit("Abort: No edges returned. Empty subnetwork.");
 
         // add any new edges to the regulon_set
         for (const auto &[reg, regulon] : subnet)
@@ -377,12 +381,8 @@ int main(int argc, char *argv[]) {
                                 subnets_dir, subnets_log_dir, threads, runid,
                                 decompressor, save_subnets);
 
-        if (subnets.at(i).size() == 0) {
-          std::cerr << "Abort: No edges left after all pruning steps. Empty "
-                       "subnetwork."
-                    << std::endl;
-          std::exit(EXIT_FAILURE);
-        }
+        if (subnets.at(i).size() == 0)
+          qexit("Abort: No edges returned. Empty subnetwork.");
 
         qlog_subnet(i + 1u, subnet_sizes.at(i));
       }
@@ -392,7 +392,6 @@ int main(int argc, char *argv[]) {
          watch1.getSeconds());
     qlog("Total subnetworks generated: " + std::to_string(n_subnets));
   } else if (consolidate_mode) {
-
     qlog("Skip to consolidate step requested. Attempting to read subnetworks "
          "from directory \"" +
          subnets_dir + "\" and subnetwork logging information from \"" +
@@ -403,13 +402,10 @@ int main(int argc, char *argv[]) {
     const auto &[subnet_filenames, subnet_log_filenames] =
         findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir);
 
-    if (subnet_filenames.size() < n_subnets) {
-      std::cerr << "Error: Too many subnets requested. Only " +
-                       std::to_string(subnet_filenames.size()) +
-                       " subnets found in \"" + subnets_dir + "\"."
-                << std::endl;
-      std::exit(EXIT_FAILURE);
-    }
+    if (subnet_filenames.size() < n_subnets)
+      qexit("Error: Too many subnets requested. Only " +
+            std::to_string(subnet_filenames.size()) + " subnets found in \"" +
+            subnets_dir + "\".");
 
     for (uint16_t subnet_idx = 0; subnet_idx < n_subnets; ++subnet_idx) {
       const auto &[subnet, FPR_estimate_subnet] =
@@ -433,7 +429,6 @@ int main(int argc, char *argv[]) {
       FPR_estimates.size();
 
   if (!no_consolidate) {
-
     qlog("Consolidating subnetworks...");
     watch1.reset();
 
@@ -450,7 +445,6 @@ int main(int argc, char *argv[]) {
                    decompressor);
 
   } else if (no_consolidate) {
-
     qlog("No consolidation requested.");
   }
 

@@ -87,7 +87,7 @@ pruneAlpha(const vv_float &network, const std::vector<gene_id> &regs_c,
     }
   }
 
-  reg_tar_mi.erase(reg_tar_mi.cbegin() + argmax_k + 1, reg_tar_mi.cend());
+  reg_tar_mi.erase(reg_tar_mi.cbegin() + argmax_k + 1u, reg_tar_mi.cend());
 
   // rebuild network
   gene_to_gene_to_float pruned_net;

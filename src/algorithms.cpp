@@ -5,8 +5,6 @@
 #include <numeric>
 #include <stdexcept>
 
-extern float DEVELOPER_mi_cutoff;
-
 static float q_thresh;
 static uint16_t size_thresh;
 
@@ -280,8 +278,8 @@ std::vector<float> copulaTransform(const std::vector<float> &data,
 
   // Assign ranks (idx + 1) to the values, ratio by n + 1
   std::vector<float> ranks(n);
-  for (uint32_t i = 0U; i != n; ++i)
-    ranks[indices[i]] = static_cast<float>(i + 1) / (n + 1);
+  for (uint32_t i = 0u; i < n; ++i)
+    ranks[indices[i]] = static_cast<float>(i + 1.f) / (n + 1);
 
   return ranks;
 }
