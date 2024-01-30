@@ -269,20 +269,22 @@ int main(int argc, char *argv[]) {
 
   qlog("Getting null model for mutual information by adaptive partitioning...");
 
-  const size_t n_samps = exp_mat.at(0).size();
+  const uint16_t n_samps = exp_mat.at(0).size();
+  const uint16_t n_subsamp = std::ceil(n_samps * subsamp_pct);
+
   constexpr uint32_t null_model_seed = 0u;
   const std::string cached_blob_name =
-      cached_dir + "APMINullModel_" + std::to_string(n_samps) + "_" +
+      cached_dir + "APMINullModel_" + std::to_string(n_subsamp) + "_" +
       std::to_string(n_nulls) + "_" + std::to_string(null_model_seed) + "_" +
       APP_VERSION + ".blob";
 
   APMINullModel apmi_null_model;
 
 #ifdef _DEBUG // Avoid caches when debugging
-  qlog("Debug build: Generating new null model...");
+  qlog("Debug build: Generating new null model for subsampled APMI...");
   watch1.reset();
 
-  apmi_null_model = APMINullModel(n_samps, n_nulls, null_model_seed);
+  apmi_null_model = APMINullModel(n_subsamp, n_nulls, null_model_seed);
 
   qlog("Null model generated. Time elapsed: " + watch1.getSeconds());
 
@@ -317,7 +319,9 @@ int main(int argc, char *argv[]) {
 
 #else
   if (std::filesystem::exists(cached_blob_name)) {
-    qlog("Cached null model found. Reading in null model...");
+    qlog("Cached null model for subsampled APMI found. Reading in null model "
+         "(n = " +
+         std::to_string(n_subsamp) + ")...");
     watch1.reset();
 
     std::ifstream ifs(cached_blob_name, std::ios::binary);
@@ -328,14 +332,15 @@ int main(int argc, char *argv[]) {
     qlog("Null model read. Time elapsed: " + watch1.getSeconds());
 
   } else {
-    qlog("Generating new null model...");
+    qlog("Generating new null model for subsampled APMI...");
     watch1.reset();
 
-    apmi_null_model = APMINullModel(n_samps, n_nulls, null_model_seed);
+    apmi_null_model = APMINullModel(n_subsamp, n_nulls, null_model_seed);
 
     qlog("Null model generated. Time elapsed: " + watch1.getSeconds());
 
-    qlog("Caching null model...");
+    qlog("Caching null model for subsampled APMI (n = " +
+         std::to_string(n_subsamp) + ")...");
     watch1.reset();
     std::ofstream ofs(cached_blob_name, std::ios::binary);
     boost::archive::binary_oarchive oa(ofs);
@@ -346,7 +351,6 @@ int main(int argc, char *argv[]) {
 
   // ---- Begin subnetwork generation ----
 
-  const uint16_t n_subsamp = std::ceil(n_samps * subsamp_pct);
   std::vector<gene_to_gene_to_float> subnets;
   std::vector<uint32_t> subnet_sizes;
   std::vector<float> FPR_estimates;
