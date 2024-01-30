@@ -60,12 +60,12 @@ int main(int argc, char *argv[]) {
   bool seed_provided = false;
   uint8_t threads = 1U;
   std::string runid = "defaultid";
-  bool verbose = false, suppress_logs = false;
+  bool verbose = false, suppress_log = false;
   std::string cached_dir = CACHE_PATH;
 
   uint16_t n_subnets = 1u;
   float subsamp_pct = 1 - std::exp(-1);
-  bool no_consolidate = false;
+  bool skip_consolidate = false;
   bool consolidate_mode = false;
   bool adaptive = false;
   float alpha = 0.05f;
@@ -134,8 +134,8 @@ int main(int argc, char *argv[]) {
     runid = clp.getOpt("--runid");
   if (clp.optExists("--verbose") || clp.optExists("-v"))
     verbose = true;
-  if (clp.optExists("--suppress-logs"))
-    suppress_logs = true;
+  if (clp.optExists("--suppress-log"))
+    suppress_log = true;
 
   if (clp.optExists("--alpha"))
     alpha = std::stof(clp.getOpt("--alpha"));
@@ -171,13 +171,13 @@ int main(int argc, char *argv[]) {
     min_subnets = std::stoi(clp.getOpt("--min-subnets"));
   if (clp.optExists("--save-subnetworks"))
     save_subnets = true;
-  if (clp.optExists("--no-consolidate"))
-    no_consolidate = save_subnets = true;
-  if (clp.optExists("--consolidate"))
+  if (clp.optExists("--skip-consolidate"))
+    skip_consolidate = save_subnets = true;
+  if (clp.optExists("--consolidate-mode"))
     consolidate_mode = true;
 
   // TODO: Make more formal
-  if (no_consolidate && consolidate_mode)
+  if (skip_consolidate && consolidate_mode)
     std::exit(EXIT_FAILURE);
 
   // ---- Developer options ----
@@ -202,7 +202,7 @@ int main(int argc, char *argv[]) {
 
   const std::string log_file_name =
       output_dir + "log-network_" + runid + ".txt";
-  if (!suppress_logs)
+  if (!suppress_log)
     aracne3_logger = std::make_unique<Logger>(log_file_name, argc, argv);
 
   makeDirs(cached_dir, aracne3_logger.get());
@@ -462,7 +462,7 @@ int main(int argc, char *argv[]) {
       std::accumulate(FPR_estimates.begin(), FPR_estimates.end(), 0.0f) /
       FPR_estimates.size();
 
-  if (!no_consolidate) {
+  if (!skip_consolidate) {
     qlog("Consolidating subnetworks...");
     watch1.reset();
 
@@ -478,7 +478,7 @@ int main(int argc, char *argv[]) {
     writeARACNe3DF(output_dir + "network_" + runid + ".tsv", '\t', final_df,
                    decompressor);
 
-  } else if (no_consolidate) {
+  } else if (skip_consolidate) {
     qlog("No consolidation requested.");
   }
 
