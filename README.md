@@ -1,5 +1,5 @@
 # ARACNe3
-ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) is an implementation of the ARACNe algorithm. Given a list of regulators and a gene expression matrix, ARACNe3 infers all significant regulatory interactions and outputs a Transcriptional Regulatory Network. A robust analysis will generate these networks on subsamples (called "subnetworks") and then consolidate them into a robust *consensus network*.
+ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) is an implementation of the ARACNe algorithm. Given a list of regulators and a gene expression matrix, ARACNe3 infers all significant regulatory interactions and outputs a Transcriptional Regulatory Network. A robust analysis will generate these networks on subsamples (called "subnetworks") and then consolidate them into a robust **consensus network**.
 
 ## Installing and Running ARACNe3
 ### Installing required libraries
@@ -38,7 +38,7 @@ The ARACNe3 executable is now in `build/src/ARACNe3_app_release`. You can now ru
 ```
 
 ### ARACNe3 output files
-ARACNe3 outputs a *consensus network* in the directory provided by the user (e.g., `-o outputdir/`).  If ARACNe3 is run with `--runid abc`, within `outputdir/` the *consensus network* is the file `outputdir/network_abc.tsv`, which summarizes each edge of the network in five columns:
+ARACNe3 outputs a **consensus network** in the directory provided by the user (e.g., `-o outputdir/`).  If ARACNe3 is run with `--runid abc`, within `outputdir/` the **consensus network** is the file `outputdir/network_abc.tsv`, which summarizes each edge of the network in five columns:
 1.	The regulator.
 2.	The target.
 3.	The APMI of the pair.
@@ -46,7 +46,7 @@ ARACNe3 outputs a *consensus network* in the directory provided by the user (e.g
 5.	The _p_-value of the edge, based on how many subnetworks in which it appeared (see the [manuscript](https://github.com/califano-lab/ARACNe3) for methodology).
 
 ### (Optional) Using an HPC cluster
-Sometimes, individual subnetworks may take a very long time to compute, making an ensemble of, e.g. 100 subnetworks (`-x 100`), take several days. If you find yourself wanting to use a cluster computer to divide this labor, this is possible. In short, you should send independent jobs of fewer subnetworks (e.g. `-x 10`) to cluster nodes and target the same output directory. Send the parameter `--skip-consolidate` to avoid making a *consensus network* on 10 subnetworks and instead save the subnetworks. Then, once all jobs are done, run ARACNe3 with `--consolidate`, pointing to the original output directory of all jobs. ARACNe3 will enter consolidate mode, read all these subnetworks in, and then output a single *consensus network*.
+Sometimes, individual subnetworks may take a very long time to compute, making an ensemble of, e.g. 100 subnetworks (`-x 100`), take several days. If you find yourself wanting to use a cluster computer to divide this labor, this is possible. In short, you should send independent jobs of fewer subnetworks (e.g. `-x 10`) to cluster nodes and target the same output directory. Send the parameter `--skip-consolidate` to avoid making a **consensus network** on 10 subnetworks and instead save the subnetworks. Then, once all jobs are done, run ARACNe3 with `--consolidate`, pointing to the original output directory of all jobs. ARACNe3 will enter consolidate mode, read all these subnetworks in, and then output a single **consensus network**.
 
 [Go to example 5](#example-5) to see a worked example.
 
