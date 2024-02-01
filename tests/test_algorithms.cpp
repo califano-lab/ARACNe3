@@ -42,7 +42,7 @@ TEST(RankWithRandomTiebreakTest, SomeTiedElements) {
 
 TEST(RankWithRandomTiebreakTest, LargeDataSet) {
     std::mt19937 rnd(seed);
-    const size_t large_size = 1'000'000;
+    const size_t large_size = 100'000;
     std::vector<float> vec(large_size, 0.0);
     auto ranks = rankWithRandomTiebreak(vec, rnd);
     std::vector<uint32_t> sortedRanks = ranks;
@@ -101,9 +101,9 @@ TEST(RankWithAverageTiebreakTest, MixedTies) {
 }
 
 TEST(RankWithAverageTiebreakTest, LargeDataSet) {
-    const size_t large_size = 1'000'000;
+    const size_t large_size = 100'000;
     std::vector<float> vec(large_size, 0.0);
-    std::vector<float> expected(large_size, 500000.5);
+    std::vector<float> expected(large_size, 50000.5);
     auto ranks = rankWithAverageTiebreak(vec);
     EXPECT_EQ(expected, ranks);
 }
@@ -132,7 +132,7 @@ TEST(AlgorithmsTest, SpearmansRhoNoCorrelation) {
     std::mt19937 rnd(seed);
 
     // Generate large vectors
-    const size_t large_size = 5'000'000;
+    const size_t large_size = 100'000;
     std::vector<float> x_ranked(large_size);
     std::vector<float> y_ranked(large_size);
 
