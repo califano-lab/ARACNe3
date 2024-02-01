@@ -89,6 +89,7 @@ pruneAlpha(const vv_float &network, const std::vector<gene_id> &regs_c,
 
   reg_tar_mi.erase(reg_tar_mi.cbegin() + argmax_k + 1u, reg_tar_mi.cend());
 
+  // TODO: Remove all .at()
   // rebuild network
   gene_to_gene_to_float pruned_net;
   gene_to_gene_to_float pruned_net_reg_reg_only;
@@ -327,7 +328,8 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
 const std::vector<ARACNe3_df>
 consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
                       const float FPR_estimate, const vv_float &exp_mat,
-                      const geneset &regulators, const geneset &genes) {
+                      const geneset &regulators, const geneset &genes,
+                      std::mt19937 &rnd) {
   std::vector<ARACNe3_df> final_df;
   const uint32_t tot_poss_edgs = regulators.size() * (genes.size() - 1u);
 
@@ -341,7 +343,8 @@ consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
       }
       if (num_occurrences > 0) {
         const float final_mi = calcAPMI(exp_mat.at(reg), exp_mat.at(tar));
-        const float final_scc = pearsonsR(exp_mat.at(reg), exp_mat.at(tar));
+        const float final_scc =
+            spearmansRho(exp_mat.at(reg), exp_mat.at(tar));
         const double final_log_p =
             lRightTailBinomialP(subnets.size(), num_occurrences, FPR_estimate);
         final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences,

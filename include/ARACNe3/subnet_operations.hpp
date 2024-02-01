@@ -19,7 +19,8 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
 const std::vector<ARACNe3_df>
 consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
                       const float FPR_estimate, const vv_float &exp_mat,
-                      const geneset &regulators, const geneset &genes);
+                      const geneset &regulators, const geneset &genes,
+                      std::mt19937 &rnd);
 
 class TooManySubnetsRequested : public std::exception {
 public:

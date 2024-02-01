@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
 
   // ---- Begin ARACNe3 instance ----
 
-  std::mt19937 rand{seed};
+  std::mt19937 rnd{seed};
 
   std::string cur_msg = "Beginning ARACNe3 instance...";
   std::cout << M << cur_msg << std::endl;
@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime("...processing expression matrix...");
     std::tie(exp_mat, genes, compressor, decompressor) =
-        readExpMatrixAndCopulaTransform(exp_mat_file_path, rand,
+        readExpMatrixAndCopulaTransform(exp_mat_file_path, rnd,
                                         aracne3_logger.get());
 
     if (aracne3_logger)
@@ -368,7 +368,7 @@ int main(int argc, char *argv[]) {
 
       while (!stoppingCriteriaMet) {
         vv_float subsample_exp_mat =
-            sampleExpMatAndReCopulaTransform(exp_mat, n_subsamp, rand);
+            sampleExpMatAndReCopulaTransform(exp_mat, n_subsamp, rnd);
 
         auto [subnet, FPR_estimate_subnet, subnet_size] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, n_samps, n_subsamp,
@@ -406,7 +406,7 @@ int main(int argc, char *argv[]) {
 
       for (uint16_t i = 0u; i < n_subnets; ++i) {
         vv_float subsample_exp_mat =
-            sampleExpMatAndReCopulaTransform(exp_mat, n_subsamp, rand);
+            sampleExpMatAndReCopulaTransform(exp_mat, n_subsamp, rnd);
 
         std::tie(subnets.at(i), FPR_estimates.at(i), subnet_sizes.at(i)) =
             createARACNe3Subnet(subsample_exp_mat, regulators, genes, n_samps,
@@ -467,7 +467,7 @@ int main(int argc, char *argv[]) {
     watch1.reset();
 
     std::vector<ARACNe3_df> final_df = consolidateSubnetsVec(
-        subnets, FPR_estimate, exp_mat, regulators, genes);
+        subnets, FPR_estimate, exp_mat, regulators, genes, rnd);
 
     qlog("Consolidation complete. Time elapsed: " + watch1.getSeconds());
     qlog("Total subnetworks consolidated: " + std::to_string(n_subnets));

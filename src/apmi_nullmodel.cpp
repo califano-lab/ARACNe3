@@ -9,7 +9,7 @@ APMINullModel::APMINullModel() {};
 APMINullModel::APMINullModel(const size_t n_samps, const size_t n_nulls,
                              const uint32_t seed)
     : n_samps(n_samps), n_nulls(n_nulls), seed(seed) {
-  std::mt19937 rand(seed);
+  std::mt19937 rnd(seed);
 
   // All null APMIs are based on a shuffled copula of ref_vec with n_samps
   std::vector<float> ref_vec;
@@ -19,7 +19,7 @@ APMINullModel::APMINullModel(const size_t n_samps, const size_t n_nulls,
 
   std::vector<std::vector<float>> shuffle_vecs(n_nulls, ref_vec);
   for (size_t i = 0u; i < n_nulls; ++i)
-    std::shuffle(shuffle_vecs[i].begin(), shuffle_vecs[i].end(), rand);
+    std::shuffle(shuffle_vecs[i].begin(), shuffle_vecs[i].end(), rnd);
 
   this->null_mis = std::vector<float>(n_nulls);
   for (size_t i = 0u; i < n_nulls; ++i)

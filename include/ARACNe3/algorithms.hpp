@@ -17,7 +17,7 @@ typedef struct {
  * ranking are randomly shuffled.
  *
  * @param vec The input vector for which the ranking should be formed.
- * @param rand A Mersenne Twister pseudo-random generator of 32-bit numbers
+ * @param rnd A Mersenne Twister pseudo-random generator of 32-bit numbers
  * with a state size of 19937 bits. Used to shuffle indices corresponding to
  * equal values in vec.
  *
@@ -28,7 +28,7 @@ typedef struct {
  * may be shuffled differently in different runs.
  */
 std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
-                                  std::mt19937 &rand);
+                                  std::mt19937 &rnd);
 
 /**
  * @brief Performs a copula transform on a given vector of floats.
@@ -38,12 +38,12 @@ std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
  * the vector + 1. Ties are broken by random shuffling
  *
  * @param data A const reference to a vector of floats to be transformed.
- * @param rand A reference to a random device for random tie breaking.
+ * @param rnd A reference to a random device for random tie breaking.
  * @return std::vector<float> A vector containing the copula transform of the
  * input.
  */
 std::vector<float> copulaTransform(const std::vector<float> &data,
-                                   std::mt19937 &rand);
+                                   std::mt19937 &rnd);
 
 /**
  * @brief Calculates the Adaptive Partitioning Mutual Information (APMI)
@@ -58,8 +58,13 @@ std::vector<float> copulaTransform(const std::vector<float> &data,
 float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
                const float q_thresh = 7.815, const uint16_t size_thresh = 4);
 
-float pearsonsR(const std::vector<float> &x_vec,
-                const std::vector<float> &y_vec);
+std::vector<uint32_t> rankWithRandomTiebreak(const std::vector<float> &vec,
+                                             std::mt19937 &rnd);
+
+std::vector<float> rankWithAverageTiebreak(const std::vector<float>& v);
+
+float spearmansRho(const std::vector<float> &x_vec,
+                   const std::vector<float> &y_vec);
 
 std::pair<float, float> OLS(const std::vector<float> &x,
                             const std::vector<float> &y);

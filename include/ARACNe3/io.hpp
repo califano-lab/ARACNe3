@@ -69,14 +69,14 @@ bool makeDirs(const std::string &dir_name, Logger *const logger);
 
 std::tuple<vv_float, geneset, compression_map, decompression_map>
 readExpMatrixAndCopulaTransform(const std::string &exp_mat_file_path,
-                                std::mt19937 &rand, Logger *const logger);
+                                std::mt19937 &rnd, Logger *const logger);
 
 geneset readRegList(const std::string &regulators_list_file_path,
                     const compression_map &defined_genes, Logger *const logger);
 
 const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
                                           const uint16_t n_subsample,
-                                          std::mt19937 &rand);
+                                          std::mt19937 &rnd);
 
 void writeNetworkRegTarMI(const std::string &output_file_name, const char sep,
                           const gene_to_gene_to_float &network,
