@@ -4,6 +4,9 @@ ARACNe3 (Algorithm for the Reconstruction of Accurate Cellular Networks ver. 3) 
 --- 
 
 ## Installing and Running ARACNe3
+
+---
+
 ### Installing required libraries
 ARACNe3 supports multithreading using OpenMP.  Here is **one** example of how you might download OpenMP libraries on the latest version of MacOS, with [homebrew](https://brew.sh) already installed.
 
@@ -32,7 +35,10 @@ ARACNe3 is now located in `build/src/ARACNe3_app_release`.
 
 ---
 
-## Using ARACNe3
+##  Using ARACNe3
+
+---
+
 ### ARACNe3 input files (see [file format](#input-file-format) below)
 1.	A `tsv` that contains the normalized expression profile, with genes as rows and samples as columns. Make sure your file includes both the row names (gene names) and header names.
 2.	List of regulators (e.g., transcription factors).
@@ -58,7 +64,10 @@ In short, you should send independent jobs of fewer subnetworks (e.g. `-x 10`) t
 
 ---
 
-## Parameters
+##  Parameters
+
+---
+
 ### Required
 `-e <file>` is the expression file.
 
@@ -96,7 +105,10 @@ In short, you should send independent jobs of fewer subnetworks (e.g. `-x 10`) t
 
 ---
 
-## Examples
+##  Examples
+
+---
+
 Note: the examples have been written based on the provided test sets: `test/exp_mat.txt` (the normalized expression matrix) and `test/regulators.txt` (the list of regulators).
 
 ### Example 1: generate one ARACNe3 subnetwork, subsampling $1-e^{-1}%$ of expression profiles, controlling for FDR < 0.05, using only one CPU core
@@ -143,7 +155,10 @@ After all your jobs have finished, run ARACNe3 in `--consolidate-mode` to build 
 ---
 
 <a name="input-file-format"></a>
-## Input file format
+##  Input file format
+
+---
+
 ### A gene/regulator list
 A text file, containing one symbol per line. E.g.,
 
@@ -167,7 +182,10 @@ g_10011_	0.055	0.73	4.64
 
 ---
 
-## Contact
+##  Contact
+
+---
+
 Please contact Aaron Griffin or Andrew Howe for questions regarding this project.
 
 Aaron T. Griffin - atg2142@cumc.columbia.edu
