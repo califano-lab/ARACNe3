@@ -1,4 +1,5 @@
 #include "cmdline_parser.hpp"
+#include <algorithm>
 
 CmdLineParser::CmdLineParser(int argc, char **argv) {
   this->begin = argv;
