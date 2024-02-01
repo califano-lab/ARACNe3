@@ -344,7 +344,7 @@ consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
       if (num_occurrences > 0) {
         const float final_mi = calcAPMI(exp_mat.at(reg), exp_mat.at(tar));
         const float final_scc =
-            spearmansRho(exp_mat.at(reg), exp_mat.at(tar));
+            pearsonsR(exp_mat.at(reg), exp_mat.at(tar));
         const double final_log_p =
             lRightTailBinomialP(subnets.size(), num_occurrences, FPR_estimate);
         final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences,

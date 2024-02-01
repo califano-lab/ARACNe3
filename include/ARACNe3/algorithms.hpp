@@ -31,21 +31,6 @@ std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
                                   std::mt19937 &rnd);
 
 /**
- * @brief Performs a copula transform on a given vector of floats.
- *
- * The copula transform ranks the elements of the input vector, and then
- * normalizes these ranks by dividing each by the total number of elements in
- * the vector + 1. Ties are broken by random shuffling
- *
- * @param data A const reference to a vector of floats to be transformed.
- * @param rnd A reference to a random device for random tie breaking.
- * @return std::vector<float> A vector containing the copula transform of the
- * input.
- */
-std::vector<float> copulaTransform(const std::vector<float> &data,
-                                   std::mt19937 &rnd);
-
-/**
  * @brief Calculates the Adaptive Partitioning Mutual Information (APMI)
  * between two vectors.
  *
@@ -63,13 +48,13 @@ std::vector<uint32_t> rankWithRandomTiebreak(const std::vector<float> &vec,
 
 std::vector<float> rankWithAverageTiebreak(const std::vector<float>& v);
 
+float pearsonsR(const std::vector<float> &x_vec,
+                const std::vector<float> &y_vec);
+
 float spearmansRho(const std::vector<float> &x_vec,
                    const std::vector<float> &y_vec);
 
-std::pair<float, float> OLS(const std::vector<float> &x,
-                            const std::vector<float> &y);
-
-double lchoose(const uint16_t &n, const uint16_t &k);
+double lChoose(const uint16_t &n, const uint16_t &k);
 
 double rightTailBinomialP(const uint16_t n, const uint16_t k,
                           const float theta);
@@ -79,6 +64,24 @@ double rightTailBinomialP(const uint16_t n, const uint16_t k,
  */
 double lRightTailBinomialP(const uint16_t n, const uint16_t k,
                            const float theta);
+
+std::pair<float, float> OLS(const std::vector<float> &x,
+                            const std::vector<float> &y);
+
+/**
+ * @brief Performs a copula transform on a given vector of floats.
+ *
+ * The copula transform ranks the elements of the input vector, and then
+ * normalizes these ranks by dividing each by the total number of elements in
+ * the vector + 1. Ties are broken by random shuffling
+ *
+ * @param data A const reference to a vector of floats to be transformed.
+ * @param rnd A reference to a random device for random tie breaking.
+ * @return std::vector<float> A vector containing the copula transform of the
+ * input.
+ */
+std::vector<float> copulaTransform(const std::vector<float> &data,
+                                   std::mt19937 &rnd);
 
 float estimateFPRNoMaxEnt(const float alpha, const std::string &method,
                           const uint32_t num_edges_after_threshold_pruning,

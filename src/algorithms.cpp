@@ -245,7 +245,7 @@ float spearmansRho(const std::vector<float> &x_vec,
   return pearsonsR(x_ranks, y_ranks);
 }
 
-double lchoose(const uint16_t &n, const uint16_t &k) {
+double lChoose(const uint16_t &n, const uint16_t &k) {
   return std::lgamma(n + 1) - std::lgamma(k + 1) - std::lgamma(n - k + 1);
 }
 
@@ -258,7 +258,7 @@ double rightTailBinomialP(uint16_t n, uint16_t k, float theta) {
   double p = 0.0;
   // Start from k and go up to n to avoid underflow.
   for (uint16_t i = k; i <= n; ++i)
-    p += std::exp(lchoose(n, i) + i * std::log(theta) +
+    p += std::exp(lChoose(n, i) + i * std::log(theta) +
                   (n - i) * std::log(1 - theta));
 
   return p;
@@ -276,7 +276,7 @@ double lRightTailBinomialP(uint16_t n, uint16_t k, float theta) {
   // Calculate log probabilities and find the maximum log probability
   for (uint16_t i = k; i <= n; ++i) {
     double log_p =
-        lchoose(n, i) + i * std::log(theta) + (n - i) * std::log(1. - theta);
+        lChoose(n, i) + i * std::log(theta) + (n - i) * std::log(1. - theta);
     max_log_p = std::max(max_log_p, log_p);
     log_ps.push_back(log_p);
   }
@@ -333,23 +333,15 @@ std::pair<float, float> OLS(const std::vector<float> &x_vec,
 
 std::vector<float> copulaTransform(const std::vector<float> &data,
                                    std::mt19937 &rnd) {
-  uint32_t n = data.size();
-  std::vector<uint32_t> indices(n);
-  std::iota(indices.begin(), indices.end(), 0U);
+  size_t n = data.size();
 
-  // Shuffle indices for random tie breaking
-  std::shuffle(indices.begin(), indices.end(), rnd);
+  std::vector<uint32_t> ranks = rankWithRandomTiebreak(data, rnd);
+  std::vector<float> copulas(n);
 
-  // Sort indices based on corresponding data values
-  std::sort(indices.begin(), indices.end(),
-            [&](uint32_t i1, uint32_t i2) { return data[i1] < data[i2]; });
+  std::transform(ranks.cbegin(), ranks.cend(), copulas.begin(),
+                 [=](auto &r) { return r / static_cast<float>(n); });
 
-  // Assign ranks (idx + 1) to the values, ratio by n + 1
-  std::vector<float> ranks(n);
-  for (uint32_t i = 0u; i < n; ++i)
-    ranks[indices[i]] = static_cast<float>(i + 1.f) / (n + 1);
-
-  return ranks;
+  return copulas;
 }
 
 float estimateFPRNoMaxEnt(const float alpha, const std::string &method,

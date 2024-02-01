@@ -108,9 +108,41 @@ TEST(RankWithAverageTiebreakTest, LargeDataSet) {
     EXPECT_EQ(expected, ranks);
 }
 
+// ---- pearsonsR ----
+
+TEST(PearsonsRTest, PerfectPositive) {
+    std::vector<float> x_vec = {1, 2, 3, 4, 5};
+    std::vector<float> y_vec = {1, 2, 3, 4, 5};
+    EXPECT_FLOAT_EQ(pearsonsR(x_vec, y_vec), 1.0);
+}
+
+TEST(PearsonsRTest, PerfectNegative) {
+    std::vector<float> x_vec = {1, 2, 3, 4, 5};
+    std::vector<float> y_vec = {5, 4, 3, 2, 1};
+    EXPECT_FLOAT_EQ(pearsonsR(x_vec, y_vec), -1.0);
+}
+
+TEST(PearsonsRTest, NoCorrelation) {
+    std::vector<float> x_vec = {1, 2, 3, 4, 5};
+    std::vector<float> y_vec = {2, 2, 2.1, 2, 2};  // not defined for constant
+    EXPECT_NEAR(pearsonsR(x_vec, y_vec), 0.0, 0.001);
+}
+
+TEST(PearsonsRTest, ModeratePositive) {
+    std::vector<float> x_vec = {1, 2, 3, 4, 5};
+    std::vector<float> y_vec = {2, 3, 4, 4, 6};
+    EXPECT_TRUE(pearsonsR(x_vec, y_vec) > 0.0 && pearsonsR(x_vec, y_vec) < 1.0);
+}
+
+TEST(PearsonsRTest, ModerateNegative) {
+    std::vector<float> x_vec = {1, 2, 3, 4, 5};
+    std::vector<float> y_vec = {8, 7, 5, 4, 3};
+    EXPECT_TRUE(pearsonsR(x_vec, y_vec) < 0.0 && pearsonsR(x_vec, y_vec) > -1.0);
+}
+
 // ---- spearmansRho ----
 
-TEST(AlgorithmsTest, SpearmansRhoPerfectPositive) {
+TEST(SpearmansRhoTest, PerfectPositive) {
     std::mt19937 rnd(seed);
 
     std::vector<float> x_ranked{1, 2, 3, 4, 5};
@@ -119,7 +151,7 @@ TEST(AlgorithmsTest, SpearmansRhoPerfectPositive) {
     EXPECT_NEAR(expected, spearmansRho(x_ranked, y_ranked), 0.0001f);
 }
 
-TEST(AlgorithmsTest, SpearmansRhoPerfectNegative) {
+TEST(SpearmansRhoTest, PerfectNegative) {
     std::mt19937 rnd(seed);
 
     std::vector<float> x_ranked{1, 2, 3, 4, 5};
@@ -128,7 +160,7 @@ TEST(AlgorithmsTest, SpearmansRhoPerfectNegative) {
     EXPECT_NEAR(expected, spearmansRho(x_ranked, y_ranked), 0.0001f);
 }
 
-TEST(AlgorithmsTest, SpearmansRhoNoCorrelation) {
+TEST(SpearmansRhoTest, NoCorrelation) {
     std::mt19937 rnd(seed);
 
     // Generate large vectors
@@ -149,31 +181,62 @@ TEST(AlgorithmsTest, SpearmansRhoNoCorrelation) {
 
 // ---- lchoose ----
 
-TEST(AlgorithmsTest, LchooseBasic) {
-  EXPECT_NEAR(0.0, lchoose(5, 0), 1e-9); // n choose 0 should always be 1, log(1) is 0
-  EXPECT_NEAR(0.0, lchoose(5, 5), 1e-9); // n choose n should always be 1, log(1) is 0
-  EXPECT_NEAR(std::log(10.0), lchoose(5, 2), 1e-9); // 5 choose 2 is 10, log(10) should be the result
-  EXPECT_NEAR(std::log(9.77449461715677e103), lchoose(350, 175), 1e-9);  // google'd result
+TEST(LChooseTest, Basic) {
+  EXPECT_NEAR(0.0, lChoose(5, 0), 1e-9); // n choose 0 should always be 1, log(1) is 0
+  EXPECT_NEAR(0.0, lChoose(5, 5), 1e-9); // n choose n should always be 1, log(1) is 0
+  EXPECT_NEAR(std::log(10.0), lChoose(5, 2), 1e-9); // 5 choose 2 is 10, log(10) should be the result
+  EXPECT_NEAR(std::log(9.77449461715677e103), lChoose(350, 175), 1e-9);  // google'd result
 }
 
 // ---- rightTailBinomialP ----
 
-TEST(AlgorithmsTest, RightTailBinomialPKnownValues) {
+TEST(RightTailBinomialPTest, KnownValues) {
     EXPECT_NEAR(0.5, rightTailBinomialP(9, 5, 0.5), 1e-5);
     EXPECT_NEAR(0.0107421875, rightTailBinomialP(10, 9, 0.5), 1e-5);
     EXPECT_NEAR(0.00, rightTailBinomialP(350, 349, 0.01), 1e-5);
 }
 
-TEST(AlgorithmsTest, RightTailBinomialPExtremeValues) {
+TEST(RightTailBinomialPTest, ExtremeValues) {
     EXPECT_NEAR(1.0, rightTailBinomialP(10, 0, 0.5), 1e-5); 
     EXPECT_NEAR(0.0009765625, rightTailBinomialP(10, 10, 0.5), 1e-5); 
 }
 
 // ---- lRightTailBinomialP ----
 
-TEST(AlgorithmsTest, LogRightTailBinomialPKnownValues) {
+TEST(LRightTailBinomialPTest, KnownValues) {
     EXPECT_NEAR(std::log(0.5), lRightTailBinomialP(9, 5, 0.5), 1e-5);
     EXPECT_NEAR(std::log(0.0107421875), lRightTailBinomialP(10, 9, 0.5), 1e-5);
     EXPECT_NEAR(-200, lRightTailBinomialP(200, 200, 1./std::exp(1)), 1e-5);
     EXPECT_NEAR(-65534, lRightTailBinomialP(65534U, 65534U, 1./std::exp(1)), 1e-5);
+}
+
+// ---- OLS ----
+TEST(OLSTest, KnownPositive) {
+    std::vector<float> x = {1, 2, 3, 4, 5};
+    std::vector<float> y = {2, 4, 6, 8, 10}; // Perfect linear relationship y = 2x
+    auto [m, b] = OLS(x, y);
+    EXPECT_NEAR(2.0, m, 1e-5); // Expect slope of 2
+    EXPECT_NEAR(0.0, b, 1e-5); // Expect intercept of 0
+}
+
+TEST(OLSTest, KnownNegative) {
+    std::vector<float> x = {1, 2, 3, 4, 5};
+    std::vector<float> y = {-1, -2, -3, -4, -5};  // Perfect negative cor
+    auto [m, b] = OLS(x, y);
+    EXPECT_NEAR(-1.0, m, 1e-5); // Expect slope of 1
+    EXPECT_NEAR(0.0, b, 1e-5); // Expect intercept of 0
+}
+
+// ---- copulaTransform ----
+TEST(CopulaTransformTest, KnownValues) {
+    std::mt19937 rnd(seed); // Fixed seed for reproducibility
+    std::vector<float> data = {5, 2, 3, 4, 1};
+    auto transformed = copulaTransform(data, rnd);
+    std::vector<float> expected {5./5, 2./5, 3./5, 4./5, 1./5};
+    EXPECT_EQ(5, transformed.size()); // Expect same size
+    EXPECT_EQ(expected, transformed);
+
+    data = {2*5, 2*2, 2*3, 2*4, 2*1};
+    transformed = copulaTransform(data, rnd);
+    EXPECT_EQ(expected, transformed);
 }
