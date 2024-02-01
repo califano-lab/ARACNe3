@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <tuple>
 
 class APMINullModel {
 public:
@@ -12,6 +13,7 @@ public:
                 const uint32_t seed);
 
   float getMIPVal(const float mi, const float p_precise = 0.001f) const;
+
   std::tuple<std::vector<float>, float, float, size_t, size_t, uint32_t>
   getModel() {
     return {null_mis, ols_m, ols_b, n_samps, n_nulls, seed};

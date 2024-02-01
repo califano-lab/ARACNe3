@@ -7,6 +7,8 @@
 #include <fstream>
 #include <iostream>
 #include <set>
+#include <algorithm>
+#include <memory>
 
 class SubnetLogger : public Logger {
   public:

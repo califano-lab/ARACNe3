@@ -1,6 +1,7 @@
 #include "logger.hpp"
 
 #include <ctime>
+#include <iomanip>
 
 Logger::Logger(const std::string &log_file_name) : log_output(log_file_name) {
   std::time_t t = std::time(nullptr);
