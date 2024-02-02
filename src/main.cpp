@@ -383,7 +383,7 @@ int main(int argc, char *argv[]) {
           qexit("Abort: No edges returned. Empty subnetwork.");
 
         // add any new edges to the regulon_set
-        for (const auto &[reg, regulon] : subnet)
+        for (const auto &[reg, regulon] : subnets[subnets.size()-1u])
           for (const auto [tar, mi] : regulon)
             regulons.at(reg).insert(tar);
 
