@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     runid = clp.getOpt("--runid");
   if (clp.optExists("--verbose") || clp.optExists("-v"))
     verbose = true;
-  if (clp.optExists("--suppress-log"))
+  if (clp.optExists("--suppress-log") | clp.optExists("--suppress-logs"))
     suppress_log = true;
 
   if (clp.optExists("--alpha"))
@@ -202,7 +202,7 @@ int main(int argc, char *argv[]) {
   makeDirs(output_dir, aracne3_logger.get());
 
   const std::string log_file_name =
-      output_dir + "log-network_" + runid + ".txt";
+      output_dir + "log_" + runid + ".txt";
   if (!suppress_log)
     aracne3_logger = std::make_unique<Logger>(log_file_name, argc, argv);
 
