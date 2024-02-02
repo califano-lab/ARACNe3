@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
 
   if (clp.optExists("--adaptive"))
     adaptive = true;
-  if (clp.optExists("--min-subnets"))
+  if (clp.optExists("--min-subnetworks") || clp.optExists("--min-subnets"))
     min_subnets = std::stoi(clp.getOpt("--min-subnets"));
   if (clp.optExists("--save-subnetworks"))
     save_subnets = true;
@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
         subnets.push_back(std::move(subnet));
         FPR_estimates.push_back(FPR_estimate_subnet);
 
-        if (subnet.size() == 0u)
+        if (subnets.size() == 0u)
           qexit("Abort: No edges returned. Empty subnetwork.");
 
         // add any new edges to the regulon_set
