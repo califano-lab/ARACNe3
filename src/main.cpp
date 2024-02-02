@@ -127,55 +127,67 @@ int main(int argc, char *argv[]) {
   const std::string regulators_list_file_path = clp.getOpt("-r");
   std::string output_dir = clp.getOpt("-o");
 
-  if (clp.optExists("--seed"))
-    seed = std::stoi(clp.getOpt("--seed"));
-  if (clp.optExists("--threads"))
-    threads = std::stoi(clp.getOpt("--threads"));
-  if (clp.optExists("--runid"))
-    runid = clp.getOpt("--runid");
-  if (clp.optExists("--verbose") || clp.optExists("-v"))
-    verbose = true;
-  if (clp.optExists("--suppress-log") | clp.optExists("--suppress-logs"))
-    suppress_log = true;
+  try {
+    if (clp.optExists("--seed"))
+      seed = std::stoi(clp.getOpt("--seed"));
+    if (clp.optExists("--threads"))
+      threads = std::stoi(clp.getOpt("--threads"));
+    if (clp.optExists("--runid"))
+      runid = clp.getOpt("--runid");
+    if (clp.optExists("--verbose") || clp.optExists("-v"))
+      verbose = true;
+    if (clp.optExists("--suppress-log") | clp.optExists("--suppress-logs"))
+      suppress_log = true;
 
-  if (clp.optExists("--alpha"))
-    alpha = std::stof(clp.getOpt("--alpha"));
-  if (clp.optExists("--subsample"))
-    subsamp_pct = std::stof(clp.getOpt("--subsample"));
+    if (clp.optExists("--alpha"))
+      alpha = std::stof(clp.getOpt("--alpha"));
+    if (clp.optExists("--subsample"))
+      subsamp_pct = std::stof(clp.getOpt("--subsample"));
 
-  if (alpha > 1.f || alpha <= 0.f)
-    alpha = 1.f;
-  if (subsamp_pct > 1.f || subsamp_pct <= 0.f)
-    subsamp_pct = 1.f;
+    if (alpha > 1.f || alpha <= 0.f)
+      alpha = 1.f;
+    if (subsamp_pct > 1.f || subsamp_pct <= 0.f)
+      subsamp_pct = 1.f;
 
-  if (clp.optExists("-x"))
-    n_subnets = min_regulon_occpuancy = std::stoi(clp.getOpt("-x"));
+    if (clp.optExists("-x"))
+      n_subnets = min_regulon_occpuancy = std::stoi(clp.getOpt("-x"));
 
-  if (clp.optExists("--threads"))
-    threads = std::stoi(clp.getOpt("--threads"));
+    if (clp.optExists("--threads"))
+      threads = std::stoi(clp.getOpt("--threads"));
 
-  if (clp.optExists("--skip-alpha"))
-    prune_alpha = false;
-  if (clp.optExists("--skip-maxent"))
-    prune_MaxEnt = false;
+    if (clp.optExists("--skip-alpha"))
+      prune_alpha = false;
+    if (clp.optExists("--skip-maxent"))
+      prune_MaxEnt = false;
 
-  if (clp.optExists("--FDR"))
-    method = "FDR";
-  if (clp.optExists("--FWER"))
-    method = "FWER";
-  if (clp.optExists("--FPR"))
-    method = "FPR";
+    if (clp.optExists("--FDR"))
+      method = "FDR";
+    if (clp.optExists("--FWER"))
+      method = "FWER";
+    if (clp.optExists("--FPR"))
+      method = "FPR";
 
-  if (clp.optExists("--adaptive"))
-    adaptive = true;
-  if (clp.optExists("--min-subnetworks") || clp.optExists("--min-subnets"))
-    min_subnets = std::stoi(clp.getOpt("--min-subnets"));
-  if (clp.optExists("--save-subnetworks"))
-    save_subnets = true;
-  if (clp.optExists("--skip-consolidate"))
-    skip_consolidate = save_subnets = true;
-  if (clp.optExists("--consolidate-mode") || clp.optExists("--consolidate"))
-    consolidate_mode = true;
+    if (clp.optExists("--adaptive"))
+      adaptive = true;
+    if (clp.optExists("--min-subnetworks") || clp.optExists("--min-subnets"))
+      min_subnets = std::stoi(clp.getOpt("--min-subnets"));
+    if (clp.optExists("--save-subnetworks"))
+      save_subnets = true;
+    if (clp.optExists("--skip-consolidate"))
+      skip_consolidate = save_subnets = true;
+    if (clp.optExists("--consolidate-mode") || clp.optExists("--consolidate"))
+      consolidate_mode = true;
+
+  } catch (const std::exception &e) {
+    std::string err_msg =
+        std::string("Error parsing command line option: ") + e.what();
+
+    std::cerr << err_msg << std::endl;
+    if (aracne3_logger)
+      aracne3_logger->writeLineWithTime(err_msg);
+
+    throw; // re-throw the exception for natural program termination
+  }
 
   // TODO: Make more formal
   if (skip_consolidate && consolidate_mode)
@@ -255,7 +267,7 @@ int main(int argc, char *argv[]) {
     regulators = readRegList(regulators_list_file_path, compressor,
                              aracne3_logger.get());
   } catch (const std::exception &e) {
-    std::string err_msg = std::string("Error: ") + e.what();
+    std::string err_msg = std::string("Error reading input files: ") + e.what();
 
     std::cerr << err_msg << std::endl;
     if (aracne3_logger)

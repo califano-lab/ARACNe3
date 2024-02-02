@@ -1,5 +1,6 @@
 #include "cmdline_parser.hpp"
 #include <algorithm>
+#include <stdexcept>
 
 CmdLineParser::CmdLineParser(int argc, char **argv) {
   this->begin = argv;
@@ -8,11 +9,13 @@ CmdLineParser::CmdLineParser(int argc, char **argv) {
 }
 
 
-char *CmdLineParser::getOpt(const std::string& option) {
+char* CmdLineParser::getOpt(const std::string& option) {
   char **itr = std::find(begin, end, option);
   if (itr != end && ++itr != end)
     return *itr;
-  return nullptr;
+  else
+    throw std::runtime_error("Could not parse command-line option for " +
+                             option);
 }
 
 bool CmdLineParser::optExists(const std::string& option) {
