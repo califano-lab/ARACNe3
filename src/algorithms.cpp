@@ -157,53 +157,54 @@ std::vector<uint32_t> rankWithRandomTiebreak(const std::vector<float> &vec,
   return ranks;
 }
 
-std::vector<float> rankWithAverageTiebreak(const std::vector<float>& v) {
-    std::vector<uint32_t> idx_rnks(v.size());
-    std::iota(idx_rnks.begin(), idx_rnks.end(), 0u);
-    std::sort(idx_rnks.begin(), idx_rnks.end(), [&](uint32_t i1, uint32_t i2) { return v[i1] < v[i2]; });
+std::vector<float> rankWithAverageTiebreak(const std::vector<float> &v) {
+  std::vector<uint32_t> idx_rnks(v.size());
+  std::iota(idx_rnks.begin(), idx_rnks.end(), 0u);
+  std::sort(idx_rnks.begin(), idx_rnks.end(),
+            [&](uint32_t i1, uint32_t i2) { return v[i1] < v[i2]; });
 
-    // This will assign ranks like 1 2 2 4 5 6 6 6 9 (truncated ranks for ties)
-    std::vector<float> ranks(v.size());
-    for (uint32_t i = 0u; i < idx_rnks.size(); ++i) {
-      if (i > 0u && v[idx_rnks[i]] == v[idx_rnks[i - 1]])
-        ranks[idx_rnks[i]] = ranks[idx_rnks[i - 1]];
-      else
-        ranks[idx_rnks[i]] = i + 1u;
+  // This will assign ranks like 1 2 2 4 5 6 6 6 9 (truncated ranks for ties)
+  std::vector<float> ranks(v.size());
+  for (uint32_t i = 0u; i < idx_rnks.size(); ++i) {
+    if (i > 0u && v[idx_rnks[i]] == v[idx_rnks[i - 1]])
+      ranks[idx_rnks[i]] = ranks[idx_rnks[i - 1]];
+    else
+      ranks[idx_rnks[i]] = i + 1u;
+  }
+
+  // Now we need to count how many are the same, add, and average
+  auto cur_beg = idx_rnks.begin();
+  auto cur_end = cur_beg + 1u;
+
+  // Sum of 0 + 1 + 2 (the truncated portion of ranks r r r) is n(n - 1)/2
+  while (cur_end != idx_rnks.end()) {
+    // base case is rank goes 1 2 3, in which sum is 0 and ranks don't change
+    if (ranks[*cur_end] > ranks[*cur_beg]) {
+      double r = static_cast<double>(ranks[*cur_beg]);
+      double n = static_cast<double>(cur_end - cur_beg);
+      double sum = n * (n - 1.) / 2.;
+      float avg_rank = (n * r + sum) / n;
+
+      for (auto it = cur_beg; it != cur_end; ++it)
+        ranks[*it] = avg_rank;
+
+      // set the new cur_beg and cur_end
+      cur_beg = cur_end;
+      ++cur_end;
+    } else { // when ranks is the same, we increment cur_end
+      ++cur_end;
     }
+  }
+  // final transformation for cur_beg -> actual end
+  double r = static_cast<double>(ranks[*cur_beg]);
+  double n = static_cast<double>(cur_end - cur_beg);
+  double sum = n * (n - 1.) / 2.;
+  float avg_rank = (n * r + sum) / n;
 
-    // Now we need to count how many are the same, add, and average
-    auto cur_beg = idx_rnks.begin();
-    auto cur_end = cur_beg + 1u;
+  for (auto it = cur_beg; it != cur_end; ++it)
+    ranks[*it] = avg_rank;
 
-    // Sum of 0 + 1 + 2 (the truncated portion of ranks r r r) is n(n - 1)/2
-    while (cur_end != idx_rnks.end()) {
-      // base case is rank goes 1 2 3, in which sum is 0 and ranks don't change
-      if (ranks[*cur_end] > ranks[*cur_beg]) {
-        double r = static_cast<double>(ranks[*cur_beg]);
-        double n = static_cast<double>(cur_end - cur_beg);
-        double sum = n * (n - 1.)/2.;
-        float avg_rank = (n *r + sum) / n;
-
-        for (auto it = cur_beg; it != cur_end; ++it)
-          ranks[*it] = avg_rank;
-
-        // set the new cur_beg and cur_end
-        cur_beg = cur_end;
-        ++cur_end;
-      } else {  // when ranks is the same, we increment cur_end
-        ++cur_end;
-      }
-    }
-    // final transformation for cur_beg -> actual end
-    double r = static_cast<double>(ranks[*cur_beg]);
-    double n = static_cast<double>(cur_end - cur_beg);
-    double sum = n * (n - 1.)/2.;
-    float avg_rank = (n * r + sum) / n;
-
-    for (auto it = cur_beg; it != cur_end; ++it)
-      ranks[*it] = avg_rank;
-
-    return ranks;
+  return ranks;
 }
 
 float pearsonsR(const std::vector<float> &x_vec,
@@ -219,14 +220,12 @@ float pearsonsR(const std::vector<float> &x_vec,
   float y_mean =
       std::reduce(y_vec.cbegin(), y_vec.cend()) / static_cast<float>(n);
 
-  float ssr_x = std::reduce(x_vec.cbegin(), x_vec.cend(), 0.f,
-                            [&x_mean](float a, float cur) {
-                              return a + (cur - x_mean) * (cur - x_mean);
-                            });
-  float ssr_y = std::reduce(y_vec.cbegin(), y_vec.cend(), 0.f,
-                            [&y_mean](float a, float cur) {
-                              return a + (cur - y_mean) * (cur - y_mean);
-                            });
+  float ssr_x = std::transform_reduce(
+      x_vec.cbegin(), x_vec.cend(), 0.f, std::plus<>(),
+      [x_mean](float x) { return (x - x_mean) * (x - x_mean); });
+  float ssr_y = std::transform_reduce(
+      y_vec.cbegin(), y_vec.cend(), 0.f, std::plus<>(),
+      [y_mean](float y) { return (y - y_mean) * (y - y_mean); });
 
   float sum_prod = 0.f;
   for (size_t i = 0U; i < n; ++i)
@@ -316,10 +315,9 @@ std::pair<float, float> OLS(const std::vector<float> &x_vec,
   float y_mean =
       std::reduce(y_vec.cbegin(), y_vec.cend()) / static_cast<float>(n);
 
-  float ssr_x = std::reduce(x_vec.cbegin(), x_vec.cend(), 0.f,
-                            [&x_mean](float a, float cur) {
-                              return a + (cur - x_mean) * (cur - x_mean);
-                            });
+  float ssr_x = std::transform_reduce(
+      x_vec.cbegin(), x_vec.cend(), 0.f, std::plus<>(),
+      [x_mean](float x) { return (x - x_mean) * (x - x_mean); });
 
   float sum_prod = 0.f;
   for (size_t i = 0U; i < n; ++i)
