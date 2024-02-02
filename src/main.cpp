@@ -144,11 +144,6 @@ int main(int argc, char *argv[]) {
     if (clp.optExists("--subsample"))
       subsamp_pct = std::stof(clp.getOpt("--subsample"));
 
-    if (alpha > 1.f || alpha <= 0.f)
-      alpha = 1.f;
-    if (subsamp_pct > 1.f || subsamp_pct <= 0.f)
-      subsamp_pct = 1.f;
-
     if (clp.optExists("-x"))
       n_subnets = min_regulon_occpuancy = std::stoi(clp.getOpt("-x"));
 
@@ -180,6 +175,25 @@ int main(int argc, char *argv[]) {
     if (clp.optExists("--consolidate-mode") || clp.optExists("--consolidate"))
       consolidate_mode = true;
 
+    // ---- Developer options ----
+    if (clp.optExists("--mithresh"))
+      mi_cutoff = std::stof(clp.getOpt("--mithresh"));
+    if (clp.optExists("--numnulls"))
+      n_nulls = std::stoi(clp.getOpt("--numnulls"));
+
+    // ---- Checking edge cases ----
+    if (alpha > 1.f || alpha <= 0.f)
+      throw std::runtime_error("--alpha must be on range [0,1]");
+    if (subsamp_pct > 1.f || subsamp_pct <= 0.f)
+      throw std::runtime_error("--subsample must be on range [0,1]");
+
+    if (skip_consolidate && consolidate_mode)
+      throw std::runtime_error(
+          "Cannot simultaneously skip consolidate and enter consolidate mode");
+
+    if (n_nulls < 0u)
+      throw std::runtime_error("--numnulls be greater than 0");
+
   } catch (const std::exception &e) {
     std::string err_msg =
         std::string("Error parsing command line option: ") + e.what();
@@ -188,20 +202,6 @@ int main(int argc, char *argv[]) {
 
     throw; // re-throw the exception for natural program termination
   }
-
-  // TODO: Make more formal
-  if (skip_consolidate && consolidate_mode)
-    std::exit(EXIT_FAILURE);
-
-  // ---- Developer options ----
-
-  if (clp.optExists("--mithresh"))
-    mi_cutoff = std::stof(clp.getOpt("--mithresh"));
-  if (clp.optExists("--numnulls"))
-    n_nulls = std::stoi(clp.getOpt("--numnulls"));
-
-  if (n_nulls < 0u)
-    n_nulls = 1'000'000u;
 
   // ---- Processing command line arguments ----
 
@@ -397,7 +397,7 @@ int main(int argc, char *argv[]) {
         // add any new edges to the regulon_set
         for (const auto &[reg, regulon] : subnets[subnets.size()-1u])
           for (const auto [tar, mi] : regulon)
-            regulons.at(reg).insert(tar);
+            regulons[reg].insert(tar);
 
         // check minimum regulon size
         uint16_t min_regulon_size = 65535U;
