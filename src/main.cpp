@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
     save_subnets = true;
   if (clp.optExists("--skip-consolidate"))
     skip_consolidate = save_subnets = true;
-  if (clp.optExists("--consolidate-mode"))
+  if (clp.optExists("--consolidate-mode") || clp.optExists("--consolidate"))
     consolidate_mode = true;
 
   // TODO: Make more formal
@@ -431,7 +431,7 @@ int main(int argc, char *argv[]) {
          "from directory \"" +
          subnets_dir + "\" and subnetwork logging information from \"" +
          subnets_log_dir +
-         "\" (subnetwork logging information is required) ...");
+         "\" (subnetwork logging information is required)...");
     watch1.reset();
 
     const auto &[subnet_filenames, subnet_log_filenames] =
