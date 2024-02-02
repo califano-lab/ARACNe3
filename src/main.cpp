@@ -169,8 +169,10 @@ int main(int argc, char *argv[]) {
 
     if (clp.optExists("--adaptive"))
       adaptive = true;
-    if (clp.optExists("--min-subnetworks") || clp.optExists("--min-subnets"))
+    if (clp.optExists("--min-subnets"))
       min_subnets = std::stoi(clp.getOpt("--min-subnets"));
+    if (clp.optExists("--min-subnetworks"))
+      min_subnets = std::stoi(clp.getOpt("--min-subnetworks"));
     if (clp.optExists("--save-subnetworks"))
       save_subnets = true;
     if (clp.optExists("--skip-consolidate"))
@@ -183,8 +185,6 @@ int main(int argc, char *argv[]) {
         std::string("Error parsing command line option: ") + e.what();
 
     std::cerr << err_msg << std::endl;
-    if (aracne3_logger)
-      aracne3_logger->writeLineWithTime(err_msg);
 
     throw; // re-throw the exception for natural program termination
   }
