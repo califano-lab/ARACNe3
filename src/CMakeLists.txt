@@ -22,7 +22,7 @@ add_library(aracne3io STATIC
   )
 
 target_include_directories(aracne3io PRIVATE
-	${PROJECT_SOURCE_DIR}/include/aracne3
+	${PROJECT_SOURCE_DIR}/include/ARACNe3
 )
 
 target_link_libraries(aracne3io PRIVATE
