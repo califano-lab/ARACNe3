@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) {
   bool save_subnets = false;
   uint16_t min_regulon_occpuancy = 30U;
   uint16_t min_subnets = 0u;
+  uint16_t max_subnets = 65535u;
   std::string method = "FDR";
 
   std::unique_ptr<Logger> aracne3_logger;
@@ -168,6 +169,10 @@ int main(int argc, char *argv[]) {
       min_subnets = std::stoi(clp.getOpt("--min-subnets"));
     if (clp.optExists("--min-subnetworks"))
       min_subnets = std::stoi(clp.getOpt("--min-subnetworks"));
+    if (clp.optExists("--max-subnets"))
+      max_subnets = std::stoi(clp.getOpt("--max-subnets"));
+    if (clp.optExists("--max-subnetworks"))
+      max_subnets = std::stoi(clp.getOpt("--max-subnetworks"));
     if (clp.optExists("--save-subnetworks"))
       save_subnets = true;
     if (clp.optExists("--skip-consolidate"))
@@ -265,7 +270,7 @@ int main(int argc, char *argv[]) {
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime("...processing regulators...");
     regulators = readRegList(regulators_list_file_path, compressor,
-                             aracne3_logger.get());
+                             aracne3_logger.get(), verbose);
   } catch (const std::exception &e) {
     std::string err_msg = std::string("Error reading input files: ") + e.what();
 
@@ -410,6 +415,9 @@ int main(int argc, char *argv[]) {
           stoppingCriteriaMet = true;
 
         qlog_subnet(subnets.size(), subnet_size);
+
+        if (subnets.size() >= max_subnets)
+          qexit("Abort: Max subnets reached.");
       }
       n_subnets = subnets.size();
     } else if (!adaptive) {

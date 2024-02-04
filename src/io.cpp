@@ -153,31 +153,41 @@ const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
 }
 
 geneset readRegList(const std::string &regulators_list_file_path,
-                    const compression_map &defined_genes,
-                    Logger *const logger) {
+                    const compression_map &defined_genes, Logger *const logger,
+                    bool verbose) {
 
   std::ifstream ifs{regulators_list_file_path};
   exitIfFileNotOpen(ifs, regulators_list_file_path, logger);
 
   std::string cur_reg;
   geneset regulators;
+  uint32_t num_warnings = 0U;
   while (std::getline(ifs, cur_reg, '\n')) {
     if (cur_reg.back() == '\r') /* Alert! We have a Windows dweeb! */
       cur_reg.pop_back();
 
+    // Warn if not found in exp_mat once.
     if (defined_genes.find(cur_reg) == defined_genes.end()) {
       const std::string warning_msg =
           "Warning: \"" + cur_reg +
           "\" found in regulators, but not in expression matrix. Removing "
           "from analysis.";
 
-      std::cerr << warning_msg << std::endl;
       if (logger)
         logger->writeLineWithTime(warning_msg);
+
+      if (num_warnings < 3u || verbose)
+        std::cerr << warning_msg << std::endl;
+
+      ++num_warnings;
     } else {
       regulators.insert(defined_genes.at(cur_reg));
     }
   }
+
+  if (num_warnings > 3u && !verbose)
+    std::cerr << "..." << num_warnings - 3U << " warnings suppressed ..."
+              << std::endl;
 
   if (regulators.empty()) {
     const std::string abort_msg = "Abort: no regulators to analyze.";
