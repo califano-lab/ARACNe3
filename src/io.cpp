@@ -186,7 +186,7 @@ geneset readRegList(const std::string &regulators_list_file_path,
   }
 
   if (num_warnings > 3u && !verbose)
-    std::cerr << "..." << num_warnings - 3U << " warnings suppressed ..."
+    std::cerr << "... " << num_warnings - 3U << " similar warnings suppressed ..."
               << std::endl;
 
   if (regulators.empty()) {
