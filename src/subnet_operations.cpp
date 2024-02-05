@@ -64,32 +64,32 @@ pruneAlpha(const vv_float &network, const std::vector<gene_id> &regs_c,
               return std::get<2>(rtm1) > std::get<2>(rtm2);
             });
 
-  uint32_t argmax_k = 0u;
+  uint32_t lowest_idx_that_doesnt_pass_thresh = 0u;
   if (method == "FDR") {
     // Benjamini-Hochberg
     for (auto it = reg_tar_mi.cbegin(); it != reg_tar_mi.cend(); ++it) {
       const size_t k = it - reg_tar_mi.cbegin();
       const float p_k = nullmodel.getMIPVal(std::get<2>(*it));
       if (p_k <= (k + 1.f) / size_of_network * alpha)
-        argmax_k = k;
+        lowest_idx_that_doesnt_pass_thresh = k + 1u;
     }
   } else if (method == "FWER") {
     for (auto it = reg_tar_mi.begin(); it != reg_tar_mi.end(); ++it) {
       const size_t k = it - reg_tar_mi.cbegin();
       const float p_k = nullmodel.getMIPVal(std::get<2>(*it));
       if (p_k <= alpha / size_of_network)
-        argmax_k = k;
+        lowest_idx_that_doesnt_pass_thresh = k + 1u;
     }
   } else if (method == "FPR") {
     for (auto it = reg_tar_mi.begin(); it != reg_tar_mi.end(); ++it) {
       const size_t k = it - reg_tar_mi.cbegin();
       const float p_k = nullmodel.getMIPVal(std::get<2>(*it));
       if (p_k <= alpha)
-        argmax_k = k;
+        lowest_idx_that_doesnt_pass_thresh = k + 1u;
     }
   }
 
-  reg_tar_mi.erase(reg_tar_mi.cbegin() + argmax_k + 1u, reg_tar_mi.cend());
+  reg_tar_mi.erase(reg_tar_mi.cbegin() + lowest_idx_that_doesnt_pass_thresh, reg_tar_mi.cend());
 
   // TODO: Remove all .at()
   // rebuild network
