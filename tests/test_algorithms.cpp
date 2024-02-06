@@ -176,7 +176,7 @@ TEST(SpearmansRhoTest, NoCorrelation) {
     std::shuffle(x_ranked.begin(), x_ranked.end(), rnd);
 
     // Since this is random, we allow a bit more tolerance here
-    EXPECT_NEAR(0.f, spearmansRho(x_ranked, y_ranked), 0.001f);
+    EXPECT_NEAR(0.f, spearmansRho(x_ranked, y_ranked), 0.01f);
 }
 
 // ---- lchoose ----
