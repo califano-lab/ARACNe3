@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <tuple>
+#include <cstdint>
 
 class APMINullModel {
 public:
