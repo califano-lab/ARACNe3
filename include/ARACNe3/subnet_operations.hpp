@@ -4,6 +4,7 @@
 #include "aracne3io.hpp"
 
 #include <vector>
+#include <cstdint>
 
 std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
     const vv_float &subsample_exp_mat, const geneset &regulators,

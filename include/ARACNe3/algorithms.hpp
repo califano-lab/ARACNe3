@@ -2,6 +2,7 @@
 
 #include <random>
 #include <vector>
+#include <cstdint>
 
 typedef struct {
   const float x_bound1, y_bound1, width;
