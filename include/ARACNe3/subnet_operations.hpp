@@ -1,7 +1,7 @@
 #pragma once
 
 #include "apmi_nullmodel.hpp"
-#include "io.hpp"
+#include "aracne3io.hpp"
 
 #include <vector>
 

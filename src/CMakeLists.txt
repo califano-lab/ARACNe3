@@ -18,7 +18,7 @@ endif()
 
 # ---- Define the aracne3io target ----
 add_library(aracne3io STATIC
-	io.cpp
+	aracne3io.cpp
   )
 
 target_include_directories(aracne3io PRIVATE

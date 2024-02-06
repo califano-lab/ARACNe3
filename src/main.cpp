@@ -2,7 +2,7 @@
 
 #include "apmi_nullmodel.hpp"
 #include "cmdline_parser.hpp"
-#include "io.hpp"
+#include "aracne3io.hpp"
 #include "logger.hpp"
 #include "stopwatch.hpp"
 #include "subnet_operations.hpp"
@@ -396,7 +396,7 @@ int main(int argc, char *argv[]) {
         subnets.push_back(std::move(subnet));
         FPR_estimates.push_back(FPR_estimate_subnet);
 
-        if (subnets.size() == 0u)
+        if (subnets[subnets.size()-1u].size() == 0u)
           qexit("Abort: No edges returned. Empty subnetwork.");
 
         // add any new edges to the regulon_set
