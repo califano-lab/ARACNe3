@@ -85,7 +85,7 @@ readExpMatrixAndCopulaTransform(const std::string &exp_mat_file_path,
       expr_vec.reserve(gexp_matrix.at(0).size());
 
     // gene name is first column of matrix
-    std::std::size_t cur_pos = 0U, cur_end = cur_line.find_first_of("\t", cur_pos);
+    std::size_t cur_pos = 0U, cur_end = cur_line.find_first_of("\t", cur_pos);
     const std::string gene = cur_line.substr(cur_pos, cur_end - cur_pos);
     cur_pos = cur_end + 1;
 
@@ -318,7 +318,7 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
     if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
       line.pop_back();
 
-    std::std::size_t prev = 0U, pos = line.find_first_of("\t", prev);
+    std::size_t prev = 0U, pos = line.find_first_of("\t", prev);
     const std::string reg = line.substr(prev, pos - prev);
     prev = pos + 1;
 
