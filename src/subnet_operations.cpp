@@ -68,21 +68,21 @@ pruneAlpha(const vv_float &network, const std::vector<gene_id> &regs_c,
   if (method == "FDR") {
     // Benjamini-Hochberg
     for (auto it = reg_tar_mi.cbegin(); it != reg_tar_mi.cend(); ++it) {
-      const size_t k = it - reg_tar_mi.cbegin();
+      const std::size_t k = it - reg_tar_mi.cbegin();
       const float p_k = nullmodel.getMIPVal(std::get<2>(*it));
       if (p_k <= (k + 1.f) / size_of_network * alpha)
         lowest_idx_that_doesnt_pass_thresh = k + 1u;
     }
   } else if (method == "FWER") {
     for (auto it = reg_tar_mi.begin(); it != reg_tar_mi.end(); ++it) {
-      const size_t k = it - reg_tar_mi.cbegin();
+      const std::size_t k = it - reg_tar_mi.cbegin();
       const float p_k = nullmodel.getMIPVal(std::get<2>(*it));
       if (p_k <= alpha / size_of_network)
         lowest_idx_that_doesnt_pass_thresh = k + 1u;
     }
   } else if (method == "FPR") {
     for (auto it = reg_tar_mi.begin(); it != reg_tar_mi.end(); ++it) {
-      const size_t k = it - reg_tar_mi.cbegin();
+      const std::size_t k = it - reg_tar_mi.cbegin();
       const float p_k = nullmodel.getMIPVal(std::get<2>(*it));
       if (p_k <= alpha)
         lowest_idx_that_doesnt_pass_thresh = k + 1u;

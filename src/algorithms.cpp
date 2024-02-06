@@ -132,16 +132,16 @@ float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
 
 std::vector<uint32_t> rankWithRandomTiebreak(const std::vector<float> &vec,
                                              std::mt19937 &rnd) {
-  const size_t n = vec.size();
+  const std::size_t n = vec.size();
 
   // We need to sort an indexes vector, but it should be paired with another
   // random indexes vector for breaking ties
-  std::vector<size_t> idx_ranks(n), shuffled_priorities(n);
+  std::vector<std::size_t> idx_ranks(n), shuffled_priorities(n);
   std::iota(idx_ranks.begin(), idx_ranks.end(), 0u);
   std::iota(shuffled_priorities.begin(), shuffled_priorities.end(), 0u);
   std::shuffle(shuffled_priorities.begin(), shuffled_priorities.end(), rnd);
 
-  std::vector<std::pair<size_t, size_t>> idx_ranks_p(n);
+  std::vector<std::pair<std::size_t, std::size_t>> idx_ranks_p(n);
   for (uint32_t i = 0u; i < n; ++i)
     idx_ranks_p[i] = {idx_ranks[i], shuffled_priorities[i]};
 
@@ -209,7 +209,7 @@ std::vector<float> rankWithAverageTiebreak(const std::vector<float> &v) {
 
 float pearsonsR(const std::vector<float> &x_vec,
                 const std::vector<float> &y_vec) {
-  const size_t n = x_vec.size();
+  const std::size_t n = x_vec.size();
 
   if (x_vec.size() != y_vec.size())
     throw std::runtime_error(
@@ -228,7 +228,7 @@ float pearsonsR(const std::vector<float> &x_vec,
       [y_mean](float y) { return (y - y_mean) * (y - y_mean); });
 
   float sum_prod = 0.f;
-  for (size_t i = 0U; i < n; ++i)
+  for (std::size_t i = 0U; i < n; ++i)
     sum_prod += (x_vec[i] - x_mean) * (y_vec[i] - y_mean);
 
   return sum_prod / std::sqrt(ssr_x * ssr_y);
@@ -304,7 +304,7 @@ double lRightTailBinomialP(uint16_t n, uint16_t k, float theta) {
  */
 std::pair<float, float> OLS(const std::vector<float> &x_vec,
                             const std::vector<float> &y_vec) {
-  const size_t n = x_vec.size();
+  const std::size_t n = x_vec.size();
 
   if (x_vec.size() != y_vec.size())
     throw std::runtime_error(
@@ -320,7 +320,7 @@ std::pair<float, float> OLS(const std::vector<float> &x_vec,
       [x_mean](float x) { return (x - x_mean) * (x - x_mean); });
 
   float sum_prod = 0.f;
-  for (size_t i = 0U; i < n; ++i)
+  for (std::size_t i = 0U; i < n; ++i)
     sum_prod += (x_vec[i] - x_mean) * (y_vec[i] - y_mean);
 
   float slope = sum_prod / ssr_x;
@@ -331,7 +331,7 @@ std::pair<float, float> OLS(const std::vector<float> &x_vec,
 
 std::vector<float> copulaTransform(const std::vector<float> &data,
                                    std::mt19937 &rnd) {
-  size_t n = data.size();
+  std::size_t n = data.size();
 
   std::vector<uint32_t> ranks = rankWithRandomTiebreak(data, rnd);
   std::vector<float> copulas(n);

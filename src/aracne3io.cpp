@@ -85,7 +85,7 @@ readExpMatrixAndCopulaTransform(const std::string &exp_mat_file_path,
       expr_vec.reserve(gexp_matrix.at(0).size());
 
     // gene name is first column of matrix
-    std::size_t cur_pos = 0U, cur_end = cur_line.find_first_of("\t", cur_pos);
+    std::std::size_t cur_pos = 0U, cur_end = cur_line.find_first_of("\t", cur_pos);
     const std::string gene = cur_line.substr(cur_pos, cur_end - cur_pos);
     cur_pos = cur_end + 1;
 
@@ -236,7 +236,7 @@ void writeARACNe3DF(const std::string &output_file_name, const char sep,
       << sep << "scc.values" << sep << "count.values" << sep << "log.p.values"
       << '\n';
 
-  for (size_t i = 0U; i < output_df.size(); ++i) {
+  for (std::size_t i = 0U; i < output_df.size(); ++i) {
     const ARACNe3_df &row = output_df[i];
     ofs << decompressor.at(row.regulator) << sep << decompressor.at(row.target)
         << sep << row.final_mi << sep << row.final_scc << sep
@@ -264,7 +264,7 @@ findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
 
         // Construct the expected log file name, replacing .tsv with .txt
         std::string subnet_log_filename = "log-" + subnet_filename;
-        size_t pos = subnet_log_filename.rfind(".tsv");
+        std::size_t pos = subnet_log_filename.rfind(".tsv");
         if (pos != std::string::npos)
           subnet_log_filename.replace(pos, 4, ".txt");
 
@@ -318,7 +318,7 @@ loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
     if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
       line.pop_back();
 
-    std::size_t prev = 0U, pos = line.find_first_of("\t", prev);
+    std::std::size_t prev = 0U, pos = line.find_first_of("\t", prev);
     const std::string reg = line.substr(prev, pos - prev);
     prev = pos + 1;
 
