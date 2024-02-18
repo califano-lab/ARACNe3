@@ -4,3 +4,6 @@
 [submodule "deps/boost"]
 	path = deps/boost
 	url = https://github.com/boostorg/boost.git
+[submodule "deps/eigen"]
+	path = deps/eigen
+	url = https://gitlab.com/libeigen/eigen.git

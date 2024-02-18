@@ -1,8 +1,114 @@
 #include <gtest/gtest.h>
 #include "algorithms.hpp"
 #include <unordered_set>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/variate_generator.hpp>
+#include <Eigen/Dense>
 
-int seed = 0;
+constexpr int seed = 0;
+constexpr auto cop = copulaTransform;  // function reference
+
+std::tuple<std::vector<float>, std::vector<float>>
+sample_2d_gauss(const size_t n, const double mean_x, const double mean_y,
+                const double sd_x, const double sd_y, const double cov,
+                std::mt19937 &rnd) {
+
+  std::vector<float> x_vec(n), y_vec(n);
+
+  Eigen::Vector2d mu(mean_x, mean_y);
+  Eigen::Matrix2d sigma{
+      {sd_x, cov},
+      {cov, sd_y},
+  };
+
+  // Cholesky decomposition for transforming standard normal variables
+  Eigen::LLT<Eigen::Matrix2d> llt(sigma);
+  Eigen::Matrix2d L = llt.matrixL();
+
+  boost::random::normal_distribution<> norm_x(mean_x, sd_x);
+  boost::random::normal_distribution<> norm_y(mean_y, sd_y);
+  boost::random::variate_generator<std::mt19937 &,
+                                   boost::random::normal_distribution<>>
+      norm_sampler_x(rnd, norm_x);
+  boost::random::variate_generator<std::mt19937 &,
+                                   boost::random::normal_distribution<>>
+      norm_sampler_y(rnd, norm_y);
+
+  for (size_t i = 0u; i < n; ++i) {
+    Eigen::Vector2d p(norm_sampler_x(), norm_sampler_y());
+    p = mu + L * p; // Transform independent vector via covariance
+    x_vec[i] = p(0);
+    y_vec[i] = p(1);
+  }
+
+  return {x_vec, y_vec};
+}
+
+// ---- calcAPMI ----
+
+TEST(APMITest, PerfectlyCorrelated) {
+    std::mt19937 rnd(seed);
+
+    const double sd_x = 1., sd_y = 1.;
+    const double cor = 0.99;
+    const double expected = -0.5f * std::log(1.f - cor * cor);
+
+    auto [x_vec, y_vec] =
+        sample_2d_gauss(20'000u, 0., 0., sd_x, sd_y, cor * sd_x * sd_y, rnd);
+
+    x_vec = cop(x_vec, rnd);
+    y_vec = cop(y_vec, rnd);
+
+    EXPECT_NEAR(expected, calcAPMI(x_vec, y_vec), 0.01f);
+}
+
+TEST(APMITest, NoCorrelation) {
+    std::mt19937 rnd(seed);
+
+    const double sd_x = 1., sd_y = 1.;
+    const double cor = 0.;
+    const double expected = -0.5f * std::log(1.f - cor * cor);
+
+    auto [x_vec, y_vec] =
+        sample_2d_gauss(20'000u, 0., 0., sd_x, sd_y, cor * sd_x * sd_y, rnd);
+
+    x_vec = cop(x_vec, rnd);
+    y_vec = cop(y_vec, rnd);
+
+    EXPECT_NEAR(expected, calcAPMI(x_vec, y_vec), 0.01f);
+}
+
+TEST(APMITest, SlightCorrelation) {
+    std::mt19937 rnd(seed);
+
+    const double sd_x = 1., sd_y = 1.;
+    const double cor = 0.5;
+    const double expected = -0.5f * std::log(1.f - cor * cor);
+
+    auto [x_vec, y_vec] =
+        sample_2d_gauss(20'000u, 0., 0., sd_x, sd_y, cor * sd_x * sd_y, rnd);
+
+    x_vec = cop(x_vec, rnd);
+    y_vec = cop(y_vec, rnd);
+
+    EXPECT_NEAR(expected, calcAPMI(x_vec, y_vec), 0.01f);
+}
+
+TEST(APMITest, PerfectNegative) {
+    std::mt19937 rnd(seed);
+
+    const double sd_x = 1., sd_y = 1.;
+    const double cor = -0.99;
+    const double expected = -0.5f * std::log(1.f - cor * cor);
+
+    auto [x_vec, y_vec] =
+        sample_2d_gauss(20'000u, 0., 0., sd_x, sd_y, cor * sd_x * sd_y, rnd);
+
+    x_vec = cop(x_vec, rnd);
+    y_vec = cop(y_vec, rnd);
+
+    EXPECT_NEAR(expected, calcAPMI(x_vec, y_vec), 0.01f);
+}
 
 // ---- rankWithRandomTiebreak ----
 

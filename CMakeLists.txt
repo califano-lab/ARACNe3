@@ -48,6 +48,8 @@ include_directories("${PROJECT_BINARY_DIR}/include/ARACNe3")
 
 # ---- Required Libraries ----
 add_subdirectory(deps/boost EXCLUDE_FROM_ALL)
+add_subdirectory(deps/eigen EXCLUDE_FROM_ALL)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 # ---- Options ----
 option(USE_OPENMP "Compile with multithreading support" ON)

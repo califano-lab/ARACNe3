@@ -45,7 +45,7 @@ float calcMI(const square &s) {
 const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
                           const square s) {
   constexpr float q_thresh = 7.815f;
-  constexpr uint16_t size_thresh = 4U;
+  constexpr uint16_t size_thresh = 4u;
 
   // if we have less points in the square than size_thresh, calc MI
   if (s.num_pts < size_thresh) {
@@ -57,8 +57,8 @@ const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
               y_thresh = s.y_bound1 + s.width * 0.5f;
 
   // indices for quadrants, to test chi-square, with num_pts for each
-  uint16_t *tr_pts, *br_pts, *bl_pts, *tl_pts, tr_num_pts = 0U, br_num_pts = 0U,
-                                               bl_num_pts = 0U, tl_num_pts = 0U;
+  uint16_t *tr_pts, *br_pts, *bl_pts, *tl_pts, tr_num_pts = 0u, br_num_pts = 0u,
+                                               bl_num_pts = 0u, tl_num_pts = 0u;
   tr_pts = (uint16_t *)alloca(s.num_pts * sizeof(uint16_t));
   br_pts = (uint16_t *)alloca(s.num_pts * sizeof(uint16_t));
   bl_pts = (uint16_t *)alloca(s.num_pts * sizeof(uint16_t));
@@ -110,13 +110,13 @@ const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
 
 float calcAPMI(const std::vector<float> &x_vec,
                const std::vector<float> &y_vec) {
-  uint16_t tot_num_pts = x_vec.size();
+  const uint16_t tot_num_pts = x_vec.size();
 
   uint16_t *all_pts = (uint16_t *)alloca(tot_num_pts * sizeof(uint16_t));
-  std::iota(all_pts, &all_pts[tot_num_pts], 0U);
+  std::iota(all_pts, &all_pts[tot_num_pts], 0u);
 
   // Initialize plane and calc all MIs
-  const square init{0.0f, 0.0f, 1.0f, &all_pts[0U], tot_num_pts, tot_num_pts};
+  const square init{0.0f, 0.0f, 1.0f, &all_pts[0u], tot_num_pts, tot_num_pts};
   float *x_ptr = (float *)alloca(x_vec.size() * sizeof(float)),
         *y_ptr = (float *)alloca(y_vec.size() * sizeof(float));
 

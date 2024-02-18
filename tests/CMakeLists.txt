@@ -6,6 +6,9 @@ target_link_libraries(aracne3_test
   PRIVATE
     gtest_main
     aracne3tools
+    Eigen3::Eigen
+    Boost::random
+    Boost::math
 )
 
 target_include_directories(aracne3_test

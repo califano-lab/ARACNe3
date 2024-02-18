@@ -37,8 +37,6 @@ std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
  *
  * @param x_vec The first vector.
  * @param y_vec The second vector.
- * @param q_thresh A threshold for chi-square.
- * @param size_thresh A threshold for minimum partition size.
  * @return float The APMI value between the two input vectors.
  */
 float calcAPMI(const std::vector<float> &x_vec,
