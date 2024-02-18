@@ -289,19 +289,6 @@ double lRightTailBinomialP(uint16_t n, uint16_t k, float theta) {
   return max_log_p + std::log(log_sum_exp);
 }
 
-/**
- * @brief Calculate linear regression to find the slope and y-intercept.
- *
- * This function takes two float vector parameters, x and y, representing data
- * points on a two-dimensional plane. It returns a pair of floats where the
- * first float is the slope (m) and the second float is the y-intercept (b)
- * from the line equation y = mx + b.
- *
- * @param x A vector of x floats.
- * @param y A vector of y floats.
- *
- * @return A pair of floats (m,b).
- */
 std::pair<float, float> OLS(const std::vector<float> &x_vec,
                             const std::vector<float> &y_vec) {
   const std::size_t n = x_vec.size();

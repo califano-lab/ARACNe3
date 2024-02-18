@@ -66,6 +66,19 @@ double rightTailBinomialP(const uint16_t n, const uint16_t k,
 double lRightTailBinomialP(const uint16_t n, const uint16_t k,
                            const float theta);
 
+/**
+ * @brief Calculate linear regression to find the slope and y-intercept.
+ *
+ * This function takes two float vector parameters, x and y, representing data
+ * points on a two-dimensional plane. It returns a pair of floats where the
+ * first float is the slope (m) and the second float is the y-intercept (b)
+ * from the line equation y = mx + b.
+ *
+ * @param x A vector of x floats.
+ * @param y A vector of y floats.
+ *
+ * @return A pair of floats (m,b).
+ */
 std::pair<float, float> OLS(const std::vector<float> &x,
                             const std::vector<float> &y);
 
