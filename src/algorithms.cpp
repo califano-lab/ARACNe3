@@ -5,9 +5,6 @@
 #include <numeric>
 #include <stdexcept>
 
-static float q_thresh;
-static uint16_t size_thresh;
-
 /**
  * @brief Calculate the Mutual Information (MI) for a square struct.
  *
@@ -47,6 +44,9 @@ float calcMI(const square &s) {
  */
 const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
                           const square s) {
+  constexpr float q_thresh = 7.815f;
+  constexpr uint16_t size_thresh = 4U;
+
   // if we have less points in the square than size_thresh, calc MI
   if (s.num_pts < size_thresh) {
     return calcMI(s);
@@ -108,12 +108,8 @@ const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
   }
 }
 
-float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
-               const float q_thresh, const uint16_t size_thresh) {
-  // Set file static variables
-  ::size_thresh = size_thresh;
-  ::q_thresh = q_thresh;
-
+float calcAPMI(const std::vector<float> &x_vec,
+               const std::vector<float> &y_vec) {
   uint16_t tot_num_pts = x_vec.size();
 
   uint16_t *all_pts = (uint16_t *)alloca(tot_num_pts * sizeof(uint16_t));

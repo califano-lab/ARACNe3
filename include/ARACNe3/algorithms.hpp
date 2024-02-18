@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cstdint>
 #include <random>
 #include <vector>
-#include <cstdint>
 
 typedef struct {
   const float x_bound1, y_bound1, width;
@@ -41,13 +41,13 @@ std::vector<uint16_t> rankIndices(const std::vector<float> &vec,
  * @param size_thresh A threshold for minimum partition size.
  * @return float The APMI value between the two input vectors.
  */
-float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
-               const float q_thresh = 7.815, const uint16_t size_thresh = 4);
+float calcAPMI(const std::vector<float> &x_vec,
+               const std::vector<float> &y_vec);
 
 std::vector<uint32_t> rankWithRandomTiebreak(const std::vector<float> &vec,
                                              std::mt19937 &rnd);
 
-std::vector<float> rankWithAverageTiebreak(const std::vector<float>& v);
+std::vector<float> rankWithAverageTiebreak(const std::vector<float> &v);
 
 float pearsonsR(const std::vector<float> &x_vec,
                 const std::vector<float> &y_vec);
