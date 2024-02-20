@@ -141,7 +141,7 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
 
     // schedule in skips as opposed to chunks, faster now
 #pragma omp for schedule(static, 1)
-    for (uint32_t i = 0U; i < network_reg_reg_only.size(); ++i) {
+    for (int i = 0u; i < network_reg_reg_only.size(); ++i) {
       auto it = network_reg_reg_only.cbegin();
       std::advance(it, i);
       const uint16_t reg1 = it->first;
@@ -240,7 +240,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
                           std::vector<float>(genes.size(), 0.f));
 
 #pragma omp parallel for num_threads(nthreads)
-  for (uint32_t reg_idx = 0u; reg_idx < regs_c.size(); ++reg_idx) {
+  for (int reg_idx = 0; reg_idx < regs_c.size(); ++reg_idx) {
     const gene_id reg = regs_c.at(reg_idx);
     for (uint32_t tar_idx = 0u; tar_idx < genes_c.size(); ++tar_idx) {
       const gene_id tar = genes_c.at(tar_idx);
