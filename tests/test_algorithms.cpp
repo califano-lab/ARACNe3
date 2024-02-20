@@ -4,6 +4,7 @@
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <Eigen/Dense>
+#include <numeric>
 
 constexpr int seed = 0;
 constexpr auto cop = copulaTransform;  // function reference

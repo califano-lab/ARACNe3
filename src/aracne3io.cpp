@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <numeric>
 
 std::string makeUnixDirectoryNameUniversal(std::string dir_name) {
   std::replace(dir_name.begin(), dir_name.end(), '/', directory_slash);
