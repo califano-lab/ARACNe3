@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 #include <filesystem>
+#include <numeric>
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp> // for object caching
