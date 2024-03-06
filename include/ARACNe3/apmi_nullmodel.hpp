@@ -14,7 +14,7 @@ public:
   APMINullModel(const std::size_t n_samps, const std::size_t n_nulls,
                 const uint32_t seed);
 
-  float getMIPVal(const float mi, const float p_precise = 0.001f) const;
+  float getMIPVal(const float mi, const float p_precise = 1e-4f) const;
 
   std::tuple<std::vector<float>, float, float, std::size_t, std::size_t, uint32_t>
   getModel() {
