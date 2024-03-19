@@ -1,6 +1,7 @@
 add_executable(aracne3_test
   test_algorithms.cpp
   test_apmi_nullmodel.cpp
+  test_aracne3io.cpp
 )
 
 target_link_libraries(aracne3_test
