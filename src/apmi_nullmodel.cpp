@@ -28,7 +28,7 @@ APMINullModel::APMINullModel(const std::size_t n_samps, const std::size_t n_null
   // sort largest to smallest
   std::sort(null_mis.begin(), null_mis.end(), std::greater<float>());
 
-  // OLS regress log(p) vs MI for eCDF p < 0.01
+  // OLS regress log(p) vs MI for eCDF p < 0.01 (but use for p < 1e-4)
   float sig_p = 0.01f;
   std::size_t sig_p_offendidx = std::floor(n_nulls * sig_p);
   std::vector<float> sig_mis(null_mis.begin(),
