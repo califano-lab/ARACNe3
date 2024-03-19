@@ -8,17 +8,12 @@
 #include <sstream>
 #include <numeric>
 
-std::string makeUnixDirectoryNameUniversal(std::string dir_name) {
-  std::replace(dir_name.begin(), dir_name.end(), '/', directory_slash);
-  return dir_name;
-}
-
 bool makeDirs(const std::string &dir_name, Logger *const logger) {
   if (!std::filesystem::exists(dir_name)) {
     std::filesystem::create_directories(dir_name);
     if (std::filesystem::exists(dir_name)) {
       const std::string out_msg = "Directory Created: \"" +
-                                  makeUnixDirectoryNameUniversal(dir_name) +
+                                  dir_name +
                                   "\".";
 
       std::cout << out_msg << std::endl;
@@ -28,7 +23,7 @@ bool makeDirs(const std::string &dir_name, Logger *const logger) {
       return true;
     } else {
       const std::string err_msg = "Failed to create directory: \"" +
-                                  makeUnixDirectoryNameUniversal(dir_name) +
+                                  dir_name +
                                   "\".";
 
       std::cerr << err_msg << std::endl;
@@ -45,7 +40,7 @@ void exitIfFileNotOpen(std::ifstream &ifs, const std::string &file_path,
                        Logger *const logger) {
   if (!ifs.is_open()) {
     const std::string err_msg = "Error: could not open file \"" +
-                                makeUnixDirectoryNameUniversal(file_path) +
+                                file_path +
                                 "\".";
 
     std::cerr << err_msg << std::endl;

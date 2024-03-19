@@ -1,20 +1,20 @@
 #include "config.h"
 
 #include "apmi_nullmodel.hpp"
-#include "cmdline_parser.hpp"
 #include "aracne3io.hpp"
+#include "cmdline_parser.hpp"
 #include "logger.hpp"
 #include "stopwatch.hpp"
 #include "subnet_operations.hpp"
 
 #include <ctime>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <memory>
-#include <string>
-#include <filesystem>
 #include <numeric>
+#include <string>
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp> // for object caching
@@ -118,9 +118,8 @@ int main(int argc, char *argv[]) {
       !clp.optExists("-r") || !clp.optExists("-o")) {
     std::cout << M
               << "usage: " + ((std::string)argv[0]) +
-                     makeUnixDirectoryNameUniversal(
-                         " -e path/to/matrix.txt -r path/to/regulators.txt -o "
-                         "path/to/output/directory")
+                     " -e path/to/matrix.txt -r path/to/regulators.txt -o "
+                     "path/to/output/directory"
               << std::endl;
     return EXIT_FAILURE;
   }
@@ -219,17 +218,14 @@ int main(int argc, char *argv[]) {
 
   makeDirs(output_dir, aracne3_logger.get());
 
-  const std::string log_file_name =
-      output_dir + "log_" + runid + ".txt";
+  const std::string log_file_name = output_dir + "log_" + runid + ".txt";
   if (!suppress_log)
     aracne3_logger = std::make_unique<Logger>(log_file_name, argc, argv);
 
   makeDirs(cached_dir, aracne3_logger.get());
 
-  const std::string subnets_dir =
-      makeUnixDirectoryNameUniversal(output_dir + "subnetworks/");
-  const std::string subnets_log_dir =
-      makeUnixDirectoryNameUniversal(output_dir + "log-subnetworks/");
+  const std::string subnets_dir = output_dir + "subnetworks/";
+  const std::string subnets_log_dir = output_dir + "log-subnetworks/";
 
   if (save_subnets) {
     makeDirs(subnets_dir, aracne3_logger.get());
@@ -397,11 +393,11 @@ int main(int argc, char *argv[]) {
         subnets.push_back(std::move(subnet));
         FPR_estimates.push_back(FPR_estimate_subnet);
 
-        if (subnets[subnets.size()-1u].size() == 0u)
+        if (subnets[subnets.size() - 1u].size() == 0u)
           qexit("Abort: No edges returned. Empty subnetwork.");
 
         // add any new edges to the regulon_set
-        for (const auto &[reg, regulon] : subnets[subnets.size()-1u])
+        for (const auto &[reg, regulon] : subnets[subnets.size() - 1u])
           for (const auto [tar, mi] : regulon)
             regulons[reg].insert(tar);
 

@@ -2,18 +2,12 @@
 
 #include "logger.hpp"
 
+#include <cstdint>
 #include <random>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <cstdint>
-
-#if defined __linux__ || defined __APPLE__
-const char directory_slash = '/';
-#elif defined _WIN32 // in windows you must set a hidden file via properties
-const char directory_slash = '\\';
-#endif               /* __linux__ || __APPLE__ */
 
 // ---- Typedefs ----
 
@@ -50,16 +44,6 @@ struct ARACNe3_df {
 // ---- Functions ----
 
 const std::string getSystemTemporaryDirectory();
-
-/**
- * Transforms a Unix-style directory name into a universal format suitable for
- * both Unix and Windows. For Windows, it replaces '/' with '\'. Intended for
- * display purposes, adapting to the system-specific directory separator.
- *
- * @param dir_name A string representing the directory name to be transformed.
- * @return A string with the universal directory name.
- */
-std::string makeUnixDirectoryNameUniversal(std::string dir_name);
 
 /**
  * Creates a new full directory path using the Standard Template Library (STL)
