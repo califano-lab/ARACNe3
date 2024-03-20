@@ -58,14 +58,23 @@ std::tuple<vv_float, geneset, compression_map, decompression_map>
 readExpMatrixAndCopulaTransform(const std::string &exp_mat_file_path,
                                 std::mt19937 &rnd, Logger *const logger);
 
-geneset readRegList(const std::string &regulators_list_file_path,
-                    const compression_map &defined_genes, Logger *const logger,
-                    bool verbose);
-
+/*
+ Create a subsampled gene_to_floats.  Requires that exp_mat and
+n_subsample are set.
+ */
 const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
                                                 const uint16_t n_subsample,
                                                 std::mt19937 &rnd);
 
+geneset readRegList(const std::string &regulators_list_file_path,
+                    const compression_map &defined_genes, Logger *const logger,
+                    bool verbose);
+
+/*
+ Function that prints the Regulator, Target, and MI to the output_dir given the
+ output_suffix.  Does not print to the console.  The data structure input is a
+ gene_to_edge_tars, which is defined in "ARACNe3.hpp".
+ */
 void writeNetworkRegTarMI(const std::string &output_file_name, const char sep,
                           const gene_to_gene_to_float &network,
                           const decompression_map &decompressor);
@@ -74,10 +83,20 @@ void writeARACNe3DF(const std::string &output_file_name, const char sep,
                     const std::vector<ARACNe3_df> &output_df,
                     const decompression_map &decompressor);
 
+/*
+ * Lists the files in the provided subnets dir and matches them to their log
+ * files, assuming heterogeneous runids.  Returns a pair of string vectors that
+ * are index-matched according to subnet, so the correct log statistics are used
+ * in later computation
+ */
 pair_string_vecs
 findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
                                  const std::string &subnets_log_dir);
 
+/*
+ Reads a subnet file and then updates the FPR_estimates vector defined in
+ "subnet_operations.cpp"
+ */
 std::pair<gene_to_gene_to_float, float>
 loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
                                       const std::string &subnet_log_file_path,
