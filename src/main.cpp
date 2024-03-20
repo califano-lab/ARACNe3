@@ -452,7 +452,8 @@ int main(int argc, char *argv[]) {
     watch1.reset();
 
     const auto &[subnet_filenames, subnet_log_filenames] =
-        findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir);
+        findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir,
+                                         aracne3_logger.get());
 
     if (subnet_filenames.size() < n_subnets)
       qexit("Error: Too many subnets requested. Only " +

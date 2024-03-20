@@ -5,43 +5,33 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <numeric>
+#include <sstream>
 
-bool makeDirs(const std::string &dir_name, Logger *const logger) {
-  if (!std::filesystem::exists(dir_name)) {
-    std::filesystem::create_directories(dir_name);
-    if (std::filesystem::exists(dir_name)) {
-      const std::string out_msg = "Directory Created: \"" +
-                                  dir_name +
-                                  "\".";
-
-      std::cout << out_msg << std::endl;
-      if (logger)
-        logger->writeLineWithTime(out_msg);
-
-      return true;
-    } else {
-      const std::string err_msg = "Failed to create directory: \"" +
-                                  dir_name +
-                                  "\".";
-
-      std::cerr << err_msg << std::endl;
-      if (logger)
-        logger->writeLineWithTime(err_msg);
-
-      return false;
-    }
-  }
-  return true;
-}
-
+/**
+ * @brief Check if a file stream is open, and exit the program if it's not.
+ *
+ * This function checks if the provided input file stream (std::ifstream) is
+ * open. If the file stream is not open, it prints an error message to the
+ * standard error stream (std::cerr) and logs the error message using the
+ * provided Logger object (if not nullptr). Then, it terminates the program with
+ * a failure status.
+ *
+ * @param ifs The input file stream to check.
+ * @param file_path The path of the file associated with the file stream.
+ * @param logger A pointer to a Logger object for logging the error message.
+ *               If nullptr, no logging is performed.
+ *
+ * @return void
+ *
+ * @note This function does not return if the file stream is not open. It
+ *       terminates the program using std::exit(EXIT_FAILURE).
+ */
 void exitIfFileNotOpen(std::ifstream &ifs, const std::string &file_path,
                        Logger *const logger) {
   if (!ifs.is_open()) {
-    const std::string err_msg = "Error: could not open file \"" +
-                                file_path +
-                                "\".";
+    const std::string err_msg =
+        "Error: could not open file \"" + file_path + "\".";
 
     std::cerr << err_msg << std::endl;
     if (logger)
@@ -51,6 +41,31 @@ void exitIfFileNotOpen(std::ifstream &ifs, const std::string &file_path,
   }
 
   return;
+}
+
+bool makeDirs(const std::string &dir_name, Logger *const logger) {
+  if (!std::filesystem::exists(dir_name)) {
+    std::filesystem::create_directories(dir_name);
+    if (std::filesystem::exists(dir_name)) {
+      const std::string out_msg = "Directory Created: \"" + dir_name + "\".";
+
+      std::cout << out_msg << std::endl;
+      if (logger)
+        logger->writeLineWithTime(out_msg);
+
+      return true;
+    } else {
+      const std::string err_msg =
+          "Failed to create directory: \"" + dir_name + "\".";
+
+      std::cerr << err_msg << std::endl;
+      if (logger)
+        logger->writeLineWithTime(err_msg);
+
+      return false;
+    }
+  }
+  return true;
 }
 
 std::tuple<vv_float, geneset, compression_map, decompression_map>
@@ -178,8 +193,8 @@ geneset readRegList(const std::string &regulators_list_file_path,
   }
 
   if (num_warnings > 3u && !verbose)
-    std::cerr << "... " << num_warnings - 3U << " similar warnings suppressed ..."
-              << std::endl;
+    std::cerr << "... " << num_warnings - 3U
+              << " similar warnings suppressed ..." << std::endl;
 
   if (regulators.empty()) {
     const std::string abort_msg = "Abort: no regulators to analyze.";
@@ -235,7 +250,8 @@ void writeARACNe3DF(const std::string &output_file_name, const char sep,
 
 pair_string_vecs
 findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
-                                 const std::string &subnets_log_dir) {
+                                 const std::string &subnets_log_dir,
+                                 Logger *const logger) {
   std::vector<std::string> subnet_filenames, subnet_log_filenames;
   try {
     for (const auto &entry : std::filesystem::directory_iterator(subnets_dir)) {
@@ -252,21 +268,25 @@ findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
         if (std::filesystem::exists(subnets_log_dir + subnet_log_filename))
           subnet_log_filenames.push_back(subnet_log_filename);
         else {
-          std::cerr << "Fatal: expected \"" + subnets_log_dir +
-                           subnet_log_filename +
-                           "\" to exist based on the file \"" + subnets_dir +
-                           subnet_filename +
-                           "\", but the log file was not found."
-                    << std::endl;
+          const std::string err_msg =
+              "Fatal: expected \"" + subnets_log_dir + subnet_log_filename +
+              "\" to exist based on the file \"" + subnets_dir +
+              subnet_filename + "\", but the log file was not found.";
+          std::cerr << err_msg << std::endl;
+          if (logger)
+            logger->writeLineWithTime(err_msg);
           std::exit(EXIT_FAILURE);
         }
       }
     }
   } catch (std::filesystem::filesystem_error &e) {
-    std::cerr << "Error reading directory: " << e.what() << std::endl;
-    std::cerr << "Check that your output directory has the subdirectories "
-                 "\"subnets/\" and \"subnets_log/\""
-              << std::endl;
+    const std::string err_msg =
+        "Error reading directory: " + std::string(e.what()) +
+        "\nCheck that your output directory has the subdirectories "
+        "\"subnets/\" and \"subnets_log/\"";
+    std::cerr << err_msg << std::endl;
+    if (logger)
+      logger->writeLineWithTime(err_msg);
     std::exit(EXIT_FAILURE);
   }
   return {subnet_filenames, subnet_log_filenames};
