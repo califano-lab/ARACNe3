@@ -44,15 +44,6 @@ struct ARACNe3_df {
 // ---- Functions ----
 
 /**
- * Wraps STL functions to create a full directory path; this is mainly a
- * convenience function
- *
- * @param dir_name A constant reference to a string representing the directory
- * path.
- */
-bool makeDirs(const std::string &dir_name, Logger *const logger);
-
-/**
  * @brief Read an expression matrix file, copula-transform the data, and return
  * the parsed data.
  *

@@ -52,6 +52,38 @@ void serialize(Archive &ar, APMINullModel &model, const unsigned int version) {
 } // namespace serialization
 } // namespace boost
 
+/**
+ * Wraps STL functions to create a full directory path; this is mainly a
+ * convenience function
+ *
+ * @param dir_name A constant reference to a string representing the directory
+ * path.
+ */
+bool makeDirs(const std::string &dir_name, Logger *const logger) {
+  if (!std::filesystem::exists(dir_name)) {
+    std::filesystem::create_directories(dir_name);
+    if (std::filesystem::exists(dir_name)) {
+      const std::string out_msg = "Directory Created: \"" + dir_name + "\".";
+
+      std::cout << out_msg << std::endl;
+      if (logger)
+        logger->writeLineWithTime(out_msg);
+
+      return true;
+    } else {
+      const std::string err_msg =
+          "Failed to create directory: \"" + dir_name + "\".";
+
+      std::cerr << err_msg << std::endl;
+      if (logger)
+        logger->writeLineWithTime(err_msg);
+
+      return false;
+    }
+  }
+  return true;
+}
+
 // ---- Begin ARACNe3 runtime ----
 
 int main(int argc, char *argv[]) {

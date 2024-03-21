@@ -43,31 +43,6 @@ void exitIfFileNotOpen(std::ifstream &ifs, const std::string &file_path,
   return;
 }
 
-bool makeDirs(const std::string &dir_name, Logger *const logger) {
-  if (!std::filesystem::exists(dir_name)) {
-    std::filesystem::create_directories(dir_name);
-    if (std::filesystem::exists(dir_name)) {
-      const std::string out_msg = "Directory Created: \"" + dir_name + "\".";
-
-      std::cout << out_msg << std::endl;
-      if (logger)
-        logger->writeLineWithTime(out_msg);
-
-      return true;
-    } else {
-      const std::string err_msg =
-          "Failed to create directory: \"" + dir_name + "\".";
-
-      std::cerr << err_msg << std::endl;
-      if (logger)
-        logger->writeLineWithTime(err_msg);
-
-      return false;
-    }
-  }
-  return true;
-}
-
 std::tuple<vv_float, geneset, compression_map, decompression_map>
 readExpMatrixAndCopulaTransform(const std::string &exp_mat_file_path,
                                 std::mt19937 &rnd, Logger *const logger) {
