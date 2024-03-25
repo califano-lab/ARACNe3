@@ -1,4 +1,4 @@
-#include "aracne3io.hpp"
+#include "fsio.hpp"
 #include "algorithms.hpp"
 
 #include <algorithm>
@@ -8,44 +8,15 @@
 #include <numeric>
 #include <sstream>
 
-/**
- * @brief Check if a file stream is open, and exit the program if it's not.
- *
- * This function checks if the provided input file stream (std::ifstream) is
- * open. If the file stream is not open, it prints an error message to the
- * standard error stream (std::cerr) and logs the error message using the
- * provided Logger object (if not nullptr). Then, it terminates the program with
- * a failure status.
- *
- * @param ifs The input file stream to check.
- * @param file_path The path of the file associated with the file stream.
- * @param logger A pointer to a Logger object for logging the error message.
- *               If nullptr, no logging is performed.
- *
- * @return void
- *
- * @note This function does not return if the file stream is not open. It
- *       terminates the program using std::exit(EXIT_FAILURE).
- */
-void exitIfFileNotOpen(std::ifstream &ifs, const std::string &file_path,
-                       Logger *const logger) {
-  if (!ifs.is_open()) {
-    const std::string err_msg =
-        "Error: could not open file \"" + file_path + "\".";
-
-    std::cerr << err_msg << std::endl;
-    if (logger)
-      logger->writeLineWithTime(err_msg);
-
-    std::exit(EXIT_FAILURE);
-  }
-
-  return;
-}
+FilesystemIOHandler::FilesystemIOHandler(const std::string &emfp,
+                                         const std::string &rlfp,
+                                         const std::string &fofn, const char s)
+    : exp_mat_file_path(emfp), regulators_list_file_path(rlfp),
+      final_output_file_name(fofn), sep(s){};
 
 std::tuple<vv_float, geneset, compression_map, decompression_map>
-readExpMatrixAndCopulaTransform(const std::string &exp_mat_file_path,
-                                std::mt19937 &rnd, Logger *const logger) {
+FilesystemIOHandler::readExpMatrixAndCopulaTransform(
+    std::mt19937 &rnd, Logger *const logger) const {
 
   std::ifstream ifs{exp_mat_file_path};
   exitIfFileNotOpen(ifs, exp_mat_file_path, logger);
@@ -113,9 +84,9 @@ readExpMatrixAndCopulaTransform(const std::string &exp_mat_file_path,
   return {gexp_matrix, genes, compressor, decompressor};
 }
 
-geneset readRegList(const std::string &regulators_list_file_path,
-                    const compression_map &defined_genes, Logger *const logger,
-                    bool verbose) {
+geneset FilesystemIOHandler::readRegList(const compression_map &defined_genes,
+                                         Logger *const logger,
+                                         bool verbose) const {
 
   std::ifstream ifs{regulators_list_file_path};
   exitIfFileNotOpen(ifs, regulators_list_file_path, logger);
@@ -163,9 +134,9 @@ geneset readRegList(const std::string &regulators_list_file_path,
   return regulators;
 }
 
-void writeNetworkRegTarMI(const std::string &output_file_name, const char sep,
-                          const gene_to_gene_to_float &network,
-                          const decompression_map &decompressor) {
+void FilesystemIOHandler::writeNetworkRegTarMI(
+    const std::string &output_file_name, const gene_to_gene_to_float &network,
+    const decompression_map &decompressor) const {
   std::ofstream ofs{output_file_name};
   if (!ofs) {
     std::cerr << "error: could not write to file: " << output_file_name << "."
@@ -182,18 +153,18 @@ void writeNetworkRegTarMI(const std::string &output_file_name, const char sep,
   ofs.close();
 }
 
-void writeARACNe3DF(const std::string &output_file_name, const char sep,
-                    const std::vector<ARACNe3_df> &output_df,
-                    const decompression_map &decompressor) {
+void FilesystemIOHandler::writeARACNe3DF(
+    const std::vector<ARACNe3_df> &final_output_df,
+    const decompression_map &decompressor) const {
 
-  std::ofstream ofs(output_file_name);
+  std::ofstream ofs(final_output_file_name);
 
   ofs << "regulator.values" << sep << "target.values" << sep << "mi.values"
       << sep << "scc.values" << sep << "count.values" << sep << "log.p.values"
       << '\n';
 
-  for (std::size_t i = 0U; i < output_df.size(); ++i) {
-    const ARACNe3_df &row = output_df[i];
+  for (std::size_t i = 0U; i < final_output_df.size(); ++i) {
+    const ARACNe3_df &row = final_output_df[i];
     ofs << decompressor.at(row.regulator) << sep << decompressor.at(row.target)
         << sep << row.final_mi << sep << row.final_scc << sep
         << row.num_subnets_incident << sep << row.final_log_p << '\n';
@@ -202,10 +173,9 @@ void writeARACNe3DF(const std::string &output_file_name, const char sep,
   ofs.close();
 }
 
-pair_string_vecs
-findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
-                                 const std::string &subnets_log_dir,
-                                 Logger *const logger) {
+pair_string_vecs FilesystemIOHandler::findSubnetFilesAndSubnetLogFiles(
+    const std::string &subnets_dir, const std::string &subnets_log_dir,
+    Logger *const logger) const {
   std::vector<std::string> subnet_filenames, subnet_log_filenames;
   try {
     for (const auto &entry : std::filesystem::directory_iterator(subnets_dir)) {
@@ -247,11 +217,11 @@ findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
 }
 
 std::pair<gene_to_gene_to_float, float>
-loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
-                                      const std::string &subnet_log_file_path,
-                                      const compression_map &defined_genes,
-                                      const geneset &regulators,
-                                      Logger *const logger) {
+FilesystemIOHandler::loadARACNe3SubnetsAndUpdateFPRFromLog(
+    const std::string &subnet_file_path,
+    const std::string &subnet_log_file_path,
+    const compression_map &defined_genes, const geneset &regulators,
+    Logger *const logger) const {
   // read in the subnet file
   std::ifstream subnet_ifs{subnet_file_path};
   exitIfFileNotOpen(subnet_ifs, subnet_file_path, logger);

@@ -1,8 +1,8 @@
 #include "config.h"
 
 #include "apmi_nullmodel.hpp"
-#include "aracne3io.hpp"
 #include "cmdline_parser.hpp"
+#include "fsio.hpp"
 #include "logger.hpp"
 #include "stopwatch.hpp"
 #include "subnet_operations.hpp"
@@ -268,6 +268,9 @@ int main(int argc, char *argv[]) {
 
   std::mt19937 rnd{seed};
 
+  FilesystemIOHandler io(exp_mat_file_path, regulators_list_file_path,
+                         output_dir + "network_" + runid + ".tsv", '\t');
+
   std::string cur_msg = "Beginning ARACNe3 instance...";
   std::cout << M << cur_msg << std::endl;
 
@@ -293,13 +296,11 @@ int main(int argc, char *argv[]) {
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime("...processing expression matrix...");
     std::tie(exp_mat, genes, compressor, decompressor) =
-        readExpMatrixAndCopulaTransform(exp_mat_file_path, rnd,
-                                        aracne3_logger.get());
+        io.readExpMatrixAndCopulaTransform(rnd, aracne3_logger.get());
 
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime("...processing regulators...");
-    regulators = readRegList(regulators_list_file_path, compressor,
-                             aracne3_logger.get(), verbose);
+    regulators = io.readRegList(compressor, aracne3_logger.get(), verbose);
   } catch (const std::exception &e) {
     std::string err_msg = std::string("Error reading input files: ") + e.what();
 
@@ -421,7 +422,7 @@ int main(int argc, char *argv[]) {
             subsample_exp_mat, regulators, genes, n_samps, n_subsamp,
             subnets.size() + 1u, prune_alpha, apmi_null_model, method, alpha,
             prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir, threads,
-            runid, decompressor, save_subnets);
+            runid, decompressor, save_subnets, io);
         subnets.push_back(std::move(subnet));
         FPR_estimates.push_back(FPR_estimate_subnet);
 
@@ -463,7 +464,7 @@ int main(int argc, char *argv[]) {
                                 n_subsamp, i + 1u, prune_alpha, apmi_null_model,
                                 method, alpha, prune_MaxEnt, output_dir,
                                 subnets_dir, subnets_log_dir, threads, runid,
-                                decompressor, save_subnets);
+                                decompressor, save_subnets, io);
 
         if (subnets.at(i).size() == 0)
           qexit("Abort: No edges returned. Empty subnetwork.");
@@ -484,8 +485,8 @@ int main(int argc, char *argv[]) {
     watch1.reset();
 
     const auto &[subnet_filenames, subnet_log_filenames] =
-        findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir,
-                                         aracne3_logger.get());
+        io.findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir,
+                                            aracne3_logger.get());
 
     if (subnet_filenames.size() < n_subnets)
       qexit("Error: Too many subnets requested. Only " +
@@ -494,7 +495,7 @@ int main(int argc, char *argv[]) {
 
     for (uint16_t subnet_idx = 0; subnet_idx < n_subnets; ++subnet_idx) {
       const auto &[subnet, FPR_estimate_subnet] =
-          loadARACNe3SubnetsAndUpdateFPRFromLog(
+          io.loadARACNe3SubnetsAndUpdateFPRFromLog(
               subnets_dir + subnet_filenames[subnet_idx],
               subnets_log_dir + subnet_log_filenames[subnet_idx], compressor,
               regulators, aracne3_logger.get());
@@ -526,8 +527,7 @@ int main(int argc, char *argv[]) {
     qlog("Writing final network...");
     watch1.reset();
 
-    writeARACNe3DF(output_dir + "network_" + runid + ".tsv", '\t', final_df,
-                   decompressor);
+    io.writeARACNe3DF(final_df, decompressor);
 
   } else if (skip_consolidate) {
     qlog("No consolidation requested.");

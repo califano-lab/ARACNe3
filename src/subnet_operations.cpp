@@ -32,7 +32,7 @@ const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
 }
 
 class SubnetLogger : public Logger {
-  public:
+public:
   SubnetLogger(const std::string &log_file_name, const std::string &runid,
                const uint16_t subnet_number, const geneset &regulators,
                const geneset &genes, const uint16_t tot_num_samps,
@@ -225,7 +225,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
     const std::string &output_dir, const std::string &subnets_dir,
     const std::string &subnets_log_dir, const uint16_t nthreads,
     const std::string &runid, const decompression_map &decompressor,
-    const bool save_subnet) {
+    const bool save_subnet, const ARACNe3IOHandler& io) {
 
   std::unique_ptr<SubnetLogger> subnet_logger;
 
@@ -338,10 +338,10 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
   watch1.reset();
 
   if (save_subnet)
-    writeNetworkRegTarMI(subnets_dir + "subnetwork-" +
-                             std::to_string(subnet_number) + "_" + runid +
-                             ".tsv",
-                         '\t', subnetwork, decompressor);
+    io.writeNetworkRegTarMI(subnets_dir + "subnetwork-" +
+                                std::to_string(subnet_number) + "_" + runid +
+                                ".tsv",
+                            subnetwork, decompressor);
 
   qlog(watch1.getSeconds() + "\n");
 
@@ -366,8 +366,7 @@ consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
       }
       if (num_occurrences > 0) {
         const float final_mi = calcAPMI(exp_mat.at(reg), exp_mat.at(tar));
-        const float final_scc =
-            pearsonsR(exp_mat.at(reg), exp_mat.at(tar));
+        const float final_scc = pearsonsR(exp_mat.at(reg), exp_mat.at(tar));
         const double final_log_p =
             lRightTailBinomialP(subnets.size(), num_occurrences, FPR_estimate);
         final_df.emplace_back(reg, tar, final_mi, final_scc, num_occurrences,

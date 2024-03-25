@@ -11,26 +11,26 @@ target_include_directories(aracne3tools PRIVATE
   ${PROJECT_SOURCE_DIR}/include/ARACNe3
 )
 
-# TODO: Remove apmi_nullmodel dependency on linking fs (only aracne3io should)
+# TODO: Remove apmi_nullmodel dependency on linking fs (only fsio should)
 if(UNIX AND NOT APPLE)
   target_link_libraries(aracne3tools PRIVATE stdc++fs)
 endif()
 
-# ---- Define the aracne3io target ----
-add_library(aracne3io STATIC
-	aracne3io.cpp
+# ---- Define the fsio target ----
+add_library(fsio STATIC
+	fsio.cpp
   )
 
-target_include_directories(aracne3io PRIVATE
+target_include_directories(fsio PRIVATE
 	${PROJECT_SOURCE_DIR}/include/ARACNe3
 )
 
-target_link_libraries(aracne3io PRIVATE
+target_link_libraries(fsio PRIVATE
   $<TARGET_OBJECTS:aracne3tools>
   )
 
 if(UNIX AND NOT APPLE)
-  target_link_libraries(aracne3io PRIVATE stdc++fs)
+  target_link_libraries(fsio PRIVATE stdc++fs)
 endif()
 
 # ---- Build ARACNe3 ----
@@ -44,7 +44,7 @@ set_target_properties(ARACNe3_app PROPERTIES
 )
 
 target_link_libraries(ARACNe3_app PRIVATE 
-  aracne3io
+  fsio
   $<TARGET_OBJECTS:aracne3tools>
   Boost::serialization
   )

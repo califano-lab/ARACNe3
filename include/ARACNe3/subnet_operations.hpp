@@ -39,7 +39,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
     const std::string &output_dir, const std::string &subnets_dir,
     const std::string &subnet_log_dir, const uint16_t nthreads,
     const std::string &runid, const decompression_map &decompressor,
-    const bool save_subnet);
+    const bool save_subnet, const ARACNe3IOHandler& io);
 
 const std::vector<ARACNe3_df>
 consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
