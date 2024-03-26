@@ -4,11 +4,11 @@
 #include "aracne3io.hpp"
 #include "stopwatch.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <set>
-#include <algorithm>
 #include <memory>
+#include <set>
 
 const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
                                                 const uint16_t n_subsamp,
@@ -110,7 +110,8 @@ pruneAlpha(const vv_float &network, const std::vector<gene_id> &regs_c,
     }
   }
 
-  reg_tar_mi.erase(reg_tar_mi.cbegin() + lowest_idx_that_doesnt_pass_thresh, reg_tar_mi.cend());
+  reg_tar_mi.erase(reg_tar_mi.cbegin() + lowest_idx_that_doesnt_pass_thresh,
+                   reg_tar_mi.cend());
 
   // TODO: Remove all .at()
   // rebuild network

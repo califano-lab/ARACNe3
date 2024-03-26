@@ -435,7 +435,7 @@ int main(int argc, char *argv[]) {
             regulons[reg].insert(tar);
 
         // check minimum regulon size
-        uint16_t min_regulon_size = 65535U;
+        uint16_t min_regulon_size = 65535u;
         for (const auto &[reg, regulon] : regulons)
           if (regulons.at(reg).size() < min_regulon_size)
             min_regulon_size = regulons.at(reg).size();
