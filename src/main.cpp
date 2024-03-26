@@ -397,7 +397,7 @@ int main(int argc, char *argv[]) {
   }
 #endif /* _DEBUG */
 
-  // ---- Begin subnetwork generation ----
+  // ---- Begin analysis ----
 
   std::vector<gene_to_gene_to_float> subnets;
   std::vector<uint32_t> subnet_sizes;

@@ -10,27 +10,6 @@
 #include <memory>
 #include <set>
 
-const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
-                                                const uint16_t n_subsamp,
-                                                std::mt19937 &rnd) {
-  std::vector<uint16_t> idxs(exp_mat[0].size());
-  std::iota(idxs.begin(), idxs.end(), 0U);
-
-  std::vector<uint16_t> fold(n_subsamp);
-  std::sample(idxs.begin(), idxs.end(), fold.begin(), n_subsamp, rnd);
-
-  vv_float subsample_exp_mat(exp_mat.size(),
-                             std::vector<float>(n_subsamp, 0.f));
-  for (gene_id gene = 0u; gene < exp_mat.size(); ++gene) {
-    for (uint16_t i = 0u; i < n_subsamp; ++i)
-      subsample_exp_mat[gene][i] = exp_mat[gene][fold[i]];
-
-    subsample_exp_mat[gene] = copulaTransform(subsample_exp_mat[gene], rnd);
-  }
-
-  return subsample_exp_mat;
-}
-
 class SubnetLogger : public Logger {
 public:
   SubnetLogger(const std::string &log_file_name, const std::string &runid,
@@ -55,6 +34,27 @@ public:
     writeLine("\n-----------Begin Network Generation-----------");
   }
 };
+
+const vv_float sampleExpMatAndReCopulaTransform(const vv_float &exp_mat,
+                                                const uint16_t n_subsamp,
+                                                std::mt19937 &rnd) {
+  std::vector<uint16_t> idxs(exp_mat[0].size());
+  std::iota(idxs.begin(), idxs.end(), 0U);
+
+  std::vector<uint16_t> fold(n_subsamp);
+  std::sample(idxs.begin(), idxs.end(), fold.begin(), n_subsamp, rnd);
+
+  vv_float subsample_exp_mat(exp_mat.size(),
+                             std::vector<float>(n_subsamp, 0.f));
+  for (gene_id gene = 0u; gene < exp_mat.size(); ++gene) {
+    for (uint16_t i = 0u; i < n_subsamp; ++i)
+      subsample_exp_mat[gene][i] = exp_mat[gene][fold[i]];
+
+    subsample_exp_mat[gene] = copulaTransform(subsample_exp_mat[gene], rnd);
+  }
+
+  return subsample_exp_mat;
+}
 
 /*
  Prunes a network by control of alpha using the Benjamini-Hochberg Procedure if
