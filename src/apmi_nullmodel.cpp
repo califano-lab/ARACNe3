@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <random>
+#include <fstream>
 
 #include "apmi_nullmodel.hpp"
 #include "algorithms.hpp"
@@ -54,4 +55,50 @@ float APMINullModel::getMIPVal(const float mi, const float p_precise) const {
   const float p = (n_nulls_gt_mi + 1.f) / (null_mis.size() + 1.f);
 
   return p < p_precise ? std::exp(ols_m * mi + ols_b) : p;
+}
+
+template<class Archive>
+void APMINullModel::serialize(Archive& ar, const unsigned int version)
+{
+    ar & null_mis;
+    ar & ols_m;
+    ar & ols_b;
+    ar & n_samps;
+    ar & n_nulls;
+    ar & seed;
+}
+
+
+APMINullModel
+APMINullModel::getCachedModel(const std::string &cached_blob_name) {
+  APMINullModel apmi_null_model;
+  std::ifstream ifs(cached_blob_name, std::ios::binary);
+  if (ifs) {
+    try {
+      boost::archive::binary_iarchive ia(ifs);
+      ia >> apmi_null_model;
+    } catch (const std::exception &e) {
+      throw std::runtime_error("Failed to get cached APMINullModel: " +
+                               std::string(e.what()));
+    }
+  } else {
+    throw std::runtime_error("File not found: " + cached_blob_name);
+  }
+  return apmi_null_model;
+}
+
+void APMINullModel::cacheModel(const std::string &cached_blob_name) const {
+  std::ofstream ofs(cached_blob_name, std::ios::binary);
+  if (ofs) {
+    try {
+      boost::archive::binary_oarchive oa(ofs);
+      oa << *this;
+    } catch (const std::exception &e) {
+      throw std::runtime_error("Failed to serialize APMINullModel: " +
+                               std::string(e.what()));
+    }
+  } else {
+    throw std::runtime_error("Unable to open file for writing: " +
+                             cached_blob_name);
+  }
 }

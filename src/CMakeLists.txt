@@ -7,6 +7,10 @@ add_library(aracne3tools OBJECT  # compile source files but do not archive
   logger.cpp
   )
 
+target_link_libraries(aracne3tools PUBLIC
+  Boost::serialization
+  )
+
 target_include_directories(aracne3tools PRIVATE
   ${PROJECT_SOURCE_DIR}/include/ARACNe3
 )
@@ -26,7 +30,7 @@ target_include_directories(fsio PRIVATE
 )
 
 target_link_libraries(fsio PRIVATE
-  $<TARGET_OBJECTS:aracne3tools>
+  aracne3tools
   )
 
 if(UNIX AND NOT APPLE)
@@ -45,8 +49,7 @@ set_target_properties(ARACNe3_app PROPERTIES
 
 target_link_libraries(ARACNe3_app PRIVATE 
   fsio
-  $<TARGET_OBJECTS:aracne3tools>
-  Boost::serialization
+  aracne3tools
   )
 
 target_include_directories(ARACNe3_app PRIVATE 

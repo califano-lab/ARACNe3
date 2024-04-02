@@ -5,6 +5,10 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/serialization/vector.hpp>  // for vector serialize member
+
 class APMINullModel {
 public:
   APMINullModel();
@@ -21,9 +25,17 @@ public:
     return {null_mis, ols_m, ols_b, n_samps, n_nulls, seed};
   }
 
+  static APMINullModel getCachedModel(const std::string &cached_blob_name);
+  void cacheModel(const std::string& cached_blob_name) const;
+
 private:
   std::vector<float> null_mis;
   float ols_m, ols_b;
   std::size_t n_samps, n_nulls;
   uint32_t seed;
+
+  template<class Archive>
+  void serialize(Archive& ar, const unsigned int version);
+
+  friend class boost::serialization::access;
 };

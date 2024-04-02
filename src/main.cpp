@@ -16,10 +16,6 @@
 #include <numeric>
 #include <string>
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp> // for object caching
-#include <boost/serialization/vector.hpp>
-
 // ---- Fetch app information ----
 #ifndef CACHE_PATH
 #define CACHE_PATH "cache/aracne3"
@@ -28,29 +24,6 @@
 #ifndef APP_VERSION
 #define APP_VERSION "0.0.0"
 #endif
-
-// ---- Define APMINullModel serialization fn for Boost ----
-namespace boost {
-namespace serialization {
-
-template <class Archive>
-void serialize(Archive &ar, APMINullModel &model, const unsigned int version) {
-  auto [null_mis, ols_m, ols_b, n_samps, n_nulls, seed] = model.getModel();
-
-  ar &null_mis;
-  ar &ols_m;
-  ar &ols_b;
-  ar &n_samps;
-  ar &n_nulls;
-  ar &seed;
-
-  // For deserialization, set the values back into the model
-  if (Archive::is_loading::value) {
-    model = APMINullModel(null_mis, ols_m, ols_b, n_samps, n_nulls, seed);
-  }
-}
-} // namespace serialization
-} // namespace boost
 
 /**
  * Wraps STL functions to create a full directory path; this is mainly a
@@ -372,11 +345,8 @@ int main(int argc, char *argv[]) {
          std::to_string(n_subsamp) + ")...");
     watch1.reset();
 
-    std::ifstream ifs(cached_blob_name, std::ios::binary);
-    if (ifs) {
-      boost::archive::binary_iarchive ia(ifs);
-      ia >> apmi_null_model;
-    }
+    apmi_null_model = APMINullModel::getCachedModel(cached_blob_name);
+
     qlog("Null model read. Time elapsed: " + watch1.getSeconds());
 
   } else {
@@ -390,9 +360,9 @@ int main(int argc, char *argv[]) {
     qlog("Caching null model for subsampled APMI (n = " +
          std::to_string(n_subsamp) + ")...");
     watch1.reset();
-    std::ofstream ofs(cached_blob_name, std::ios::binary);
-    boost::archive::binary_oarchive oa(ofs);
-    oa << apmi_null_model;
+
+    apmi_null_model.cacheModel(cached_blob_name);
+
     qlog("Null model cached. Time elapsed: " + watch1.getSeconds());
   }
 #endif /* _DEBUG */
