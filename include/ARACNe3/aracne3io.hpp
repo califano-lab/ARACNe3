@@ -112,7 +112,7 @@ public:
    * @param decompressor A decompression map that maps gene IDs to their
    * corresponding gene names.
    */
-  virtual void writeNetworkRegTarMI(const std::string &output_file_name,
+  virtual void writeNetworkRegTarMI(const uint16_t subnet_number,
                             const gene_to_gene_to_float &network,
                             const decompression_map &decompressor) const {
     throw std::runtime_error(

@@ -223,10 +223,10 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
     const uint16_t tot_num_subsample, const uint16_t subnet_number,
     const bool prune_alpha, const APMINullModel &nullmodel,
     const std::string &method, const float alpha, const bool prune_MaxEnt,
-    const std::string &output_dir, const std::string &subnets_dir,
-    const std::string &subnets_log_dir, const uint16_t nthreads,
-    const std::string &runid, const decompression_map &decompressor,
-    const bool save_subnet, const ARACNe3IOHandler& io) {
+    const std::string &subnets_dir, const std::string &subnets_log_dir,
+    const uint16_t nthreads, const std::string &runid,
+    const decompression_map &decompressor, const bool save_subnet,
+    const ARACNe3IOHandler &io) {
 
   std::unique_ptr<SubnetLogger> subnet_logger;
 
@@ -339,10 +339,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
   watch1.reset();
 
   if (save_subnet)
-    io.writeNetworkRegTarMI(subnets_dir + "subnetwork-" +
-                                std::to_string(subnet_number) + "_" + runid +
-                                ".tsv",
-                            subnetwork, decompressor);
+    io.writeNetworkRegTarMI(subnet_number, subnetwork, decompressor);
 
   qlog(watch1.getSeconds() + "\n");
 

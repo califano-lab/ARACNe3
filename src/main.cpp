@@ -242,17 +242,10 @@ int main(int argc, char *argv[]) {
   std::mt19937 rnd{seed};
 
   FilesystemIOHandler io(exp_mat_file_path, regulators_list_file_path,
-                         output_dir + "network_" + runid + ".tsv", '\t');
+                         output_dir + "network_" + runid + ".tsv", subnets_dir,
+                         runid, '\t');
 
-  std::string cur_msg = "Beginning ARACNe3 instance...";
-  std::cout << M << cur_msg << std::endl;
-
-  if (aracne3_logger) {
-    std::cout << M
-              << "See logs and progress reports in \"" + log_file_name + "\""
-              << std::endl;
-    aracne3_logger->writeLineWithTime(cur_msg);
-  }
+  qlog("See logs and progress reports in \"" + log_file_name + "\"");
 
   // ---- Reading input files ----
 
@@ -391,8 +384,8 @@ int main(int argc, char *argv[]) {
         auto [subnet, FPR_estimate_subnet, subnet_size] = createARACNe3Subnet(
             subsample_exp_mat, regulators, genes, n_samps, n_subsamp,
             subnets.size() + 1u, prune_alpha, apmi_null_model, method, alpha,
-            prune_MaxEnt, output_dir, subnets_dir, subnets_log_dir, threads,
-            runid, decompressor, save_subnets, io);
+            prune_MaxEnt, subnets_dir, subnets_log_dir, threads, runid,
+            decompressor, save_subnets, io);
         subnets.push_back(std::move(subnet));
         FPR_estimates.push_back(FPR_estimate_subnet);
 
@@ -432,9 +425,9 @@ int main(int argc, char *argv[]) {
         std::tie(subnets.at(i), FPR_estimates.at(i), subnet_sizes.at(i)) =
             createARACNe3Subnet(subsample_exp_mat, regulators, genes, n_samps,
                                 n_subsamp, i + 1u, prune_alpha, apmi_null_model,
-                                method, alpha, prune_MaxEnt, output_dir,
-                                subnets_dir, subnets_log_dir, threads, runid,
-                                decompressor, save_subnets, io);
+                                method, alpha, prune_MaxEnt, subnets_dir,
+                                subnets_log_dir, threads, runid, decompressor,
+                                save_subnets, io);
 
         if (subnets.at(i).size() == 0)
           qexit("Abort: No edges returned. Empty subnetwork.");

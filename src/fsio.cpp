@@ -10,9 +10,11 @@
 
 FilesystemIOHandler::FilesystemIOHandler(const std::string &emfp,
                                          const std::string &rlfp,
-                                         const std::string &fofn, const char s)
+                                         const std::string &fofn,
+                                         const std::string &sd,
+                                         const std::string &r, const char s)
     : exp_mat_file_path(emfp), regulators_list_file_path(rlfp),
-      final_output_file_name(fofn), sep(s){};
+      final_output_file_name(fofn), subnets_dir(sd), runid(r), sep(s){};
 
 std::tuple<vv_float, geneset, compression_map, decompression_map>
 FilesystemIOHandler::readExpMatrixAndCopulaTransform(
@@ -135,8 +137,11 @@ geneset FilesystemIOHandler::readRegList(const compression_map &defined_genes,
 }
 
 void FilesystemIOHandler::writeNetworkRegTarMI(
-    const std::string &output_file_name, const gene_to_gene_to_float &network,
+    const uint16_t subnet_number, const gene_to_gene_to_float &network,
     const decompression_map &decompressor) const {
+  const std::string output_file_name = subnets_dir + "subnetwork-" +
+                                       std::to_string(subnet_number) + "_" +
+                                       runid + ".tsv";
   std::ofstream ofs{output_file_name};
   if (!ofs) {
     std::cerr << "error: could not write to file: " << output_file_name << "."
