@@ -223,10 +223,9 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
     const uint16_t tot_num_subsample, const uint16_t subnet_number,
     const bool prune_alpha, const APMINullModel &nullmodel,
     const std::string &method, const float alpha, const bool prune_MaxEnt,
-    const std::string &subnets_dir, const std::string &subnets_log_dir,
-    const uint16_t nthreads, const std::string &runid,
-    const decompression_map &decompressor, const bool save_subnet,
-    const ARACNe3IOHandler &io) {
+    const std::string &subnets_log_dir, const uint16_t nthreads,
+    const std::string &runid, const decompression_map &decompressor,
+    const bool save_subnet, const ARACNe3IOHandler &io) {
 
   std::unique_ptr<SubnetLogger> subnet_logger;
 
@@ -238,14 +237,14 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
     return;
   };
 
-  float FPR_estimate_subnet;
-  const std::string log_file_name = subnets_log_dir + "log-subnetwork-" +
-                                    std::to_string(subnet_number) + "_" +
-                                    runid + ".txt";
-  if (save_subnet)
+  if (save_subnet) {
+    const std::string log_file_name = subnets_log_dir + "log-subnetwork-" +
+                                      std::to_string(subnet_number) + "_" +
+                                      runid + ".txt";
     subnet_logger = std::make_unique<SubnetLogger>(
         log_file_name, runid, subnet_number, regulators, genes, tot_num_samps,
         tot_num_subsample, method, alpha, prune_MaxEnt);
+  }
 
   // ---- Generate raw subnetwork ----
 
@@ -303,6 +302,8 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
   // ---- Prune by maximizing entropy ----
 
   uint32_t size_of_subnet;
+  float FPR_estimate_subnet;
+
   if (prune_MaxEnt) {
     qlog("\nMaxEnt pruning time: ");
     watch1.reset();
@@ -335,13 +336,14 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
 
   // ---- Return and/or print subnetwork  ----
 
-  qlog("\nPrinting subnetwork in directory \"" + subnets_dir + "\"...");
-  watch1.reset();
+  if (save_subnet) {
+    qlog("\nPrinting subnetwork...");
+    watch1.reset();
 
-  if (save_subnet)
     io.writeNetworkRegTarMI(subnet_number, subnetwork, decompressor);
 
-  qlog(watch1.getSeconds() + "\n");
+    qlog(watch1.getSeconds() + "\n");
+  }
 
   return {subnetwork, FPR_estimate_subnet, size_of_subnet};
 }

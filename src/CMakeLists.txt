@@ -1,12 +1,14 @@
 # ---- Define aracne3tools target ----
-add_library(aracne3tools OBJECT  # compile source files but do not archive
+add_library(aracne3tools
 	cmdline_parser.cpp
 	stopwatch.cpp
 	algorithms.cpp
 	apmi_nullmodel.cpp
   logger.cpp
+  analysis.cpp
   )
 
+# TODO: Make serialization link privately so not all libs need to link serialization
 target_link_libraries(aracne3tools PUBLIC
   Boost::serialization
   )

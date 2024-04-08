@@ -1,97 +1,27 @@
-#include "config.h"
-
-#include "apmi_nullmodel.hpp"
-#include "cmdline_parser.hpp"
-#include "fsio.hpp"
-#include "logger.hpp"
-#include "stopwatch.hpp"
-#include "subnet_operations.hpp"
-
-#include <ctime>
-#include <filesystem>
-#include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <numeric>
-#include <string>
 
-// ---- Fetch app information ----
-#ifndef CACHE_PATH
-#define CACHE_PATH "cache/aracne3"
-#endif
+#include "analysis.hpp"
+#include "apmi_nullmodel.hpp"
+#include "stopwatch.hpp"
+#include "subnet_operations.hpp"
 
-#ifndef APP_VERSION
-#define APP_VERSION "0.0.0"
-#endif
-
-/**
- * Wraps STL functions to create a full directory path; this is mainly a
- * convenience function
- *
- * @param dir_name A constant reference to a string representing the directory
- * path.
- */
-bool makeDirs(const std::string &dir_name, Logger *const logger) {
-  if (!std::filesystem::exists(dir_name)) {
-    std::filesystem::create_directories(dir_name);
-    if (std::filesystem::exists(dir_name)) {
-      const std::string out_msg = "Directory Created: \"" + dir_name + "\".";
-
-      std::cout << out_msg << std::endl;
-      if (logger)
-        logger->writeLineWithTime(out_msg);
-
-      return true;
-    } else {
-      const std::string err_msg =
-          "Failed to create directory: \"" + dir_name + "\".";
-
-      std::cerr << err_msg << std::endl;
-      if (logger)
-        logger->writeLineWithTime(err_msg);
-
-      return false;
-    }
-  }
-  return true;
-}
-
-// ---- Begin ARACNe3 runtime ----
-
-int main(int argc, char *argv[]) {
-
-  // ---- Initialize ARACNe3 runtime variables ----
-
-  uint32_t seed = static_cast<uint32_t>(std::time(nullptr));
-  bool seed_provided = false;
-  uint8_t threads = 1U;
-  std::string runid = "defaultid";
-  bool verbose = false, suppress_log = false;
-  std::string cached_dir = CACHE_PATH;
-
-  uint16_t n_subnets = 1u;
-  float subsamp_pct = 1 - std::exp(-1);
-  bool skip_consolidate = false;
-  bool consolidate_mode = false;
-  bool adaptive = false;
-  float alpha = 0.05f;
-  bool prune_alpha = true;
-  bool prune_MaxEnt = true;
-  bool save_subnets = false;
-  uint16_t min_regulon_occpuancy = 30U;
-  uint16_t min_subnets = 0u;
-  uint16_t max_subnets = 65535u;
-  std::string method = "FDR";
-
-  std::unique_ptr<Logger> aracne3_logger;
-  const std::string M = " -A3- ";
-
-  float mi_cutoff = 0.f;
-  uint32_t n_nulls = 1'000'000u;
+int ARACNe3Analysis(const ARACNe3IOHandler &io, const std::string &version,
+             const std::string &runid, const uint32_t seed,
+             const uint8_t threads, const bool verbose, const float alpha,
+             const float subsamp_pct, const uint32_t n_nulls,
+             const std::string &method, const bool prune_alpha,
+             const bool prune_MaxEnt, const bool save_subnets,
+             const std::string &subnets_log_dir, const bool adaptive,
+             const uint16_t min_subnets, const uint16_t max_subnets,
+             const uint16_t min_regulon_occpuancy, const bool consolidate_mode,
+             const bool skip_consolidate, Logger *const aracne3_logger,
+             const std::string &subnets_dir, const std::string &cached_dir) {
 
   // ---- Quick macros ----
 
+  const std::string M = " -A3- ";
   auto qlog = [&](const std::string &cur_msg) {
     std::cout << M << cur_msg << std::endl;
     if (aracne3_logger)
@@ -115,137 +45,12 @@ int main(int argc, char *argv[]) {
     return;
   };
 
-  // ---- Capturing command line arguments ----
-
-  CmdLineParser clp(argc, argv);
-
-  if (clp.optExists("-h") || clp.optExists("--help") || !clp.optExists("-e") ||
-      !clp.optExists("-r") || !clp.optExists("-o")) {
-    std::cout << M
-              << "usage: " + ((std::string)argv[0]) +
-                     " -e path/to/matrix.txt -r path/to/regulators.txt -o "
-                     "path/to/output/directory"
-              << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  const std::string exp_mat_file_path = clp.getOpt("-e");
-  const std::string regulators_list_file_path = clp.getOpt("-r");
-  std::string output_dir = clp.getOpt("-o");
-
-  try {
-    if (clp.optExists("--seed"))
-      seed = std::stoi(clp.getOpt("--seed"));
-    if (clp.optExists("--threads"))
-      threads = std::stoi(clp.getOpt("--threads"));
-    if (clp.optExists("--runid"))
-      runid = clp.getOpt("--runid");
-    if (clp.optExists("--verbose") || clp.optExists("-v"))
-      verbose = true;
-    if (clp.optExists("--suppress-log") | clp.optExists("--suppress-logs"))
-      suppress_log = true;
-
-    if (clp.optExists("--alpha"))
-      alpha = std::stof(clp.getOpt("--alpha"));
-    if (clp.optExists("--subsample"))
-      subsamp_pct = std::stof(clp.getOpt("--subsample"));
-
-    if (clp.optExists("-x"))
-      n_subnets = min_regulon_occpuancy = std::stoi(clp.getOpt("-x"));
-
-    if (clp.optExists("--threads"))
-      threads = std::stoi(clp.getOpt("--threads"));
-
-    if (clp.optExists("--skip-alpha"))
-      prune_alpha = false;
-    if (clp.optExists("--skip-maxent"))
-      prune_MaxEnt = false;
-
-    if (clp.optExists("--FDR"))
-      method = "FDR";
-    if (clp.optExists("--FWER"))
-      method = "FWER";
-    if (clp.optExists("--FPR"))
-      method = "FPR";
-
-    if (clp.optExists("--adaptive"))
-      adaptive = true;
-    if (clp.optExists("--min-subnets"))
-      min_subnets = std::stoi(clp.getOpt("--min-subnets"));
-    if (clp.optExists("--min-subnetworks"))
-      min_subnets = std::stoi(clp.getOpt("--min-subnetworks"));
-    if (clp.optExists("--max-subnets"))
-      max_subnets = std::stoi(clp.getOpt("--max-subnets"));
-    if (clp.optExists("--max-subnetworks"))
-      max_subnets = std::stoi(clp.getOpt("--max-subnetworks"));
-    if (clp.optExists("--save-subnetworks"))
-      save_subnets = true;
-    if (clp.optExists("--skip-consolidate"))
-      skip_consolidate = save_subnets = true;
-    if (clp.optExists("--consolidate-mode") || clp.optExists("--consolidate"))
-      consolidate_mode = true;
-
-    // ---- Developer options ----
-    if (clp.optExists("--mithresh"))
-      mi_cutoff = std::stof(clp.getOpt("--mithresh"));
-    if (clp.optExists("--numnulls"))
-      n_nulls = std::stoi(clp.getOpt("--numnulls"));
-
-    // ---- Checking edge cases ----
-    if (alpha > 1.f || alpha <= 0.f)
-      throw std::runtime_error("--alpha must be on range [0,1]");
-    if (subsamp_pct > 1.f || subsamp_pct <= 0.f)
-      throw std::runtime_error("--subsample must be on range [0,1]");
-
-    if (skip_consolidate && consolidate_mode)
-      throw std::runtime_error(
-          "Cannot simultaneously skip consolidate and enter consolidate mode");
-
-    if (n_nulls < 0u)
-      throw std::runtime_error("--numnulls be greater than 0");
-
-  } catch (const std::exception &e) {
-    std::string err_msg =
-        std::string("Error parsing command line option: ") + e.what();
-
-    std::cerr << err_msg << std::endl;
-
-    throw; // re-throw the exception for natural program termination
-  }
-
-  // ---- Processing command line arguments ----
-
-  if (output_dir.back() != '/')
-    output_dir += '/';
-
-  if (cached_dir.back() != '/')
-    cached_dir += '/';
-
-  makeDirs(output_dir, aracne3_logger.get());
-
-  const std::string log_file_name = output_dir + "log_" + runid + ".txt";
-  if (!suppress_log)
-    aracne3_logger = std::make_unique<Logger>(log_file_name, argc, argv);
-
-  makeDirs(cached_dir, aracne3_logger.get());
-
-  const std::string subnets_dir = output_dir + "subnetworks/";
-  const std::string subnets_log_dir = output_dir + "log-subnetworks/";
-
-  if (save_subnets) {
-    makeDirs(subnets_dir, aracne3_logger.get());
-    makeDirs(subnets_log_dir, aracne3_logger.get());
-  }
-
   // ---- Begin ARACNe3 instance ----
 
   std::mt19937 rnd{seed};
+  uint16_t n_subnets = 1u;
 
-  FilesystemIOHandler io(exp_mat_file_path, regulators_list_file_path,
-                         output_dir + "network_" + runid + ".tsv", subnets_dir,
-                         runid, '\t');
-
-  qlog("See logs and progress reports in \"" + log_file_name + "\"");
+  qlog("Beginning ARACNe3 instance...");
 
   // ---- Reading input files ----
 
@@ -255,20 +60,22 @@ int main(int argc, char *argv[]) {
   gene_to_geneset regulons;
   geneset genes, regulators;
 
-  qlog("Reading input files...");
+  qlog("Processing inputs...");
   Stopwatch watch1{};
 
   try {
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime("...processing expression matrix...");
+
     std::tie(exp_mat, genes, compressor, decompressor) =
-        io.readExpMatrixAndCopulaTransform(rnd, aracne3_logger.get());
+        io.readExpMatrixAndCopulaTransform(rnd, aracne3_logger);
 
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime("...processing regulators...");
-    regulators = io.readRegList(compressor, aracne3_logger.get(), verbose);
+
+    regulators = io.readRegList(compressor, aracne3_logger, verbose);
   } catch (const std::exception &e) {
-    std::string err_msg = std::string("Error reading input files: ") + e.what();
+    std::string err_msg = std::string("Error processing input: ") + e.what();
 
     std::cerr << err_msg << std::endl;
     if (aracne3_logger)
@@ -277,7 +84,7 @@ int main(int argc, char *argv[]) {
     throw; // re-throw the exception for natural program termination
   }
 
-  qlog("Input files read. Time elapsed: " + watch1.getSeconds());
+  qlog("Inputs processed. Time elapsed: " + watch1.getSeconds());
 
   // ---- Get the null model for mutual information ----
 
@@ -290,7 +97,7 @@ int main(int argc, char *argv[]) {
   const std::string cached_blob_name =
       cached_dir + "APMINullModel_" + std::to_string(n_subsamp) + "_" +
       std::to_string(n_nulls) + "_" + std::to_string(null_model_seed) + "_" +
-      APP_VERSION + ".blob";
+      version + ".blob";
 
   APMINullModel apmi_null_model;
 
@@ -448,7 +255,7 @@ int main(int argc, char *argv[]) {
 
     const auto &[subnet_filenames, subnet_log_filenames] =
         io.findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir,
-                                            aracne3_logger.get());
+                                            aracne3_logger);
 
     if (subnet_filenames.size() < n_subnets)
       qexit("Error: Too many subnets requested. Only " +
@@ -460,7 +267,7 @@ int main(int argc, char *argv[]) {
           io.loadARACNe3SubnetsAndUpdateFPRFromLog(
               subnets_dir + subnet_filenames[subnet_idx],
               subnets_log_dir + subnet_log_filenames[subnet_idx], compressor,
-              regulators, aracne3_logger.get());
+              regulators, aracne3_logger);
       subnets.push_back(subnet);
       FPR_estimates.push_back(FPR_estimate_subnet);
     }
