@@ -85,13 +85,13 @@ int main(int argc, char *argv[]) {
   std::string method = "FDR";
 
   std::unique_ptr<Logger> aracne3_logger;
-  const std::string M = " -A3- ";
 
   float mi_cutoff = 0.f;
   uint32_t n_nulls = 1'000'000u;
 
   // ---- Quick macros ----
 
+  const std::string M = " -A3- ";
   auto qlog = [&](const std::string &cur_msg) {
     std::cout << M << cur_msg << std::endl;
     if (aracne3_logger)
