@@ -60,10 +60,6 @@ public:
    *         - compression_map: A map from gene names to uint16_t indices.
    *         - decompression_map: A vector of gene names, where the index
    * corresponds to the uint16_t index in the compression map.
-   *
-   * @note If the expression matrix cannot be read or if the genes in the
-   * matrix do not have equal samples, the function terminates the program with
-   * an error message.
    */
   virtual std::tuple<vv_float, geneset, compression_map, decompression_map>
   readExpMatrixAndCopulaTransform(std::mt19937 &rnd,
@@ -74,7 +70,8 @@ public:
    * defined in the matrix.
    *
    * @param defined_genes A compression map containing the mapping of gene names
-   * to their IDs in the expression matrix.
+   * to their IDs in the expression matrix. Requires that
+   * readExpMatrixAndCopulaTransform was called successfully.
    * @param logger A pointer to a Logger object for logging messages. If
    * nullptr, no logging is performed.
    * @param verbose If true, all warning messages are printed; otherwise,
@@ -84,7 +81,7 @@ public:
    * regulator list file and the defined genes.
    */
   virtual geneset readRegList(const compression_map &defined_genes,
-                      Logger *const logger, bool verbose) const = 0;
+                              Logger *const logger, bool verbose) const = 0;
 
   /**
    * @brief Write ARACNe3 data frame as regulator-target pairs and
@@ -96,7 +93,7 @@ public:
    * corresponding gene names.
    */
   virtual void writeARACNe3DF(const std::vector<ARACNe3_df> &output_df,
-                      const decompression_map &decompressor) const = 0;
+                              const decompression_map &decompressor) const = 0;
 
   /**
    * @brief Write a network, with regulator-target pairs and their
@@ -111,10 +108,14 @@ public:
    * represented as individual maps of target gene IDs to their MI values.
    * @param decompressor A decompression map that maps gene IDs to their
    * corresponding gene names.
+   *
+   * @note This functionality is currently only available for filesystem
+   * implementations.
    */
-  virtual void writeNetworkRegTarMI(const uint16_t subnet_number,
-                            const gene_to_gene_to_float &network,
-                            const decompression_map &decompressor) const {
+  virtual void
+  writeNetworkRegTarMI(const uint16_t subnet_number,
+                       const gene_to_gene_to_float &network,
+                       const decompression_map &decompressor) const {
     throw std::runtime_error(
         "Single subnetwork inference not supported in this implementation.");
   };
@@ -140,6 +141,9 @@ public:
    * @note The function expects the subnet files to have a `.tsv` extension and
    * the log files to have a `.txt` extension with a prefix of "log-" followed
    * by the subnet file name.
+   *
+   * @note This functionality is currently only available for filesystem
+   * implementations.
    */
   virtual pair_string_vecs
   findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
@@ -182,6 +186,9 @@ public:
    * consolidation step to follow. If the subnet files contain gene names not
    * defined in the expression matrix, the function terminates the program with
    * an error message.
+   *
+   * @note This functionality is currently only available for filesystem
+   * implementations.
    */
   virtual std::pair<gene_to_gene_to_float, float>
   loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
