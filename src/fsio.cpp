@@ -2,11 +2,48 @@
 #include "algorithms.hpp"
 
 #include <algorithm>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <numeric>
 #include <sstream>
+
+class FileNotOpenException : public std::runtime_error {
+public:
+  explicit FileNotOpenException(const std::string &filename)
+      : std::runtime_error("Could not open file: " + filename) {}
+};
+
+class DirectoryReadException : public std::runtime_error {
+public:
+  explicit DirectoryReadException(const std::string &directoryPath)
+      : std::runtime_error("Error reading directory: " + directoryPath) {}
+};
+
+class MatrixDataException : public std::runtime_error {
+public:
+  explicit MatrixDataException(const std::string &message)
+      : std::runtime_error(message) {}
+};
+
+std::ifstream getReadStream(const std::string &filePath) {
+  std::ifstream ifs{filePath};
+  if (!ifs.is_open()) {
+    std::string err_msg = "Could not open file: " + filePath;
+    throw FileNotOpenException(filePath);
+  }
+  return ifs;
+}
+
+std::ofstream getWriteStream(const std::string &filePath) {
+  std::ofstream ofs{filePath};
+  if (!ofs.is_open()) {
+    std::string err_msg = "Could not open file: " + filePath;
+    throw FileNotOpenException(filePath);
+  }
+  return ofs;
+}
 
 FilesystemIOHandler::FilesystemIOHandler(const std::string &emfp,
                                          const std::string &rlfp,
@@ -18,15 +55,14 @@ FilesystemIOHandler::FilesystemIOHandler(const std::string &emfp,
 
 std::tuple<vv_float, geneset, compression_map, decompression_map>
 FilesystemIOHandler::readExpMatrixAndCopulaTransform(
-    std::mt19937 &rnd, Logger *const logger) const {
+    std::mt19937 &rnd) const {
 
-  std::ifstream ifs{exp_mat_file_path};
-  exitIfFileNotOpen(ifs, exp_mat_file_path, logger);
+  auto ifs = getReadStream(exp_mat_file_path);
 
   // pop the first line
   std::string cur_line;
   getline(ifs, cur_line, '\n');
-  if (cur_line.back() == '\r') /* Alert! We have a Windows dweeb! */
+  if (cur_line.back() == '\r')
     cur_line.pop_back();
 
   // parse the exp_mat
@@ -36,7 +72,7 @@ FilesystemIOHandler::readExpMatrixAndCopulaTransform(
   decompression_map decompressor;
 
   while (std::getline(ifs, cur_line, '\n')) {
-    if (cur_line.back() == '\r') /* Alert! We have a Windows dweeb! */
+    if (cur_line.back() == '\r')
       cur_line.pop_back();
     std::vector<float> expr_vec;
 
@@ -44,7 +80,7 @@ FilesystemIOHandler::readExpMatrixAndCopulaTransform(
       expr_vec.reserve(gexp_matrix.at(0).size());
 
     // gene name is first column of matrix
-    std::size_t cur_pos = 0U, cur_end = cur_line.find_first_of("\t", cur_pos);
+    std::size_t cur_pos = 0u, cur_end = cur_line.find_first_of("\t", cur_pos);
     const std::string gene = cur_line.substr(cur_pos, cur_end - cur_pos);
     cur_pos = cur_end + 1;
 
@@ -64,17 +100,13 @@ FilesystemIOHandler::readExpMatrixAndCopulaTransform(
     expr_vec.emplace_back(stof(cur_line.substr(cur_pos, std::string::npos)));
 
     // if this vector is bigger than the first, the data are invalid
-    if (gexp_matrix.size() > 0U && expr_vec.size() != gexp_matrix[0].size()) {
-      const std::string err_msg = "Error: genes in expression matrix do not "
-                                  "all have equal samples. Check that \"" +
-                                  gene + "\" has same number of samples as " +
-                                  decompressor[0];
+    if (gexp_matrix.size() > 0u && expr_vec.size() != gexp_matrix[0].size()) {
+      std::string err_msg = "Error: genes in expression matrix do not "
+                            "all have equal samples. Check that \"" +
+                            gene + "\" has same number of samples as " +
+                            decompressor[0];
 
-      std::cerr << err_msg << std::endl;
-      if (logger)
-        logger->writeLineWithTime(err_msg);
-
-      std::exit(EXIT_FAILURE);
+      throw MatrixDataException(err_msg);
     }
 
     // copula-transform expr_vec
@@ -89,15 +121,15 @@ FilesystemIOHandler::readExpMatrixAndCopulaTransform(
 geneset FilesystemIOHandler::readRegList(const compression_map &defined_genes,
                                          Logger *const logger,
                                          bool verbose) const {
+  constexpr uint32_t MaxPrintWarnings = 3u;
 
-  std::ifstream ifs{regulators_list_file_path};
-  exitIfFileNotOpen(ifs, regulators_list_file_path, logger);
+  auto ifs = getReadStream(regulators_list_file_path);
 
   std::string cur_reg;
   geneset regulators;
-  uint32_t num_warnings = 0U;
+  uint32_t num_warnings = 0u;
   while (std::getline(ifs, cur_reg, '\n')) {
-    if (cur_reg.back() == '\r') /* Alert! We have a Windows dweeb! */
+    if (cur_reg.back() == '\r')
       cur_reg.pop_back();
 
     // Warn if not found in exp_mat once.
@@ -110,7 +142,7 @@ geneset FilesystemIOHandler::readRegList(const compression_map &defined_genes,
       if (logger)
         logger->writeLineWithTime(warning_msg);
 
-      if (num_warnings < 3u || verbose)
+      if (num_warnings < MaxPrintWarnings || verbose)
         std::cerr << warning_msg << std::endl;
 
       ++num_warnings;
@@ -119,18 +151,17 @@ geneset FilesystemIOHandler::readRegList(const compression_map &defined_genes,
     }
   }
 
-  if (num_warnings > 3u && !verbose)
-    std::cerr << "... " << num_warnings - 3U
+  if (num_warnings > MaxPrintWarnings && !verbose)
+    std::cerr << "... " << num_warnings - MaxPrintWarnings
               << " similar warnings suppressed ..." << std::endl;
 
   if (regulators.empty()) {
-    const std::string abort_msg = "Abort: no regulators to analyze.";
+    const std::string abort_msg = "abort: no regulators to analyze.";
 
-    std::cerr << abort_msg << std::endl;
     if (logger)
       logger->writeLineWithTime(abort_msg);
 
-    std::exit(EXIT_FAILURE);
+    throw std::runtime_error(abort_msg);
   }
 
   return regulators;
@@ -139,15 +170,12 @@ geneset FilesystemIOHandler::readRegList(const compression_map &defined_genes,
 void FilesystemIOHandler::writeNetworkRegTarMI(
     const uint16_t subnet_number, const gene_to_gene_to_float &network,
     const decompression_map &decompressor) const {
+
   const std::string output_file_name = subnets_dir + "subnetwork-" +
                                        std::to_string(subnet_number) + "_" +
                                        runid + ".tsv";
-  std::ofstream ofs{output_file_name};
-  if (!ofs) {
-    std::cerr << "error: could not write to file: " << output_file_name << "."
-              << std::endl;
-    std::exit(EXIT_FAILURE);
-  }
+
+  std::ofstream ofs = getWriteStream(output_file_name);
 
   ofs << "regulator.values" << sep << "target.values" << sep << "mi.values"
       << std::endl;
@@ -168,7 +196,7 @@ void FilesystemIOHandler::writeARACNe3DF(
       << sep << "scc.values" << sep << "count.values" << sep << "log.p.values"
       << '\n';
 
-  for (std::size_t i = 0U; i < final_output_df.size(); ++i) {
+  for (std::size_t i = 0u; i < final_output_df.size(); ++i) {
     const ARACNe3_df &row = final_output_df[i];
     ofs << decompressor.at(row.regulator) << sep << decompressor.at(row.target)
         << sep << row.final_mi << sep << row.final_scc << sep
@@ -179,8 +207,7 @@ void FilesystemIOHandler::writeARACNe3DF(
 }
 
 pair_string_vecs FilesystemIOHandler::findSubnetFilesAndSubnetLogFiles(
-    const std::string &subnets_dir, const std::string &subnets_log_dir,
-    Logger *const logger) const {
+    const std::string &subnets_dir, const std::string &subnets_log_dir) const {
   std::vector<std::string> subnet_filenames, subnet_log_filenames;
   try {
     for (const auto &entry : std::filesystem::directory_iterator(subnets_dir)) {
@@ -190,21 +217,18 @@ pair_string_vecs FilesystemIOHandler::findSubnetFilesAndSubnetLogFiles(
 
         // Construct the expected log file name, replacing .tsv with .txt
         std::string subnet_log_filename = "log-" + subnet_filename;
-        std::size_t pos = subnet_log_filename.rfind(".tsv");
-        if (pos != std::string::npos)
-          subnet_log_filename.replace(pos, 4, ".txt");
+        subnet_log_filename.replace(subnet_log_filename.size() - 4, 4, ".txt");
 
-        if (std::filesystem::exists(subnets_log_dir + subnet_log_filename))
+        const std::string full_log_path = subnets_log_dir + subnet_log_filename;
+        if (std::filesystem::exists(full_log_path))
           subnet_log_filenames.push_back(subnet_log_filename);
         else {
-          const std::string err_msg =
-              "Fatal: expected \"" + subnets_log_dir + subnet_log_filename +
-              "\" to exist based on the file \"" + subnets_dir +
-              subnet_filename + "\", but the log file was not found.";
-          std::cerr << err_msg << std::endl;
-          if (logger)
-            logger->writeLineWithTime(err_msg);
-          std::exit(EXIT_FAILURE);
+          const std::string err_msg = "Fatal: expected \"" + full_log_path +
+                                      "\" to exist based on the file \"" +
+                                      subnets_dir + subnet_filename +
+                                      "\", but the log file was not found.";
+
+          throw std::runtime_error(err_msg);
         }
       }
     }
@@ -213,10 +237,8 @@ pair_string_vecs FilesystemIOHandler::findSubnetFilesAndSubnetLogFiles(
         "Error reading directory: " + std::string(e.what()) +
         "\nCheck that your output directory has the subdirectories "
         "\"subnets/\" and \"subnets_log/\"";
-    std::cerr << err_msg << std::endl;
-    if (logger)
-      logger->writeLineWithTime(err_msg);
-    std::exit(EXIT_FAILURE);
+
+    throw DirectoryReadException(subnets_dir);
   }
   return {subnet_filenames, subnet_log_filenames};
 }
@@ -225,41 +247,38 @@ std::pair<gene_to_gene_to_float, float>
 FilesystemIOHandler::loadARACNe3SubnetsAndUpdateFPRFromLog(
     const std::string &subnet_file_path,
     const std::string &subnet_log_file_path,
-    const compression_map &defined_genes, const geneset &regulators,
-    Logger *const logger) const {
+    const compression_map &defined_genes, const geneset &regulators) const {
+
   // read in the subnet file
-  std::ifstream subnet_ifs{subnet_file_path};
-  exitIfFileNotOpen(subnet_ifs, subnet_file_path, logger);
+  auto subnet_ifs = getReadStream(subnet_file_path);
 
   // discard the first line (header)
   std::string line;
   std::getline(subnet_ifs, line, '\n');
-  if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+  if (line.back() == '\r')
     line.pop_back();
 
   gene_to_gene_to_float subnet;
   while (std::getline(subnet_ifs, line, '\n')) {
-    if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+    if (line.back() == '\r')
       line.pop_back();
 
-    std::size_t prev = 0U, pos = line.find_first_of("\t", prev);
+    std::size_t prev = 0u, pos = line.find_first_of("\t", prev);
     const std::string reg = line.substr(prev, pos - prev);
-    prev = pos + 1;
+    prev = pos + 1u;
 
     pos = line.find_first_of("\t", prev);
     const std::string tar = line.substr(prev, pos - prev);
-    prev = pos + 1;
+    prev = pos + 1u;
 
     for (const std::string &gene : {reg, tar})
       if (defined_genes.find(gene) == defined_genes.end()) {
-        const std::string err_msg = "Error: subnetwork file(s) contain gene "
-                                    "names undefined in expression matrix.";
+        const std::string err_msg =
+            "Error: subnetwork file(s) contain gene "
+            "names undefined in expression matrix. You should only consolidate "
+            "subnetworks from the expression matrix used to generate them.";
 
-        std::cerr << err_msg << std::endl;
-        if (logger)
-          logger->writeLineWithTime(err_msg);
-
-        std::exit(EXIT_FAILURE);
+        throw std::runtime_error(err_msg);
       }
 
     const float mi = std::stof(line.substr(prev, std::string::npos));
@@ -268,18 +287,17 @@ FilesystemIOHandler::loadARACNe3SubnetsAndUpdateFPRFromLog(
   }
 
   // read in the log file
-  std::ifstream log_ifs{subnet_log_file_path};
-  exitIfFileNotOpen(log_ifs, subnet_log_file_path, logger);
+  auto log_ifs = getReadStream(subnet_log_file_path);
 
   // discard 9 lines
   std::string discard;
-  for (uint8_t l = 0; l < 9; ++l)
+  for (uint8_t l = 0u; l < 9u; ++l)
     std::getline(log_ifs, discard, '\n');
 
   // next line contains the method
   std::string method;
   std::getline(log_ifs, line, '\n');
-  if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+  if (line.back() == '\r')
     line.pop_back();
   if (line.find("FDR") != std::string::npos)
     method = "FDR";
@@ -291,7 +309,7 @@ FilesystemIOHandler::loadARACNe3SubnetsAndUpdateFPRFromLog(
   // next line contains alpha
   float alpha;
   std::getline(log_ifs, line, '\n');
-  if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+  if (line.back() == '\r')
     line.pop_back();
   std::stringstream line_stream(line);
   line_stream >> discard >> alpha;
@@ -299,7 +317,7 @@ FilesystemIOHandler::loadARACNe3SubnetsAndUpdateFPRFromLog(
   // next line contains whether we have MaxEnt pruning
   std::string prune_MaxEnt_str;
   std::getline(log_ifs, line, '\n');
-  if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+  if (line.back() == '\r')
     line.pop_back();
   line_stream = std::stringstream(line);
   line_stream >> discard >> discard >> prune_MaxEnt_str;
@@ -307,26 +325,26 @@ FilesystemIOHandler::loadARACNe3SubnetsAndUpdateFPRFromLog(
   prune_MaxEnt = (prune_MaxEnt_str == "true") ? true : false;
 
   // skip 8 lines
-  for (uint8_t l = 0U; l < 8U; ++l)
+  for (uint8_t l = 0u; l < 8u; ++l)
     std::getline(log_ifs, discard, '\n');
   std::getline(log_ifs, line, '\n');
-  if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+  if (line.back() == '\r')
     line.pop_back();
   line_stream = std::stringstream(line);
-  uint32_t num_edges_after_threshold_pruning = 0U;
+  uint32_t num_edges_after_threshold_pruning = 0u;
   line_stream >> discard >> discard >> discard >>
       num_edges_after_threshold_pruning;
 
   // skip 3 lines, the 4th contains edges after MaxEnt pruning
   float FPR_estimate_subnet;
   const uint32_t tot_possible_edges =
-      regulators.size() * (defined_genes.size() - 1);
+      regulators.size() * (defined_genes.size() - 1u);
   if (prune_MaxEnt) {
-    uint32_t num_edges_after_MaxEnt_pruning = 0U;
-    for (uint8_t l = 0U; l < 3U; ++l)
+    uint32_t num_edges_after_MaxEnt_pruning = 0u;
+    for (uint8_t l = 0u; l < 3u; ++l)
       std::getline(log_ifs, discard, '\n');
     std::getline(log_ifs, line, '\n');
-    if (line.back() == '\r') /* Alert! We have a Windows dweeb! */
+    if (line.back() == '\r')
       line.pop_back();
     line_stream = std::stringstream(line);
     line_stream >> discard >> discard >> discard >>

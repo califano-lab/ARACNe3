@@ -68,7 +68,7 @@ int ARACNe3Analysis(
       aracne3_logger->writeLineWithTime("...processing expression matrix...");
 
     std::tie(exp_mat, genes, compressor, decompressor) =
-        io.readExpMatrixAndCopulaTransform(rnd, aracne3_logger);
+        io.readExpMatrixAndCopulaTransform(rnd); // TODO: Verify that logs done
 
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime("...processing regulators...");
@@ -254,8 +254,7 @@ int ARACNe3Analysis(
     watch1.reset();
 
     const auto &[subnet_filenames, subnet_log_filenames] =
-        io.findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir,
-                                            aracne3_logger);
+        io.findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir);
 
     if (subnet_filenames.size() < n_subnets)
       qexit("Error: Too many subnets requested. Only " +
@@ -267,7 +266,7 @@ int ARACNe3Analysis(
           io.loadARACNe3SubnetsAndUpdateFPRFromLog(
               subnets_dir + subnet_filenames[subnet_idx],
               subnets_log_dir + subnet_log_filenames[subnet_idx], compressor,
-              regulators, aracne3_logger);
+              regulators);  // TODO: Verify that logs done
       subnets.push_back(subnet);
       FPR_estimates.push_back(FPR_estimate_subnet);
     }

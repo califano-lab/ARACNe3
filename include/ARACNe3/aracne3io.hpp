@@ -62,8 +62,7 @@ public:
    * corresponds to the uint16_t index in the compression map.
    */
   virtual std::tuple<vv_float, geneset, compression_map, decompression_map>
-  readExpMatrixAndCopulaTransform(std::mt19937 &rnd,
-                                  Logger *const logger) const = 0;
+  readExpMatrixAndCopulaTransform(std::mt19937 &rnd) const = 0;
 
   /**
    * @brief Read a list of regulators, filtering out genes without expression
@@ -147,8 +146,7 @@ public:
    */
   virtual pair_string_vecs
   findSubnetFilesAndSubnetLogFiles(const std::string &subnets_dir,
-                                   const std::string &subnets_log_dir,
-                                   Logger *const logger) const {
+                                   const std::string &subnets_log_dir) const {
     throw std::runtime_error(
         "Consolidate mode not supported in this implementation.");
   };
@@ -194,8 +192,7 @@ public:
   loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
                                         const std::string &subnet_log_file_path,
                                         const compression_map &defined_genes,
-                                        const geneset &regulators,
-                                        Logger *const logger) const {
+                                        const geneset &regulators) const {
     throw std::runtime_error(
         "Consolidate mode not supported in this implementation.");
   };
