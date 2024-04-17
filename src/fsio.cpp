@@ -118,53 +118,36 @@ FilesystemIOHandler::readExpMatrixAndCopulaTransform(
   return {gexp_matrix, genes, compressor, decompressor};
 }
 
-geneset FilesystemIOHandler::readRegList(const compression_map &defined_genes,
-                                         Logger *const logger,
-                                         bool verbose) const {
-  constexpr uint32_t MaxPrintWarnings = 3u;
+std::pair<geneset, str_vec>
+FilesystemIOHandler::readRegList(const compression_map &defined_genes) const {
+
+  geneset regulators;
+  str_vec warn_list;
 
   auto ifs = getReadStream(regulators_list_file_path);
 
   std::string cur_reg;
-  geneset regulators;
-  uint32_t num_warnings = 0u;
   while (std::getline(ifs, cur_reg, '\n')) {
     if (cur_reg.back() == '\r')
       cur_reg.pop_back();
 
-    // Warn if not found in exp_mat once.
-    if (defined_genes.find(cur_reg) == defined_genes.end()) {
-      const std::string warning_msg =
+    if (defined_genes.find(cur_reg) == defined_genes.end())
+      // Warn if not found in exp_mat
+      warn_list.push_back(std::string(
           "Warning: \"" + cur_reg +
           "\" found in regulators, but not in expression matrix. Removing "
-          "from analysis.";
-
-      if (logger)
-        logger->writeLineWithTime(warning_msg);
-
-      if (num_warnings < MaxPrintWarnings || verbose)
-        std::cerr << warning_msg << std::endl;
-
-      ++num_warnings;
-    } else {
+          "from analysis."));
+    else
       regulators.insert(defined_genes.at(cur_reg));
-    }
   }
-
-  if (num_warnings > MaxPrintWarnings && !verbose)
-    std::cerr << "... " << num_warnings - MaxPrintWarnings
-              << " similar warnings suppressed ..." << std::endl;
 
   if (regulators.empty()) {
     const std::string abort_msg = "abort: no regulators to analyze.";
 
-    if (logger)
-      logger->writeLineWithTime(abort_msg);
-
     throw std::runtime_error(abort_msg);
   }
 
-  return regulators;
+  return {regulators, warn_list};
 }
 
 void FilesystemIOHandler::writeNetworkRegTarMI(

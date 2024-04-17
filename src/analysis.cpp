@@ -73,7 +73,25 @@ int ARACNe3Analysis(
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime("...processing regulators...");
 
-    regulators = io.readRegList(compressor, aracne3_logger, verbose);
+    str_vec warn_list;
+    std::tie(regulators, warn_list) = io.readRegList(compressor);
+
+    // Process warnings
+    constexpr uint16_t MaxPrintWarnings = 3u;
+    uint16_t warnings_printed = 0u;
+    for (uint16_t w_idx = 0u; w_idx < warn_list.size(); ++w_idx) {
+      if (aracne3_logger)
+        aracne3_logger->writeLineWithTime(warn_list[w_idx]);
+
+      if (w_idx < MaxPrintWarnings || verbose) {
+        std::cerr << warn_list[w_idx] << std::endl;
+        ++warnings_printed;
+      }
+    }
+    if (warnings_printed > MaxPrintWarnings && !verbose)
+      std::cerr << "... " << warn_list.size() - MaxPrintWarnings
+                << " similar warnings suppressed ..." << std::endl;
+
   } catch (const std::exception &e) {
     std::string err_msg = std::string("Error processing input: ") + e.what();
 
@@ -266,7 +284,7 @@ int ARACNe3Analysis(
           io.loadARACNe3SubnetsAndUpdateFPRFromLog(
               subnets_dir + subnet_filenames[subnet_idx],
               subnets_log_dir + subnet_log_filenames[subnet_idx], compressor,
-              regulators);  // TODO: Verify that logs done
+              regulators); // TODO: Verify that logs done
       subnets.push_back(subnet);
       FPR_estimates.push_back(FPR_estimate_subnet);
     }

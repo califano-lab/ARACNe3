@@ -24,6 +24,7 @@ using gene_to_gene_to_float = std::unordered_map<gene_id, gene_to_float>;
 
 using vv_float = std::vector<std::vector<float>>;
 
+using str_vec = std::vector<std::string>;
 using pair_string_vecs =
     std::pair<std::vector<std::string>, std::vector<std::string>>;
 
@@ -79,8 +80,8 @@ public:
    * @return A set of gene IDs representing the regulators found in both the
    * regulator list file and the defined genes.
    */
-  virtual geneset readRegList(const compression_map &defined_genes,
-                              Logger *const logger, bool verbose) const = 0;
+  virtual std::pair<geneset, str_vec>
+  readRegList(const compression_map &defined_genes) const = 0;
 
   /**
    * @brief Write ARACNe3 data frame as regulator-target pairs and

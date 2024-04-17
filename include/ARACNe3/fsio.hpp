@@ -14,8 +14,8 @@ public:
 
   std::tuple<vv_float, geneset, compression_map, decompression_map>
   readExpMatrixAndCopulaTransform(std::mt19937 &rnd) const override;
-  geneset readRegList(const compression_map &defined_genes,
-                      Logger *const logger, bool verbose) const override;
+  std::pair<geneset, str_vec>
+  readRegList(const compression_map &defined_genes) const override;
   void writeARACNe3DF(const std::vector<ARACNe3_df> &output_df,
                       const decompression_map &decompressor) const override;
   void
