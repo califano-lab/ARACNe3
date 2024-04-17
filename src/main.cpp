@@ -65,12 +65,10 @@ int main(int argc, char *argv[]) {
   // ---- Initialize ARACNe3 runtime variables ----
 
   uint32_t seed = static_cast<uint32_t>(std::time(nullptr));
-  bool seed_provided = false;
   uint8_t threads = 1U;
   std::string runid = "defaultid";
   bool verbose = false, suppress_log = false;
-  std::string cached_dir = CACHE_PATH;
-
+  
   uint16_t n_subnets = 1u;
   float subsamp_pct = 1 - std::exp(-1);
   bool skip_consolidate = false;
@@ -87,7 +85,6 @@ int main(int argc, char *argv[]) {
 
   std::unique_ptr<Logger> aracne3_logger;
 
-  float mi_cutoff = 0.f;
   uint32_t n_nulls = 1'000'000u;
 
   // ---- Quick macros ----
@@ -97,22 +94,6 @@ int main(int argc, char *argv[]) {
     std::cout << M << cur_msg << std::endl;
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime(cur_msg);
-    return;
-  };
-
-  auto qexit = [&](const std::string &cur_err) {
-    std::cout << M << cur_err << std::endl;
-    if (aracne3_logger)
-      aracne3_logger->writeLineWithTime(cur_err);
-    std::exit(EXIT_FAILURE);
-  };
-
-  auto qlog_subnet = [&](const uint16_t subnet_number,
-                         const uint32_t subnet_size) {
-    const std::string cur_msg =
-        "...subnetwork " + std::to_string(subnet_number) +
-        " completed = " + std::to_string(subnet_size) + " edges returned...";
-    qlog(cur_msg);
     return;
   };
 
@@ -143,7 +124,7 @@ int main(int argc, char *argv[]) {
       runid = clp.getOpt("--runid");
     if (clp.optExists("--verbose") || clp.optExists("-v"))
       verbose = true;
-    if (clp.optExists("--suppress-log") | clp.optExists("--suppress-logs"))
+    if (clp.optExists("--suppress-log") || clp.optExists("--suppress-logs"))
       suppress_log = true;
 
     if (clp.optExists("--alpha"))
@@ -187,8 +168,6 @@ int main(int argc, char *argv[]) {
       consolidate_mode = true;
 
     // ---- Developer options ----
-    if (clp.optExists("--mithresh"))
-      mi_cutoff = std::stof(clp.getOpt("--mithresh"));
     if (clp.optExists("--numnulls"))
       n_nulls = std::stoi(clp.getOpt("--numnulls"));
 
@@ -219,16 +198,11 @@ int main(int argc, char *argv[]) {
   if (output_dir.back() != '/')
     output_dir += '/';
 
-  if (cached_dir.back() != '/')
-    cached_dir += '/';
-
   makeDirs(output_dir, aracne3_logger.get());
 
   const std::string log_file_name = output_dir + "log_" + runid + ".txt";
   if (!suppress_log)
     aracne3_logger = std::make_unique<Logger>(log_file_name, argc, argv);
-
-  makeDirs(cached_dir, aracne3_logger.get());
 
   const std::string subnets_dir = output_dir + "subnetworks/";
   const std::string subnets_log_dir = output_dir + "log-subnetworks/";
@@ -245,6 +219,13 @@ int main(int argc, char *argv[]) {
                          runid, '\t');
 
   qlog("See logs and progress reports in \"" + log_file_name + "\"");
+
+#if _DEBUG  // when debug, cache null model in output dir
+  std::string cached_dir = output_dir;
+#else
+  std::string cached_dir = CACHE_PATH;
+  makeDirs(cached_dir, aracne3_logger.get());
+#endif
 
   ARACNe3Analysis(io, APP_VERSION, runid, seed, threads, verbose, alpha,
                   subsamp_pct, n_nulls, method, prune_alpha, prune_MaxEnt,

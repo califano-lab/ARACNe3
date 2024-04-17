@@ -3,8 +3,9 @@
 #include "apmi_nullmodel.hpp"
 #include "aracne3io.hpp"
 
-#include <vector>
 #include <cstdint>
+#include <stdexcept>
+#include <vector>
 
 /**
  * @brief Sample a subset of the expression matrix, re-copula-transform the
@@ -43,14 +44,13 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
 const std::vector<ARACNe3_df>
 consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
                       const float FPR_estimate, const vv_float &exp_mat,
-                      const geneset &regulators, const geneset &genes,
-                      std::mt19937 &rnd);
+                      const geneset &regulators, const geneset &genes);
 
-class TooManySubnetsRequested : public std::exception {
+class TooManySubnetsRequestedException : public std::runtime_error {
 public:
-  const char *what() {
-    return "You tried to consolidate too many subnetworks. Subnet files and "
-           "subnet log files must exist to all subnetworks specified, and "
-           "must be organized exactly according to ARACNe3 output.";
-  }
+  explicit TooManySubnetsRequestedException()
+      : std::runtime_error(
+            "You tried to consolidate too many subnetworks. Subnet files and "
+            "subnet log files must exist to all subnetworks specified, and "
+            "must be organized exactly according to ARACNe3 output.") {}
 };

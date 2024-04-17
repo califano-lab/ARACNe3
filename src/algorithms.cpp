@@ -42,7 +42,7 @@ float calcMI(const square &s) {
  * performs
  * recursion, depending on the condition.
  */
-const float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
+float calcAPMISplit(const float *const x_ptr, const float *const y_ptr,
                           const square s) {
   constexpr float q_thresh = 7.815f;
   constexpr uint16_t size_thresh = 4u;
@@ -232,8 +232,6 @@ float pearsonsR(const std::vector<float> &x_vec,
 
 float spearmansRho(const std::vector<float> &x_vec,
                    const std::vector<float> &y_vec) {
-  const double n = x_vec.size();
-
   std::vector<float> x_ranks = rankWithAverageTiebreak(x_vec);
   std::vector<float> y_ranks = rankWithAverageTiebreak(y_vec);
 

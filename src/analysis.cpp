@@ -127,11 +127,9 @@ int ARACNe3Analysis(
 
   qlog("Null model generated. Time elapsed: " + watch1.getSeconds());
 
-  std::string null_model_dir = output_dir + "null-model/";
+  std::string null_model_dir = cached_dir;
 
   qlog("Debug build: Printing null model in \'" + null_model_dir + "\'...");
-
-  makeDirs(null_model_dir, aracne3_logger.get());
 
   std::ofstream mi_ofs(null_model_dir + "null-mis.csv");
   std::ofstream stats_ofs(null_model_dir + "null-model-stats.csv");
@@ -200,7 +198,6 @@ int ARACNe3Analysis(
       gene_to_geneset regulons(regulators.size());
 
       bool stoppingCriteriaMet = false;
-      uint16_t cur_subnet_ct = 0u;
 
       while (!stoppingCriteriaMet) {
         vv_float subsample_exp_mat =
@@ -316,7 +313,7 @@ int ARACNe3Analysis(
     watch1.reset();
 
     std::vector<ARACNe3_df> final_df = consolidateSubnetsVec(
-        subnets, FPR_estimate, exp_mat, regulators, genes, rnd);
+        subnets, FPR_estimate, exp_mat, regulators, genes);
 
     qlog("Consolidation complete. Time elapsed: " + watch1.getSeconds());
     qlog("Total subnetworks consolidated: " + std::to_string(n_subnets));

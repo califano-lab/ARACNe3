@@ -3,6 +3,7 @@
 #include "apmi_nullmodel.hpp"
 #include "aracne3io.hpp"
 #include "stopwatch.hpp"
+#include "logger.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -121,7 +122,7 @@ pruneAlpha(const vv_float &network, const std::vector<gene_id> &regs_c,
   pruned_net.reserve(regs_c.size());
   pruned_net_reg_reg_only.reserve(regs_c.size());
 
-  for (const auto [reg, tar, mi] : reg_tar_mi) {
+  for (const auto &[reg, tar, mi] : reg_tar_mi) {
     pruned_net[reg].insert({tar, mi});
     if (regulators.find(tar) != regulators.end())
       pruned_net_reg_reg_only[reg].insert({tar, mi});
@@ -163,7 +164,7 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
 
     // schedule in skips as opposed to chunks, faster now
 #pragma omp for schedule(static, 1)
-    for (int i = 0u; i < network_reg_reg_only.size(); ++i) {
+    for (int i = 0u; i < static_cast<int>(network_reg_reg_only.size()); ++i) {
       auto it = network_reg_reg_only.cbegin();
       std::advance(it, i);
       const uint16_t reg1 = it->first;
@@ -261,7 +262,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
                           std::vector<float>(genes.size(), 0.f));
 
 #pragma omp parallel for num_threads(nthreads)
-  for (int reg_idx = 0; reg_idx < regs_c.size(); ++reg_idx) {
+  for (int reg_idx = 0; reg_idx < static_cast<int>(regs_c.size()); ++reg_idx) {
     const gene_id reg = regs_c.at(reg_idx);
     for (uint32_t tar_idx = 0u; tar_idx < genes_c.size(); ++tar_idx) {
       const gene_id tar = genes_c.at(tar_idx);
@@ -284,10 +285,13 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
   uint32_t num_edges_after_threshold_pruning;
   gene_to_gene_to_float subnetwork, subnetwork_reg_reg_only;
 
-  std::tie(subnetwork, num_edges_after_threshold_pruning,
-           subnetwork_reg_reg_only) =
-      pruneAlpha(subnetwork_vec, regs_c, genes_c, tot_possible_edges, method,
-                 alpha, nullmodel, regulators);
+  if (prune_alpha)
+    std::tie(subnetwork, num_edges_after_threshold_pruning,
+             subnetwork_reg_reg_only) =
+        pruneAlpha(subnetwork_vec, regs_c, genes_c, tot_possible_edges, method,
+                   alpha, nullmodel, regulators);
+  else
+    num_edges_after_threshold_pruning = tot_possible_edges;
 
   subnetwork_vec.clear();
   vv_float(subnetwork_vec).swap(subnetwork_vec);
@@ -351,10 +355,8 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
 const std::vector<ARACNe3_df>
 consolidateSubnetsVec(const std::vector<gene_to_gene_to_float> &subnets,
                       const float FPR_estimate, const vv_float &exp_mat,
-                      const geneset &regulators, const geneset &genes,
-                      std::mt19937 &rnd) {
+                      const geneset &regulators, const geneset &genes) {
   std::vector<ARACNe3_df> final_df;
-  const uint32_t tot_poss_edgs = regulators.size() * (genes.size() - 1u);
 
   for (const gene_id reg : regulators) {
     for (const gene_id tar : genes) {

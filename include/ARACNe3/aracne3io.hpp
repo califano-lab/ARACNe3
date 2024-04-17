@@ -36,8 +36,8 @@ struct ARACNe3_df {
 
   ARACNe3_df(const gene_id r, const gene_id t, const float mi, const float scc,
              const uint16_t n, const float lp)
-      : regulator(r), target(t), num_subnets_incident(n), final_mi(mi),
-        final_scc(scc), final_log_p(lp){};
+      : regulator(r), target(t), final_mi(mi), final_scc(scc),
+        num_subnets_incident(n), final_log_p(lp){};
 };
 
 // ---- Functions ----
