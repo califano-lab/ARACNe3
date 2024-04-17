@@ -1,7 +1,5 @@
 #pragma once
 
-#include "logger.hpp"
-
 #include <cstdint>
 #include <random>
 #include <string>
@@ -52,8 +50,6 @@ public:
    *
    * @param rnd A reference to a std::mt19937 random number engine used for
    * copula transform.
-   * @param logger A pointer to a Logger object for error logging. If nullptr,
-   * no logging is performed.
    *
    * @return A tuple containing:
    *         - vv_float: The copula-transformed expression matrix.
@@ -66,19 +62,14 @@ public:
   readExpMatrixAndCopulaTransform(std::mt19937 &rnd) const = 0;
 
   /**
-   * @brief Read a list of regulators, filtering out genes without expression
-   * defined in the matrix.
+   * @brief Filters regulators based on expression data, returning valid gene
+   * IDs and warnings.
    *
-   * @param defined_genes A compression map containing the mapping of gene names
-   * to their IDs in the expression matrix. Requires that
-   * readExpMatrixAndCopulaTransform was called successfully.
-   * @param logger A pointer to a Logger object for logging messages. If
-   * nullptr, no logging is performed.
-   * @param verbose If true, all warning messages are printed; otherwise,
-   * messages are suppressed after the first 3.
+   * @param defined_genes Map of gene names to IDs, set by
+   * readExpMatrixAndCopulaTransform.
    *
-   * @return A set of gene IDs representing the regulators found in both the
-   * regulator list file and the defined genes.
+   * @return Pair of gene ID set from regulators with expression data, and
+   * warning messages.
    */
   virtual std::pair<geneset, str_vec>
   readRegList(const compression_map &defined_genes) const = 0;
@@ -132,8 +123,6 @@ public:
    *
    * @param subnets_dir The directory path containing the subnet files.
    * @param subnets_log_dir The directory path containing the subnet log files.
-   * @param logger A pointer to a Logger object for logging messages. If
-   * nullptr, no logging is performed.
    *
    * @return A pair of vectors containing the matched subnet file names and
    * their corresponding log file names.
@@ -172,8 +161,6 @@ public:
    * @param defined_genes A compression map containing the mapping of gene names
    * to their IDs.
    * @param regulators A set of regulator gene IDs.
-   * @param logger A pointer to a Logger object for logging messages. If
-   * nullptr, no logging is performed.
    *
    * @return A pair containing the loaded gene regulatory network and the
    * updated FPR estimate.

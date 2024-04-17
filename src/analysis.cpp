@@ -68,7 +68,7 @@ int ARACNe3Analysis(
       aracne3_logger->writeLineWithTime("...processing expression matrix...");
 
     std::tie(exp_mat, genes, compressor, decompressor) =
-        io.readExpMatrixAndCopulaTransform(rnd); // TODO: Verify that logs done
+        io.readExpMatrixAndCopulaTransform(rnd);
 
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime("...processing regulators...");
@@ -93,13 +93,13 @@ int ARACNe3Analysis(
                 << " similar warnings suppressed ..." << std::endl;
 
   } catch (const std::exception &e) {
-    std::string err_msg = std::string("Error processing input: ") + e.what();
+    std::string err_msg = std::string("Error processing files: ") + e.what();
 
     std::cerr << err_msg << std::endl;
     if (aracne3_logger)
       aracne3_logger->writeLineWithTime(err_msg);
 
-    throw; // re-throw the exception for natural program termination
+    throw;
   }
 
   qlog("Inputs processed. Time elapsed: " + watch1.getSeconds());
@@ -271,22 +271,33 @@ int ARACNe3Analysis(
          "\" (subnetwork logging information is required)...");
     watch1.reset();
 
-    const auto &[subnet_filenames, subnet_log_filenames] =
-        io.findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir);
+    try {
+      const auto &[subnet_filenames, subnet_log_filenames] =
+          io.findSubnetFilesAndSubnetLogFiles(subnets_dir, subnets_log_dir);
 
-    if (subnet_filenames.size() < n_subnets)
-      qexit("Error: Too many subnets requested. Only " +
-            std::to_string(subnet_filenames.size()) + " subnets found in \"" +
-            subnets_dir + "\".");
+      if (subnet_filenames.size() < n_subnets)
+        qexit("Error: Too many subnets requested. Only " +
+              std::to_string(subnet_filenames.size()) + " subnets found in \"" +
+              subnets_dir + "\".");
 
-    for (uint16_t subnet_idx = 0; subnet_idx < n_subnets; ++subnet_idx) {
-      const auto &[subnet, FPR_estimate_subnet] =
-          io.loadARACNe3SubnetsAndUpdateFPRFromLog(
-              subnets_dir + subnet_filenames[subnet_idx],
-              subnets_log_dir + subnet_log_filenames[subnet_idx], compressor,
-              regulators); // TODO: Verify that logs done
-      subnets.push_back(subnet);
-      FPR_estimates.push_back(FPR_estimate_subnet);
+      for (uint16_t subnet_idx = 0; subnet_idx < n_subnets; ++subnet_idx) {
+        const auto &[subnet, FPR_estimate_subnet] =
+            io.loadARACNe3SubnetsAndUpdateFPRFromLog(
+                subnets_dir + subnet_filenames[subnet_idx],
+                subnets_log_dir + subnet_log_filenames[subnet_idx], compressor,
+                regulators);
+        subnets.push_back(subnet);
+        FPR_estimates.push_back(FPR_estimate_subnet);
+      }
+
+    } catch (const std::exception &e) {
+      std::string err_msg = std::string("Error processing files: ") + e.what();
+
+      std::cerr << err_msg << std::endl;
+      if (aracne3_logger)
+        aracne3_logger->writeLineWithTime(err_msg);
+
+      throw;
     }
 
     n_subnets = subnets.size();
