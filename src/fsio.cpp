@@ -21,27 +21,46 @@ public:
       : std::runtime_error("Error reading directory: " + directoryPath) {}
 };
 
+class NoRegulatorsException : public std::runtime_error {
+public:
+  explicit NoRegulatorsException(const std::string &filename)
+      : std::runtime_error("No regulators found in file: " + filename) {}
+};
+
 class MatrixDataException : public std::runtime_error {
 public:
   explicit MatrixDataException(const std::string &message)
       : std::runtime_error(message) {}
 };
 
+class FileNotFoundException : public std::runtime_error {
+public:
+  explicit FileNotFoundException(const std::string &filename,
+                                 const std::string &msg = "")
+      : std::runtime_error("File not found: " + filename + ". " + msg) {}
+};
+
+class GeneInSubnetNotInMatrixException : public std::runtime_error {
+public:
+  explicit GeneInSubnetNotInMatrixException(const std::string &gene)
+      : std::runtime_error(
+            "Subnetwork file cannot contain genes gene names undefined in the "
+            "expression matrix. You should only consolidate subnetworks from "
+            "the expression matrix used to generate them. (" +
+            gene + ")") {}
+};
+
 std::ifstream getReadStream(const std::string &filePath) {
   std::ifstream ifs{filePath};
-  if (!ifs.is_open()) {
-    std::string err_msg = "Could not open file: " + filePath;
+  if (!ifs.is_open())
     throw FileNotOpenException(filePath);
-  }
   return ifs;
 }
 
 std::ofstream getWriteStream(const std::string &filePath) {
   std::ofstream ofs{filePath};
-  if (!ofs.is_open()) {
-    std::string err_msg = "Could not open file: " + filePath;
+  if (!ofs.is_open())
     throw FileNotOpenException(filePath);
-  }
   return ofs;
 }
 
@@ -54,8 +73,7 @@ FilesystemIOHandler::FilesystemIOHandler(const std::string &emfp,
       final_output_file_name(fofn), subnets_dir(sd), runid(r), sep(s){};
 
 std::tuple<vv_float, geneset, compression_map, decompression_map>
-FilesystemIOHandler::readExpMatrixAndCopulaTransform(
-    std::mt19937 &rnd) const {
+FilesystemIOHandler::readExpMatrixAndCopulaTransform(std::mt19937 &rnd) const {
 
   auto ifs = getReadStream(exp_mat_file_path);
 
@@ -141,11 +159,8 @@ FilesystemIOHandler::readRegList(const compression_map &defined_genes) const {
       regulators.insert(defined_genes.at(cur_reg));
   }
 
-  if (regulators.empty()) {
-    const std::string abort_msg = "abort: no regulators to analyze.";
-
-    throw std::runtime_error(abort_msg);
-  }
+  if (regulators.empty())
+    throw NoRegulatorsException(regulators_list_file_path);
 
   return {regulators, warn_list};
 }
@@ -206,12 +221,10 @@ pair_string_vecs FilesystemIOHandler::findSubnetFilesAndSubnetLogFiles(
         if (std::filesystem::exists(full_log_path))
           subnet_log_filenames.push_back(subnet_log_filename);
         else {
-          const std::string err_msg = "Fatal: expected \"" + full_log_path +
-                                      "\" to exist based on the file \"" +
-                                      subnets_dir + subnet_filename +
-                                      "\", but the log file was not found.";
+          const std::string err_msg = "Accompanying log file required for \"" +
+                                      subnets_dir + subnet_filename + "\".";
 
-          throw std::runtime_error(err_msg);
+          throw FileNotFoundException(full_log_path, err_msg);
         }
       }
     }
@@ -255,14 +268,8 @@ FilesystemIOHandler::loadARACNe3SubnetsAndUpdateFPRFromLog(
     prev = pos + 1u;
 
     for (const std::string &gene : {reg, tar})
-      if (defined_genes.find(gene) == defined_genes.end()) {
-        const std::string err_msg =
-            "Error: subnetwork file(s) contain gene "
-            "names undefined in expression matrix. You should only consolidate "
-            "subnetworks from the expression matrix used to generate them.";
-
-        throw std::runtime_error(err_msg);
-      }
+      if (defined_genes.find(gene) == defined_genes.end())
+        throw GeneInSubnetNotInMatrixException(gene);
 
     const float mi = std::stof(line.substr(prev, std::string::npos));
 
