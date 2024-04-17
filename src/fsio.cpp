@@ -2,7 +2,6 @@
 #include "algorithms.hpp"
 
 #include <algorithm>
-#include <stdexcept>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
