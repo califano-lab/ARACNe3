@@ -218,7 +218,8 @@ int main(int argc, char *argv[]) {
                          output_dir + "network_" + runid + ".tsv", subnets_dir,
                          runid, '\t');
 
-  qlog("See logs and progress reports in \"" + log_file_name + "\"");
+  if(!suppress_log)
+    qlog("See logs and progress reports in \"" + log_file_name + "\"");
 
 #if _DEBUG  // when debug, cache null model in output dir
   std::string cached_dir = output_dir;
