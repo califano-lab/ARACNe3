@@ -3,7 +3,6 @@
 #include "aracne3io.hpp"
 
 #include <iostream>
-#include <stdexcept>
 
 class FilesystemIOHandler : public ARACNe3IOHandler {
 public:
