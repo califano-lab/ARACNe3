@@ -36,17 +36,17 @@ protected:
 
     // Make input files
     std::ofstream ofs(test_exp_mat_file);
-    ofs << "gene\tsamp1\t2\t3.3\tsamp4\n\
-          Gene1\t0.1\t0.2\t0.3\t0.4\n\
-          5\t0.2\t0.3\t0.1\t0.15\n\
-          Three\t0.\t0.1\t0.\t0.1";
+    ofs << std::string("gene\tsamp1\t2\t3.3\tsamp4\n") +
+          "Gene1\t0.1\t0.2\t0.3\t0.4\n" +
+          "5\t0.2\t0.3\t0.1\t0.15\n" +
+          "Three\t0.\t0.1\t0.\t0.1";
     ofs.close();
 
     ofs = std::ofstream(test_reg_list_file);
-    ofs << "5\n\
-          gene\n\
-          Gene1\n\
-          Gene2"; // "gene" and "Gene2" should not be added in memory.
+    ofs << std::string("5\n") +
+          "gene\n" +
+          "Gene1\n" +
+          "Gene2";  // "gene" and "Gene2" should not be added in memory"
     ofs.close();
   }
 
@@ -111,4 +111,18 @@ TEST_F(FilesystemIOTest, ReadExpMatrixAndCopulaTransform) {
   EXPECT_TRUE(near(gexp_matrix[2][1], 3. / 4, 4. / 4, tol));
   EXPECT_TRUE(near(gexp_matrix[2][2], 1. / 4, 2. / 4, tol));
   EXPECT_TRUE(near(gexp_matrix[2][3], 3. / 4, 4. / 4, tol));
+}
+
+TEST_F(FilesystemIOTest, ReadRegList) {
+  std::mt19937 rnd(123); // Use a fixed seed for reproducibility
+
+  compression_map defined_genes = {{"Gene1", 1}, {"5", 42}, {"Three", 2}}; 
+
+  auto [regs, w_list] = io.readRegList(defined_genes);
+
+  // There were 2 defined in the compressor, 2 not defined
+  ASSERT_EQ(regs.size(), 2);
+  ASSERT_EQ(w_list.size(), 2);
+  ASSERT_TRUE(regs.find(42) != regs.end());  // "5" was in the regulators
+  ASSERT_TRUE(regs.find(0) == regs.end());  // 0 should have no corresponding
 }
