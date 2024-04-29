@@ -10,10 +10,10 @@ class FilesystemIOTest : public ::testing::Test {
 protected:
   std::filesystem::path temp_dir = std::filesystem::temp_directory_path() /
                                    ("test_fsio_" + std::to_string(std::rand()));
-  std::filesystem::path test_output_dir = temp_dir / "aracne3";
+  std::filesystem::path test_output_dir = temp_dir / "aracne3/";
   std::filesystem::path test_final_output_file =
       test_output_dir / "network_testid.tsv";
-  std::filesystem::path test_subnets_dir = test_output_dir / "subnetworks";
+  std::filesystem::path test_subnets_dir = test_output_dir / "subnetworks/";
 
   std::filesystem::path test_exp_mat_file = temp_dir / "test_exp_mat.txt";
   std::filesystem::path test_reg_list_file = temp_dir / "test_reg_list.txt";
@@ -126,3 +126,77 @@ TEST_F(FilesystemIOTest, ReadRegList) {
   ASSERT_TRUE(regs.find(42) != regs.end());  // "5" was in the regulators
   ASSERT_TRUE(regs.find(0) == regs.end());  // 0 should have no corresponding
 }
+
+TEST_F(FilesystemIOTest, WriteNetworkRegTarMI) {
+    gene_to_gene_to_float subnet = {
+        {0, {{1, 0.5f}, {2, 0.3f}}},
+        {3, {{0, 0.f}}}
+    };
+    decompression_map decompressor = {"gene1", "Gene 2", "3", "gene"};
+
+    io.writeNetworkRegTarMI(1, subnet, decompressor);
+
+    std::filesystem::path expected_file = test_subnets_dir / "subnetwork-1_testid.tsv";
+    ASSERT_TRUE(std::filesystem::exists(expected_file));
+
+    std::ifstream result_file(expected_file);
+    ASSERT_TRUE(result_file.is_open());
+
+    std::string line;
+    std::getline(result_file, line);
+    ASSERT_EQ(line, "regulator.values\ttarget.values\tmi.values");
+
+    // Prepare expected results set. Because of range-based iteration,
+    // the output line order may not match the data order.
+    std::set<std::string> expected_lines = {
+        "gene1\tGene 2\t0.5",
+        "gene1\t3\t0.3",
+        "gene\tgene1\t0"
+    };
+
+    while (std::getline(result_file, line)) {
+        auto it = expected_lines.find(line);
+        ASSERT_TRUE(it != expected_lines.end());
+        expected_lines.erase(it);
+    }
+
+    // Verify that all expected lines were found
+    ASSERT_TRUE(expected_lines.empty());
+}
+
+TEST_F(FilesystemIOTest, WriteARACNe3DF) {
+    std::vector<ARACNe3_df> aracne3_final_df = {
+        {0, 1, 0.5f, 0.8f, 3, -2.0f},
+        {1, 2, 0.3f, 0.6f, 5, -3.5f},
+        {2, 0, 0.2f, 0.9f, 2, -1.2f}
+    };
+    decompression_map decompressor = {"Gene 1", "5", "gene"};
+
+    io.writeARACNe3DF(aracne3_final_df, decompressor);
+    std::filesystem::path output_file = test_final_output_file;
+
+    ASSERT_TRUE(std::filesystem::exists(output_file));
+
+    std::ifstream result_file(output_file);
+    ASSERT_TRUE(result_file.is_open());
+
+    std::string line;
+    std::getline(result_file, line);
+    ASSERT_EQ(line, "regulator.values\ttarget.values\tmi.values\tscc.values\tcount.values\tlog.p.values");
+
+    // Prepare expected results set. Because of range-based iteration,
+    // the output line order may not match the data order.
+    std::set<std::string> expected_lines = {"Gene 1\t5\t0.5\t0.8\t3\t-2",
+                                            "5\tgene\t0.3\t0.6\t5\t-3.5",
+                                            "gene\tGene 1\t0.2\t0.9\t2\t-1.2"};
+
+    while (std::getline(result_file, line)) {
+        auto it = expected_lines.find(line);
+        ASSERT_TRUE(it != expected_lines.end());
+        expected_lines.erase(it);
+    }
+
+    // Verify that all expected lines were found
+    ASSERT_TRUE(expected_lines.empty());
+}
+
