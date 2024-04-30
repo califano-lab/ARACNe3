@@ -5,6 +5,7 @@ add_library(aracne3tools
 	algorithms.cpp
 	apmi_nullmodel.cpp
   logger.cpp
+  subnet_logger.cpp
   analysis.cpp
   )
 

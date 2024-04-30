@@ -1,5 +1,4 @@
-#ifndef LOGGER_HPP
-#define LOGGER_HPP
+#pragma once
 
 #include <fstream>
 #include <string>
@@ -62,5 +61,3 @@ public:
 private:
   std::ofstream log_output;
 };
-
-#endif // LOGGER_HPP
