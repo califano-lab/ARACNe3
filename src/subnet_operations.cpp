@@ -2,8 +2,8 @@
 #include "algorithms.hpp"
 #include "apmi_nullmodel.hpp"
 #include "aracne3io.hpp"
-#include "stopwatch.hpp"
 #include "logger.hpp"
+#include "stopwatch.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -13,12 +13,14 @@
 
 class SubnetLogger : public Logger {
 public:
-  SubnetLogger(const std::string &log_file_name, const std::string &runid,
-               const uint16_t subnet_number, const geneset &regulators,
-               const geneset &genes, const uint16_t tot_num_samps,
-               const uint16_t tot_num_subsample, const std::string &method,
-               const float alpha, const bool prune_MaxEnt)
-      : Logger(log_file_name) {
+  SubnetLogger(const std::string &log_file_name) : Logger(log_file_name) {}
+
+  void initSubnetLog(const std::string &runid, const uint16_t subnet_number,
+                     const geneset &regulators, const geneset &genes,
+                     const uint16_t tot_num_samps,
+                     const uint16_t tot_num_subsample,
+                     const std::string &method, const float alpha,
+                     const bool prune_MaxEnt) {
     writeLine("\nRun ID: " + runid);
     writeLine("Subnetwork #: " + std::to_string(subnet_number));
     writeLine("Total # regulators (defined in gexp mat): " +
@@ -242,9 +244,10 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
     const std::string log_file_name = subnets_log_dir + "log-subnetwork-" +
                                       std::to_string(subnet_number) + "_" +
                                       runid + ".txt";
-    subnet_logger = std::make_unique<SubnetLogger>(
-        log_file_name, runid, subnet_number, regulators, genes, tot_num_samps,
-        tot_num_subsample, method, alpha, prune_MaxEnt);
+    subnet_logger = std::make_unique<SubnetLogger>(log_file_name);
+    subnet_logger->initSubnetLog(runid, subnet_number, regulators, genes,
+                                 tot_num_samps, tot_num_subsample, method,
+                                 alpha, prune_MaxEnt);
   }
 
   // ---- Generate raw subnetwork ----
