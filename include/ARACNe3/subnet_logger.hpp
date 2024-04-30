@@ -1,6 +1,5 @@
 #pragma once
 
-#include "aracne3io.hpp"
 #include "logger.hpp"
 
 class SubnetLogger : public Logger {
@@ -28,7 +27,7 @@ public:
    * @param prune_MaxEnt Indicates if MaxEnt pruning was performed.
    */
   void initSubnetLog(const std::string &runid, const uint16_t subnet_number,
-                     const geneset &regulators, const geneset &genes,
+                     const size_t num_regulators, const size_t num_genes,
                      const uint16_t tot_num_samps,
                      const uint16_t tot_num_subsample,
                      const std::string &method, const float alpha,

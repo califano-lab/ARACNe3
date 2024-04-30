@@ -218,9 +218,9 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
                                       std::to_string(subnet_number) + "_" +
                                       runid + ".txt";
     subnet_logger = std::make_unique<SubnetLogger>(log_file_name);
-    subnet_logger->initSubnetLog(runid, subnet_number, regulators, genes,
-                                 tot_num_samps, tot_num_subsample, method,
-                                 alpha, prune_MaxEnt);
+    subnet_logger->initSubnetLog(runid, subnet_number, regulators.size(),
+                                 genes.size(), tot_num_samps, tot_num_subsample,
+                                 method, alpha, prune_MaxEnt);
   }
 
   // ---- Generate raw subnetwork ----
