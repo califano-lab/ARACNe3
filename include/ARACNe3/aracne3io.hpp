@@ -126,7 +126,7 @@ public:
    * @param subnets_log_dir The directory path containing the subnet log files.
    *
    * @return A pair of vectors containing the matched subnet file names and
-   * their corresponding log file names.
+   * their corresponding log file names. Path does not include directories.
    *
    * @note The function expects the subnet files to have a `.tsv` extension and
    * the log files to have a `.txt` extension with a prefix of "log-" followed

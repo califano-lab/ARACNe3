@@ -5,6 +5,7 @@
 #include <string>
 
 #include "fsio.hpp"
+#include "subnet_logger.hpp"  // much easier for generating pseudo logs
 
 class FilesystemIOTest : public ::testing::Test {
 protected:
@@ -13,10 +14,21 @@ protected:
   std::filesystem::path test_output_dir = temp_dir / "aracne3/";
   std::filesystem::path test_final_output_file =
       test_output_dir / "network_testid.tsv";
-  std::filesystem::path test_subnets_dir = test_output_dir / "subnetworks/";
-
   std::filesystem::path test_exp_mat_file = temp_dir / "test_exp_mat.txt";
   std::filesystem::path test_reg_list_file = temp_dir / "test_reg_list.txt";
+
+  std::filesystem::path test_subnets_dir = test_output_dir / "subnetworks/";
+  std::filesystem::path test_subnets_log_dir = test_output_dir / "log-subnetworks/";
+
+  std::filesystem::path test_subnet_file_1 = "subnetwork-1_testid.tsv";
+  std::filesystem::path test_subnet_file_2 = "subnetwork-5_testid.tsv";
+
+  std::filesystem::path test_subnet_log_file_1 = "log-subnetwork-1_testid.txt";
+  std::filesystem::path test_subnet_log_file_2 = "log-subnetwork-5_testid.txt";
+
+  uint32_t tot_possible_edges = 4u, num_edges_after_threshold_pruning_1 = 3u,
+           num_edges_after_threshold_pruning_2 = 2u,
+           num_edges_after_MaxEnt_pruning_2 = 1u;
 
   FilesystemIOHandler io = FilesystemIOHandler(
       test_exp_mat_file.string(), test_reg_list_file.string(),
@@ -24,8 +36,9 @@ protected:
       '\t');
 
   void SetUp() override {
+    std::filesystem::remove_all(temp_dir);  // sometimes artifacts from testing
 
-    // ---- Make the test input files ----
+    // ---- Make the test directories ----
 
     // make the test dir root
     std::filesystem::create_directories(temp_dir);
@@ -33,8 +46,10 @@ protected:
     // make the simulated output dir
     std::filesystem::create_directories(test_output_dir);
     std::filesystem::create_directories(test_subnets_dir);
+    std::filesystem::create_directories(test_subnets_log_dir);
 
-    // Make input files
+    // ---- Make the test ARACNe inputs ----
+
     std::ofstream ofs(test_exp_mat_file);
     ofs << std::string("gene\tsamp1\t2\t3.3\tsamp4\n") +
           "Gene1\t0.1\t0.2\t0.3\t0.4\n" +
@@ -48,10 +63,70 @@ protected:
           "Gene1\n" +
           "Gene2";  // "gene" and "Gene2" should not be added in memory"
     ofs.close();
+
+    // ---- Make the test consolidate inputs ----
+
+    // Create log files
+
+    uint32_t tot_possible_edges = 4u;
+
+    SubnetLogger sl1(test_subnets_log_dir / test_subnet_log_file_1);
+    sl1.initSubnetLog("testid", 1, 2u, 3u, 500u, 300u, "FDR", 0.05f,
+                      false); // did not MaxEnt prune
+    sl1.write("\nRaw subnetwork computation time: 1s");
+    sl1.write("Size of subnetwork: " + std::to_string(tot_possible_edges) +
+              " edges.\n");
+    sl1.write("\nThreshold pruning time (FDR): 1s");
+    sl1.write("Edges removed: " +
+              std::to_string(tot_possible_edges -
+                             num_edges_after_threshold_pruning_1) +
+              " edges.\n");
+    sl1.write("Size of subnetwork: " +
+              std::to_string(num_edges_after_threshold_pruning_1) +
+              " edges.\n");
+    sl1.write("\nPrinting subnetwork...");
+    sl1.write("1s \n");
+
+    SubnetLogger sl2(test_subnets_log_dir / test_subnet_log_file_2);
+    sl2.initSubnetLog("testid", 1, 2u, 3u, 500u, 300u, "FDR", 0.05f,
+                      true); // did MaxEnt prune
+    sl2.write("\nRaw subnetwork computation time: 1s");
+    sl2.write("Size of subnetwork: " + std::to_string(tot_possible_edges) +
+              " edges.\n");
+    sl2.write("\nThreshold pruning time (FDR): 1s");
+    sl2.write("Edges removed: " +
+              std::to_string(tot_possible_edges -
+                             num_edges_after_threshold_pruning_2) +
+              " edges.\n");
+    sl2.write("Size of subnetwork: " +
+              std::to_string(num_edges_after_threshold_pruning_2) +
+              " edges.\n");
+    sl2.write("\nMaxEnt pruning time: 1s");
+    sl2.write("Edges removed: " +
+              std::to_string(num_edges_after_threshold_pruning_2 -
+                             num_edges_after_MaxEnt_pruning_2) +
+              " edges.\n");
+    sl2.write("Size of subnetwork: " +
+              std::to_string(num_edges_after_MaxEnt_pruning_2) + " edges.\n");
+    sl2.write("\nPrinting subnetwork...");
+    sl2.write("1s \n");
+
+    // Create network files
+
+    ofs = std::ofstream(test_subnets_dir / test_subnet_file_1);
+    ofs << std::string("regulator.values\ttarget.values\tmi.values\n") +
+          "Gene1\tThree\t0.0\n" +
+          "Gene1\tThree\t0.5\n" +
+          "5\tThree\t10\n";
+    ofs.close();
+
+    ofs = std::ofstream(test_subnets_dir / test_subnet_file_2);
+    ofs << std::string("regulator.values\ttarget.values\tmi.values\n") +
+          "5\tThree\t1\n";
+    ofs.close();
   }
 
   void TearDown() override {
-    // Remove the temporary directory and all its contents
     std::filesystem::remove_all(temp_dir);
   }
 };
@@ -200,3 +275,26 @@ TEST_F(FilesystemIOTest, WriteARACNe3DF) {
     ASSERT_TRUE(expected_lines.empty());
 }
 
+TEST_F(FilesystemIOTest, FindSubnetFilesAndSubnetLogFiles) {
+    pair_string_vecs results = io.findSubnetFilesAndSubnetLogFiles(
+        test_subnets_dir, test_subnets_log_dir);
+
+    using strvec = std::vector<std::string>;
+    using strset = std::unordered_set<std::string>;
+
+    strvec sn_paths = results.first;
+    strvec sn_log_paths = results.second;
+
+    ASSERT_EQ(sn_paths.size(), 2);
+    ASSERT_EQ(sn_log_paths.size(), 2);
+
+    strset sn_paths_set(sn_paths.begin(), sn_paths.end());
+    strset sn_log_paths_set(sn_log_paths.begin(), sn_log_paths.end());
+
+    ASSERT_TRUE(sn_paths_set.find(test_subnet_file_1) != sn_paths_set.end());
+    ASSERT_TRUE(sn_paths_set.find(test_subnet_file_2) != sn_paths_set.end());
+    ASSERT_TRUE(sn_log_paths_set.find(test_subnet_log_file_1) !=
+                sn_log_paths_set.end());
+    ASSERT_TRUE(sn_log_paths_set.find(test_subnet_log_file_2) !=
+                sn_log_paths_set.end());
+}
