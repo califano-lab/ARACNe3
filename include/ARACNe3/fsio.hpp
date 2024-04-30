@@ -25,7 +25,7 @@ public:
   pair_string_vecs findSubnetFilesAndSubnetLogFiles(
       const std::string &subnets_dir,
       const std::string &subnets_log_dir) const override;
-  std::pair<gene_to_gene_to_float, float> loadARACNe3SubnetsAndUpdateFPRFromLog(
+  std::pair<gene_to_gene_to_float, float> loadARACNe3SubnetAndUpdateFPRFromLog(
       const std::string &subnet_file_path,
       const std::string &subnet_log_file_path,
       const compression_map &defined_genes,

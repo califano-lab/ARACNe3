@@ -198,7 +198,7 @@ pair_string_vecs FilesystemIOHandler::findSubnetFilesAndSubnetLogFiles(
 }
 
 std::pair<gene_to_gene_to_float, float>
-FilesystemIOHandler::loadARACNe3SubnetsAndUpdateFPRFromLog(
+FilesystemIOHandler::loadARACNe3SubnetAndUpdateFPRFromLog(
     const std::string &subnet_file_path,
     const std::string &subnet_log_file_path,
     const compression_map &defined_genes, const geneset &regulators) const {

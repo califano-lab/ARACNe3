@@ -178,7 +178,7 @@ public:
    * implementations.
    */
   virtual std::pair<gene_to_gene_to_float, float>
-  loadARACNe3SubnetsAndUpdateFPRFromLog(const std::string &subnet_file_path,
+  loadARACNe3SubnetAndUpdateFPRFromLog(const std::string &subnet_file_path,
                                         const std::string &subnet_log_file_path,
                                         const compression_map &defined_genes,
                                         const geneset &regulators) const {

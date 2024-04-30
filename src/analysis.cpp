@@ -279,7 +279,7 @@ int ARACNe3Analysis(
 
       for (uint16_t subnet_idx = 0; subnet_idx < n_subnets; ++subnet_idx) {
         const auto &[subnet, FPR_estimate_subnet] =
-            io.loadARACNe3SubnetsAndUpdateFPRFromLog(
+            io.loadARACNe3SubnetAndUpdateFPRFromLog(
                 subnets_dir + subnet_filenames[subnet_idx],
                 subnets_log_dir + subnet_log_filenames[subnet_idx], compressor,
                 regulators);
