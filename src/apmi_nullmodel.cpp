@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "apmi_nullmodel.hpp"
-#include "algorithms.hpp"
+#include "algorithm.hpp"
 
 APMINullModel::APMINullModel() {};
 

@@ -1,5 +1,5 @@
 #include "fsio.hpp"
-#include "algorithms.hpp"
+#include "algorithm.hpp"
 
 #include <algorithm>
 #include <filesystem>

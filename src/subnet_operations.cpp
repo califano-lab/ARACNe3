@@ -1,5 +1,5 @@
 #include "subnet_operations.hpp"
-#include "algorithms.hpp"
+#include "algorithm.hpp"
 #include "apmi_nullmodel.hpp"
 #include "aracne3io.hpp"
 #include "subnet_logger.hpp"

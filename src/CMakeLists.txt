@@ -2,7 +2,7 @@
 add_library(aracne3tools
 	cmdline_parser.cpp
 	stopwatch.cpp
-	algorithms.cpp
+	algorithm.cpp
 	apmi_nullmodel.cpp
   logger.cpp
   subnet_logger.cpp
