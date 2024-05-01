@@ -53,7 +53,7 @@ FilesystemIOHandler::readExpMatrixAndCopulaTransform(std::mt19937 &rnd) const {
     std::vector<float> expr_vec;
 
     if (gexp_matrix.size() > 0u)
-      expr_vec.reserve(gexp_matrix.at(0).size());
+      expr_vec.reserve(gexp_matrix[0].size());
 
     // gene name is first column of matrix
     std::size_t cur_pos = 0u, cur_end = cur_line.find_first_of("\t", cur_pos);
@@ -63,7 +63,7 @@ FilesystemIOHandler::readExpMatrixAndCopulaTransform(std::mt19937 &rnd) const {
     // add gene to all 3 data structures
     decompressor.push_back(gene);
     compressor.insert({gene, decompressor.size() - 1u});
-    genes.insert(compressor.at(gene));
+    genes.insert(compressor[gene]);
 
     // fill gene vector
     while ((cur_end = cur_line.find_first_of("\t", cur_pos)) !=
@@ -154,7 +154,7 @@ void FilesystemIOHandler::writeARACNe3DF(
 
   for (std::size_t i = 0u; i < final_output_df.size(); ++i) {
     const ARACNe3_df &row = final_output_df[i];
-    ofs << decompressor.at(row.regulator) << sep << decompressor.at(row.target)
+    ofs << decompressor[row.regulator] << sep << decompressor[row.target]
         << sep << row.final_mi << sep << row.final_scc << sep
         << row.num_subnets_incident << sep << row.final_log_p << '\n';
   }
@@ -201,7 +201,8 @@ std::pair<gene_to_gene_to_float, float>
 FilesystemIOHandler::loadARACNe3SubnetAndUpdateFPRFromLog(
     const std::string &subnet_file_path,
     const std::string &subnet_log_file_path,
-    const compression_map &defined_genes, const geneset &regulators) const {
+    const compression_map &defined_genes, const decompression_map &decompressor,
+    const geneset &regulators) const {
 
   // read in the subnet file
   auto subnet_ifs = getReadStream(subnet_file_path);
@@ -231,8 +232,23 @@ FilesystemIOHandler::loadARACNe3SubnetAndUpdateFPRFromLog(
 
     const float mi = std::stof(line.substr(prev, std::string::npos));
 
-    subnet[defined_genes.at(reg)][defined_genes.at(tar)] = mi;
+    const gene_id rid = defined_genes.at(reg), tid = defined_genes.at(tar);
+
+    // verify edge is not a duplicate
+    if (subnet.find(rid) != subnet.end() && subnet[rid].find(tid) != subnet[rid].end())
+      throw SameEdgeDefinedTwiceException(decompressor[rid], decompressor[tid], subnet_file_path);
+    else
+      subnet[rid][tid] = mi;
   }
+
+  // verify that each reg edge is bidirectional
+  for (auto &[rid, regulon] : subnet)
+    for (auto &[tid, mi] : regulon)
+      if (regulators.find(tid) != regulators.end())
+        if (subnet.find(tid) == subnet.end() &&
+            subnet[tid].find(rid) == subnet[tid].end())
+          throw SingleRegulatorRegulatorEdgeException(
+              decompressor[rid], decompressor[tid], subnet_file_path);
 
   // read in the log file
   auto log_ifs = getReadStream(subnet_log_file_path);

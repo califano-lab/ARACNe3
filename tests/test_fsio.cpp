@@ -31,7 +31,8 @@ protected:
   std::filesystem::path test_subnet_log_file_2 = "log-subnetwork-5_testid.txt";
 
   compression_map defined_genes = {{"Gene1", 1}, {"5", 42}, {"Three", 2}};
-  geneset regulators = {"5", "Gene1"};
+  decompression_map decompressor;
+  geneset regulators = {defined_genes["5"], defined_genes["Gene1"]};
 
   uint32_t tot_possible_edges = 4u, num_edges_after_threshold_pruning_1 = 4u,
            num_edges_after_threshold_pruning_2 = 2u,
@@ -44,6 +45,14 @@ protected:
 
   void SetUp() override {
     std::filesystem::remove_all(temp_dir); // sometimes artifacts from testing
+
+    // --- Set up decompressor ----
+    // Your decompressor is a niche case
+    
+    decompressor = std::vector<std::string>(43, "");
+    decompressor[1] = std::string("Gene1");
+    decompressor[42] = std::string("5");
+    decompressor[2] = std::string("Three");
 
     // ---- Make the test directories ----
 
@@ -77,10 +86,10 @@ protected:
     SubnetLogger sl1(test_subnets_log_dir / test_subnet_log_file_1);
     sl1.initSubnetLog("testid", 1, 2u, 3u, 500u, 300u, "FDR", 0.05f,
                       false); // did not MaxEnt prune
-    sl1.write("\nRaw subnetwork computation time: 1s");
+    sl1.write("\nRaw subnetwork computation time: 1s\n");
     sl1.write("Size of subnetwork: " + std::to_string(tot_possible_edges) +
               " edges.\n");
-    sl1.write("\nThreshold pruning time (FDR): 1s");
+    sl1.write("\nThreshold pruning time (FDR): 1s\n");
     sl1.write("Edges removed: " +
               std::to_string(tot_possible_edges -
                              num_edges_after_threshold_pruning_1) +
@@ -94,10 +103,10 @@ protected:
     SubnetLogger sl2(test_subnets_log_dir / test_subnet_log_file_2);
     sl2.initSubnetLog("testid", 1, 2u, 3u, 500u, 300u, "FDR", 0.05f,
                       true); // did MaxEnt prune
-    sl2.write("\nRaw subnetwork computation time: 1s");
+    sl2.write("\nRaw subnetwork computation time: 1s\n");
     sl2.write("Size of subnetwork: " + std::to_string(tot_possible_edges) +
               " edges.\n");
-    sl2.write("\nThreshold pruning time (FDR): 1s");
+    sl2.write("\nThreshold pruning time (FDR): 1s\n");
     sl2.write("Edges removed: " +
               std::to_string(tot_possible_edges -
                              num_edges_after_threshold_pruning_2) +
@@ -105,7 +114,7 @@ protected:
     sl2.write("Size of subnetwork: " +
               std::to_string(num_edges_after_threshold_pruning_2) +
               " edges.\n");
-    sl2.write("\nMaxEnt pruning time: 1s");
+    sl2.write("\nMaxEnt pruning time: 1s\n");
     sl2.write("Edges removed: " +
               std::to_string(num_edges_after_threshold_pruning_2 -
                              num_edges_after_MaxEnt_pruning_2) +
@@ -299,10 +308,10 @@ TEST_F(FilesystemIOTest, LoadARACNe3SubnetAndUpdateFPRFromLog) {
   std::filesystem::path snlfp2 = test_subnets_log_dir / test_subnet_log_file_2;
 
   auto [subnet_1, fpr_1] = io.loadARACNe3SubnetAndUpdateFPRFromLog(
-      snfp1, snlfp1, defined_genes, regulators);
+      snfp1, snlfp1, defined_genes, decompressor, regulators);
 
   auto [subnet_2, fpr_2] = io.loadARACNe3SubnetAndUpdateFPRFromLog(
-      snfp2, snlfp2, defined_genes, regulators);
+      snfp2, snlfp2, defined_genes, decompressor, regulators);
 
   gene_to_gene_to_float exp_subnet_1 = {
       {defined_genes["Gene1"],
@@ -323,3 +332,5 @@ TEST_F(FilesystemIOTest, LoadARACNe3SubnetAndUpdateFPRFromLog) {
                        .05, "FDR", num_edges_after_threshold_pruning_2,
                        num_edges_after_MaxEnt_pruning_2, tot_possible_edges));
 }
+
+// TODO: Add tests for exception conditions among files.

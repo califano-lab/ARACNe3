@@ -282,7 +282,7 @@ int ARACNe3Analysis(
             io.loadARACNe3SubnetAndUpdateFPRFromLog(
                 subnets_dir + subnet_filenames[subnet_idx],
                 subnets_log_dir + subnet_log_filenames[subnet_idx], compressor,
-                regulators);
+                decompressor, regulators);
         subnets.push_back(subnet);
         FPR_estimates.push_back(FPR_estimate_subnet);
       }

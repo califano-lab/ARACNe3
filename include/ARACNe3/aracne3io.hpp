@@ -178,10 +178,11 @@ public:
    * implementations.
    */
   virtual std::pair<gene_to_gene_to_float, float>
-  loadARACNe3SubnetAndUpdateFPRFromLog(const std::string &subnet_file_path,
-                                        const std::string &subnet_log_file_path,
-                                        const compression_map &defined_genes,
-                                        const geneset &regulators) const {
+  loadARACNe3SubnetAndUpdateFPRFromLog(const std::string& subnet_file_path,
+                                        const std::string& subnet_log_file_path,
+                                        const compression_map& defined_genes,
+                                        const decompression_map& decompressor,
+                                        const geneset& regulators) const {
     throw std::runtime_error(
         "Consolidate mode not supported in this implementation.");
   };

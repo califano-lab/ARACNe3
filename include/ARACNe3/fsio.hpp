@@ -29,6 +29,7 @@ public:
       const std::string &subnet_file_path,
       const std::string &subnet_log_file_path,
       const compression_map &defined_genes,
+      const decompression_map &decompressor,
       const geneset &regulators) const override;
 
 private:
@@ -76,4 +77,27 @@ public:
             "expression matrix. You should only consolidate subnetworks from "
             "the expression matrix used to generate them. (" +
             gene + ")") {}
+};
+
+class SingleRegulatorRegulatorEdgeException : public std::runtime_error {
+public:
+  explicit SingleRegulatorRegulatorEdgeException(const std::string &reg1,
+                                                 const std::string &reg2,
+                                                 const std::string &subnet_file)
+      : std::runtime_error(
+            reg1 + " and " + reg2 +
+            " are both regulators, ARACNe3 requires that both edge directions "
+            "(bidirectional) with the same mutual information value are "
+            "present (in subnet file `" +
+            subnet_file + "`).") {}
+};
+
+class SameEdgeDefinedTwiceException : public std::runtime_error {
+public:
+  explicit SameEdgeDefinedTwiceException(const std::string &reg,
+                                         const std::string &tar,
+                                         const std::string &subnet_file)
+      : std::runtime_error("Edge [" + reg + " -> " + tar +
+                           "] cannot be defined twice (in subnet file `" +
+                           subnet_file + "`).") {}
 };
