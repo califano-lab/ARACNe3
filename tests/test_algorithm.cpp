@@ -1,10 +1,11 @@
 #include <gtest/gtest.h>
-#include "algorithms.hpp"
 #include <unordered_set>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <Eigen/Dense>
 #include <numeric>
+
+#include "algorithm.hpp"
 
 constexpr int seed = 0;
 constexpr auto cop = copulaTransform;  // function reference

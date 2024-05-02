@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
   // ---- Initialize ARACNe3 runtime variables ----
 
   uint32_t seed = static_cast<uint32_t>(std::time(nullptr));
-  uint8_t threads = 1U;
+  uint8_t threads = 1u;
   std::string runid = "defaultid";
   bool verbose = false, suppress_log = false;
   
@@ -134,9 +134,6 @@ int main(int argc, char *argv[]) {
 
     if (clp.optExists("-x"))
       n_subnets = min_regulon_occpuancy = std::stoi(clp.getOpt("-x"));
-
-    if (clp.optExists("--threads"))
-      threads = std::stoi(clp.getOpt("--threads"));
 
     if (clp.optExists("--skip-alpha"))
       prune_alpha = false;

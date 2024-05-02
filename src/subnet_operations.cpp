@@ -113,7 +113,7 @@ std::pair<gene_to_gene_to_float, uint32_t>
 pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
             const geneset &regulators,
             gene_to_gene_to_float network_reg_reg_only,
-            const uint16_t nthreads) {
+            const uint8_t threads) {
 
   gene_to_geneset edges_to_remove;
   edges_to_remove.reserve(regulators.size());
@@ -132,7 +132,7 @@ pruneMaxEnt(gene_to_gene_to_float network, uint32_t size_of_network,
   for (const auto &[reg1, reg2] : to_remove)
     network_reg_reg_only.at(reg1).erase(reg2);
 
-#pragma omp parallel num_threads(nthreads)
+#pragma omp parallel num_threads(threads)
   {
     // Local version for each thread
     gene_to_geneset local_edges_to_remove;
@@ -199,7 +199,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
     const uint16_t tot_num_subsample, const uint16_t subnet_number,
     const bool prune_alpha, const APMINullModel &nullmodel,
     const std::string &method, const float alpha, const bool prune_MaxEnt,
-    const std::string &subnets_log_dir, const uint16_t nthreads,
+    const std::string &subnets_log_dir, const uint8_t threads,
     const std::string &runid, const decompression_map &decompressor,
     const bool save_subnet, const ARACNe3IOHandler &io) {
 
@@ -237,7 +237,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
   vv_float subnetwork_vec(regulators.size(),
                           std::vector<float>(genes.size(), 0.f));
 
-#pragma omp parallel for num_threads(nthreads)
+#pragma omp parallel for num_threads(threads)
   for (int reg_idx = 0; reg_idx < static_cast<int>(regs_c.size()); ++reg_idx) {
     const gene_id reg = regs_c.at(reg_idx);
     for (uint32_t tar_idx = 0u; tar_idx < genes_c.size(); ++tar_idx) {
@@ -292,7 +292,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
 
     std::tie(subnetwork, num_edges_after_MaxEnt_pruning) =
         pruneMaxEnt(subnetwork, num_edges_after_threshold_pruning, regulators,
-                    subnetwork_reg_reg_only, nthreads);
+                    subnetwork_reg_reg_only, threads);
 
     qlog(watch1.getSeconds() + "\n");
     qlog("Edges removed: " +

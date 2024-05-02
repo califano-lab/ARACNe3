@@ -243,7 +243,7 @@ FilesystemIOHandler::loadARACNe3SubnetAndUpdateFPRFromLog(
 
   // verify that each reg edge is bidirectional
   for (auto &[rid, regulon] : subnet)
-    for (auto &[tid, mi] : regulon)
+    for (auto [tid, mi] : regulon)
       if (regulators.find(tid) != regulators.end())
         if (subnet.find(tid) == subnet.end() &&
             subnet[tid].find(rid) == subnet[tid].end())

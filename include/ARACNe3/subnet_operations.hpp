@@ -37,7 +37,7 @@ std::tuple<gene_to_gene_to_float, float, uint32_t> createARACNe3Subnet(
     const uint16_t tot_num_subsample, const uint16_t subnet_number,
     const bool prune_alpha, const APMINullModel &nullmodel,
     const std::string &method, const float alpha, const bool prune_MaxEnt,
-    const std::string &subnets_log_dir, const uint16_t nthreads,
+    const std::string &subnets_log_dir, const uint8_t threads,
     const std::string &runid, const decompression_map &decompressor,
     const bool save_subnet, const ARACNe3IOHandler &io);
 
