@@ -40,9 +40,7 @@ APMINullModel::APMINullModel(const std::size_t n_samps, const std::size_t n_null
   std::transform(sig_mi_ps.begin(), sig_mi_ps.end(), sig_mi_ps.begin(),
                  [](const float p) { return std::log(p); }); // log-transform
 
-  const auto [m, b] = OLS(sig_mis, sig_mi_ps);
-  this->ols_m = m;
-  this->ols_b = b;
+  std::tie(ols_m, ols_b) = OLS(sig_mis, sig_mi_ps);
 }
 
 float APMINullModel::getMIPVal(const float mi, const float p_precise) const {
@@ -70,9 +68,9 @@ void APMINullModel::serialize(Archive& ar, const unsigned int version)
 
 
 APMINullModel
-APMINullModel::getCachedModel(const std::string &cached_blob_name) {
+APMINullModel::getCachedModel(const std::string &cached_blob_path) {
   APMINullModel apmi_null_model;
-  std::ifstream ifs(cached_blob_name, std::ios::binary);
+  std::ifstream ifs(cached_blob_path, std::ios::binary);
   if (ifs) {
     try {
       boost::archive::binary_iarchive ia(ifs);
@@ -82,13 +80,13 @@ APMINullModel::getCachedModel(const std::string &cached_blob_name) {
                                std::string(e.what()));
     }
   } else {
-    throw std::runtime_error("File not found: " + cached_blob_name);
+    throw std::runtime_error("File not found: " + cached_blob_path);
   }
   return apmi_null_model;
 }
 
-void APMINullModel::cacheModel(const std::string &cached_blob_name) const {
-  std::ofstream ofs(cached_blob_name, std::ios::binary);
+void APMINullModel::cacheModel(const std::string &cached_blob_path) const {
+  std::ofstream ofs(cached_blob_path, std::ios::binary);
   if (ofs) {
     try {
       boost::archive::binary_oarchive oa(ofs);
@@ -99,6 +97,6 @@ void APMINullModel::cacheModel(const std::string &cached_blob_name) const {
     }
   } else {
     throw std::runtime_error("Unable to open file for writing: " +
-                             cached_blob_name);
+                             cached_blob_path);
   }
 }

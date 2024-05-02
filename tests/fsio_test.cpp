@@ -4,8 +4,8 @@
 #include <random>
 #include <string>
 
-#include "fsio.hpp"
 #include "algorithm.hpp"
+#include "fsio.hpp"
 #include "subnet_logger.hpp" // much easier for generating pseudo logs
 
 class FilesystemIOTest : public ::testing::Test {
@@ -13,7 +13,7 @@ protected:
   // ---- Define all expected resources for this runtime ----
 
   std::filesystem::path temp_dir = std::filesystem::temp_directory_path() /
-                                   ("test_fsio_" + std::to_string(std::rand()));
+                                   ("fsio_test_" + std::to_string(std::rand()));
   std::filesystem::path test_output_dir = temp_dir / "aracne3/";
   std::filesystem::path test_final_output_file =
       test_output_dir / "network_testid.tsv";
@@ -48,7 +48,7 @@ protected:
 
     // --- Set up decompressor ----
     // Your decompressor is a niche case
-    
+
     decompressor = std::vector<std::string>(43, "");
     decompressor[1] = std::string("Gene1");
     decompressor[42] = std::string("5");

@@ -25,8 +25,8 @@ public:
     return {null_mis, ols_m, ols_b, n_samps, n_nulls, seed};
   }
 
-  static APMINullModel getCachedModel(const std::string &cached_blob_name);
-  void cacheModel(const std::string& cached_blob_name) const;
+  static APMINullModel getCachedModel(const std::string &cached_blob_path);
+  void cacheModel(const std::string& cached_blob_path) const;
 
 private:
   std::vector<float> null_mis;
