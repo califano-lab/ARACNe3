@@ -22,4 +22,5 @@ jobs:
     - name: Build
       run: cmake --build build
     - name: Run tests
-      run: ./build/tests/aracne3_test
+      - run: ./build/tests/aracne3tools_test
+      - run: ./build/tests/fsio_test
