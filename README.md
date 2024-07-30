@@ -40,7 +40,7 @@ ARACNe3 is now located in `build/src/ARACNe3_app_release`.
 ---
 
 ### ARACNe3 input files (see [file format](#input-file-format) below)
-1.	A `tsv` that contains the normalized expression profile, with genes as rows and samples as columns. Make sure your file includes both the row names (gene names) and header names.
+1.	A `tsv` that contains the normalized expression profile (e.g. TPM, CPM), with genes as rows and samples as columns. Make sure your file includes both the row names (gene names) and header names (sample ids/names).
 2.	List of regulators (e.g., transcription factors).
 
 ### Run ARACNe3
