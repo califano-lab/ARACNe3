@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
   if (cmdOptionExists(argv, argv + argc, "--threads"))
     nthreads = std::stoi(getCmdOption(argv, argv + argc, "--threads"));
 
-  if (cmdOptionExists(argv, argv + argc, "--noalpha"))
+  if (cmdOptionExists(argv, argv + argc, "--noAlpha"))
     prune_alpha = false;
   if (cmdOptionExists(argv, argv + argc, "--noMaxEnt"))
     prune_MaxEnt = false;
