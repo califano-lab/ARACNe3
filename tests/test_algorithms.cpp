@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include "algorithms.hpp"
 #include <algorithm>
-#include <omp.h>
 
 TEST(AlgorithmsTest, RankIndicesTest) {
   // Test the rankIndices function
@@ -47,28 +46,8 @@ TEST(AlgorithmsTest, CalcSCCNoCorrelation) {
     EXPECT_NEAR(expected, result, 0.1f);
 }
 
-// Regression test for a data race in calcAPMI()/calcAPMISplit(): the
-// q_thresh/size_thresh thresholds used to be plain `static` (file-scope,
-// shared across all OpenMP threads), even though calcAPMI() is called
-// concurrently from OpenMP-parallelized loops elsewhere in the codebase
-// (subnet_operations.cpp's regulator x target loop, apmi_nullmodel.cpp's
-// null-model bootstrap). Every current call site happens to pass the same
-// default thresholds (7.815, 4), so on today's codebase the race was
-// invisible in the sense that a "wrong" value happened to equal the
-// "right" one -- but concurrent unsynchronized writes to shared mutable
-// state are undefined behavior regardless of whether the racing values
-// match, and a future call site passing different thresholds (a
-// realistic extension, since calcAPMI's thresholds are already function
-// parameters) would turn this into visibly wrong MI values with no
-// exception or crash guaranteed. (Fixed by threading q_thresh/size_thresh
-// through calcAPMISplit's recursion as explicit parameters instead of any
-// shared/thread_local state -- see algorithms.cpp.) This test exercises
-// that scenario directly: it calls calcAPMI() concurrently with several
-// distinct threshold pairs interleaved across threads and checks that
-// every call's result matches what the SAME threshold pair produces
-// sequentially, on the same fixed input -- calcAPMI is otherwise
-// deterministic (no internal randomness), so any mismatch here can only
-// come from cross-thread interference on shared state.
+// Regression test: concurrent calcAPMI() calls with different thresholds must
+// each match their own sequential result (thresholds used to be shared statics).
 TEST(AlgorithmsTest, CalcAPMIThreadSafeAcrossDifferingThresholds) {
   const int n = 200;
   std::mt19937 rng(42);
@@ -76,11 +55,10 @@ TEST(AlgorithmsTest, CalcAPMIThreadSafeAcrossDifferingThresholds) {
   std::vector<float> x(n), y(n);
   for (int i = 0; i < n; ++i) {
     x[i] = dist(rng);
-    y[i] = dist(rng);
+    y[i] = 0.7f * x[i] + 0.3f * dist(rng);
   }
 
-  // Distinct (q_thresh, size_thresh) pairs -- distinct enough to produce
-  // different partition depths/results for the same (x, y) input.
+  // Dependent x, y so that each threshold pair gives a different MI value
   const std::vector<std::pair<float, uint16_t>> thresholds = {
       {3.0f, 2}, {7.815f, 4}, {15.0f, 8}, {30.0f, 16}};
 
@@ -101,7 +79,7 @@ TEST(AlgorithmsTest, CalcAPMIThreadSafeAcrossDifferingThresholds) {
 
   for (int i = 0; i < total; ++i) {
     const size_t t = i % thresholds.size();
-    EXPECT_NEAR(expected[t], got[i], 1e-4f)
+    EXPECT_FLOAT_EQ(expected[t], got[i])
         << "mismatch at rep " << i << " for threshold pair " << t
         << " (q_thresh=" << thresholds[t].first
         << ", size_thresh=" << thresholds[t].second << ")";

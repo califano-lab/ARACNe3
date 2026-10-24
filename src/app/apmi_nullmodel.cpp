@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iterator>
 #include <algorithm>
-#include <omp.h>
 
 extern uint16_t nthreads;
 
@@ -66,31 +65,22 @@ APMINullModel::APMINullModel(const uint32_t n_nulls,
 
     this->null_mis = std::vector<float>(n_nulls);
 
-    // shuffle_vec used to be a single vector shared across all threads:
-    // the #pragma omp critical below correctly serialized the *shuffle*
-    // (and the shared `rand` generator), but the following
-    // calcAPMI(ref_vec, shuffle_vec) read it *outside* that critical
-    // section -- so one thread could read shuffle_vec while another
-    // thread was concurrently re-shuffling the very same object. That's
-    // a data race with no guaranteed crash: it can silently corrupt
-    // individual null-MI draws, which calibrate the p-value thresholds
-    // used to keep/drop edges genome-wide.
-    //
-    // Fix: give each OpenMP thread its own persistent copy, declared once
-    // per thread (not once per iteration, which would mean up to n_nulls
-    // -- often 1,000,000 -- reallocations instead of nthreads). Same
-    // pattern as pruneMaxEnt's local_edges_to_remove in
-    // subnet_operations.cpp: a #pragma omp parallel block holding the
-    // thread-private variable, with a #pragma omp for splitting the
-    // iterations across threads.
+    std::vector<float> shuffle_vec = ref_vec;
+
+    // Shuffle the shared vector and copy it inside the critical section, so
+    // calcAPMI never reads a vector being shuffled. Same permutations as with
+    // 1 thread (in another order of i); null_mis is sorted below.
 #pragma omp parallel num_threads(nthreads)
     {
-      std::vector<float> shuffle_vec = ref_vec;
+      std::vector<float> local_vec(ref_vec.size());
 #pragma omp for
       for (uint32_t i = 0U; i < n_nulls; ++i) {
 #pragma omp critical
-        { std::shuffle(shuffle_vec.begin(), shuffle_vec.end(), rand); }
-        null_mis[i] = calcAPMI(ref_vec, shuffle_vec);
+        {
+          std::shuffle(shuffle_vec.begin(), shuffle_vec.end(), rand);
+          local_vec = shuffle_vec;
+        }
+        null_mis[i] = calcAPMI(ref_vec, local_vec);
       }
     }
 

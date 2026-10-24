@@ -139,16 +139,8 @@ float calcAPMI(const std::vector<float> &x_vec, const std::vector<float> &y_vec,
   std::copy(x_vec.begin(), x_vec.end(), x_ptr);
   std::copy(y_vec.begin(), y_vec.end(), y_ptr);
 
-  // q_thresh/size_thresh are passed down explicitly through the whole
-  // calcAPMISplit() recursion (see that function) rather than through
-  // shared mutable state -- calcAPMI() is called concurrently from
-  // OpenMP-parallelized loops elsewhere in the codebase (subnet_
-  // operations.cpp's regulator x target loop, apmi_nullmodel.cpp's
-  // null-model bootstrap), and file-static globals here (even
-  // thread_local ones) would remain a latent hazard if this recursion is
-  // ever itself parallelized in the future (e.g. via nested OpenMP
-  // tasks) -- explicit parameters have no such hazard regardless of how
-  // this function is called.
+  // Thresholds are passed through the recursion, not shared state: calcAPMI()
+  // runs concurrently from OpenMP loops.
   return calcAPMISplit(x_ptr, y_ptr, init, q_thresh, size_thresh);
 }
 
