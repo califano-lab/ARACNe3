@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iterator>
 #include <algorithm>
-#include <omp.h>
 
 extern uint16_t nthreads;
 
@@ -64,15 +63,25 @@ APMINullModel::APMINullModel(const uint32_t n_nulls,
     for (uint16_t i = 1U; i <= tot_num_subsample; ++i)
       ref_vec.emplace_back(((float)i) / (tot_num_subsample + 1));
 
-    std::vector<float> shuffle_vec = ref_vec;
-
     this->null_mis = std::vector<float>(n_nulls);
 
-#pragma omp parallel for num_threads(nthreads)
-    for (uint32_t i = 0U; i < n_nulls; ++i) {
+    std::vector<float> shuffle_vec = ref_vec;
+
+    // Shuffle the shared vector and copy it inside the critical section, so
+    // calcAPMI never reads a vector being shuffled. Same permutations as with
+    // 1 thread (in another order of i); null_mis is sorted below.
+#pragma omp parallel num_threads(nthreads)
+    {
+      std::vector<float> local_vec(ref_vec.size());
+#pragma omp for
+      for (uint32_t i = 0U; i < n_nulls; ++i) {
 #pragma omp critical
-      { std::shuffle(shuffle_vec.begin(), shuffle_vec.end(), rand); }
-      null_mis[i] = calcAPMI(ref_vec, shuffle_vec);
+        {
+          std::shuffle(shuffle_vec.begin(), shuffle_vec.end(), rand);
+          local_vec = shuffle_vec;
+        }
+        null_mis[i] = calcAPMI(ref_vec, local_vec);
+      }
     }
 
     // sort largest to smallest

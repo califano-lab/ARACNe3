@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "algorithms.hpp"
+#include <algorithm>
 
 TEST(AlgorithmsTest, RankIndicesTest) {
   // Test the rankIndices function
@@ -43,6 +44,46 @@ TEST(AlgorithmsTest, CalcSCCNoCorrelation) {
 
     // Since this is random, we allow a bit more tolerance here
     EXPECT_NEAR(expected, result, 0.1f);
+}
+
+// Regression test: concurrent calcAPMI() calls with different thresholds must
+// each match their own sequential result (thresholds used to be shared statics).
+TEST(AlgorithmsTest, CalcAPMIThreadSafeAcrossDifferingThresholds) {
+  const int n = 200;
+  std::mt19937 rng(42);
+  std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+  std::vector<float> x(n), y(n);
+  for (int i = 0; i < n; ++i) {
+    x[i] = dist(rng);
+    y[i] = 0.7f * x[i] + 0.3f * dist(rng);
+  }
+
+  // Dependent x, y so that each threshold pair gives a different MI value
+  const std::vector<std::pair<float, uint16_t>> thresholds = {
+      {3.0f, 2}, {7.815f, 4}, {15.0f, 8}, {30.0f, 16}};
+
+  std::vector<float> expected(thresholds.size());
+  for (size_t t = 0; t < thresholds.size(); ++t) {
+    expected[t] = calcAPMI(x, y, thresholds[t].first, thresholds[t].second);
+  }
+
+  const int reps = 200;
+  const int total = reps * (int)thresholds.size();
+  std::vector<float> got(total);
+
+#pragma omp parallel for num_threads(8)
+  for (int i = 0; i < total; ++i) {
+    const size_t t = i % thresholds.size();
+    got[i] = calcAPMI(x, y, thresholds[t].first, thresholds[t].second);
+  }
+
+  for (int i = 0; i < total; ++i) {
+    const size_t t = i % thresholds.size();
+    EXPECT_FLOAT_EQ(expected[t], got[i])
+        << "mismatch at rep " << i << " for threshold pair " << t
+        << " (q_thresh=" << thresholds[t].first
+        << ", size_thresh=" << thresholds[t].second << ")";
+  }
 }
 
 // lchoose
