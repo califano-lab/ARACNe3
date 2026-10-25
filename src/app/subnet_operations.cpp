@@ -8,7 +8,6 @@
 #include <boost/math/distributions/beta.hpp>
 #include <fstream>
 #include <iostream>
-#include <omp.h>
 #include <set>
 
 /*

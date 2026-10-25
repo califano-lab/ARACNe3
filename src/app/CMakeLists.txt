@@ -52,7 +52,8 @@ if(USE_OPENMP)
 				message(STATUS "Attempting to link libomp_imported")
 
 				target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -fopenmp")
+				# PUBLIC so that targets linking ARACNe3_lib (app, tests) also compile with OpenMP
+				target_compile_options(ARACNe3_lib PUBLIC -Xclang -fopenmp)
       else()
 				# Set the flags if on arm64 macOS
 				set(LIBOMP_PATH "/opt/homebrew/opt/libomp")
@@ -68,7 +69,8 @@ if(USE_OPENMP)
 				message(STATUS "Attempting to link libomp_imported")
 
 				target_link_libraries(ARACNe3_lib PUBLIC libomp_imported)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -fopenmp")
+				# PUBLIC so that targets linking ARACNe3_lib (app, tests) also compile with OpenMP
+				target_compile_options(ARACNe3_lib PUBLIC -Xclang -fopenmp)
       endif()
 		endif()
 	endif()
